@@ -13,6 +13,7 @@ The trading analysis workflow is divided into two main parts: data acquisition u
 A Python script is responsible for fetching historical stock data.
 - It utilizes the **`yfinance`** library to download data for specified stock tickers.
 - The downloaded data (Opening prices, Closing prices, and Dates) is then written to a **text file** with the following format:
+
 Stock Name: AAPL
 Opening: 170.50, 171.20, 170.80, 172.00
 Closing: 171.00, 170.90, 172.10, 172.50
