@@ -75,3 +75,8 @@ A base class named `TradingStrategy` is defined to encapsulate common attributes
 ---
 
 This refactoring aims to provide a robust and high-performance framework for backtesting trading strategies on historical stock data.
+
+
+## How To Execute Program
+1. Run DownloadData.py by using your anaconda environment
+2. Within the BackTrader directory, run "make" and then "./a" to run the C++ file
