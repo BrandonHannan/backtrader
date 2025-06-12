@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <string>
-#include "stockdata.h"
+#include "../StockData/StockData.h"
 
 unordered_map<std::string, StockData> ReadData(const string &fileName);
 

@@ -36,12 +36,6 @@ class TradingStrategy {
 
         void setClosedPositions(vector<Position> cP);
 
-        double StandardDeviation();
-
-        double Mean();
-
-        double CalculatePValue();
-
         virtual ~TradingStrategy() = default;
 };
 

@@ -10,9 +10,6 @@ TARGET = a
 # The source files for your program
 SRCS = Main.cpp datareader.cpp Position.cpp TradingStrategy.cpp
 
-# The external libraries for your program
-EXTLIBS = -lboost_math_c99
-
 # --- Makefile Rules ---
 
 # The default rule, executed when you just type "make"
@@ -20,7 +17,7 @@ all: $(TARGET)
 
 # Rule to create the executable from the source files
 $(TARGET): $(SRCS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRCS) $(EXTLIBS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRCS)
 
 # Rule to run the program
 run: all
