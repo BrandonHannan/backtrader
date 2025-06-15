@@ -8,6 +8,7 @@ class Position{
         string sellDate;
         double purchasePrice;
         double sellPrice;
+        double numShares;
         bool isClosed;
 
         int toJulian(int y, int m, int d) {
@@ -38,8 +39,9 @@ class Position{
         }
     public:
         Position(): positionType(NONE), purchaseDate(""), sellDate(""), purchasePrice(-1), sellPrice(-1), isClosed(false) {}
-        Position(PositionType pType, string pDate, string sDate, double pPrice, double sPrice, bool isC): positionType(pType),
-        purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), sellPrice(sPrice), isClosed(isC) {}
+        Position(PositionType pType, string pDate, string sDate, double pPrice, double sPrice, double nShares, bool isC): 
+        positionType(pType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), sellPrice(sPrice), numShares(nShares), 
+        isClosed(isC) {}
 
         PositionType getPositionType(){
             return this->positionType;
@@ -79,6 +81,14 @@ class Position{
 
         void setSellPrice(double sPrice){
             this->sellPrice = sPrice;
+        }
+
+        double getNumShares(){
+            return this->numShares;
+        }
+
+        void setNumShares(double nShares){
+            this->numShares = nShares;
         }
 
         bool getIsClosed(){

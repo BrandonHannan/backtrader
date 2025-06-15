@@ -19,6 +19,7 @@ class Position{
         string sellDate;
         double purchasePrice;
         double sellPrice;
+        double numShares;
         bool isClosed;
 
         int toJulian(int y, int m, int d);
@@ -27,7 +28,7 @@ class Position{
 
     public:
         Position();
-        Position(PositionType pType, string pDate, string sDate, double pPrice, double sPrice, bool isC);
+        Position(PositionType pType, string pDate, string sDate, double pPrice, double sPrice, double nShares, bool isC);
 
         PositionType getPositionType();
 
@@ -48,6 +49,10 @@ class Position{
         double getSellPrice();
 
         void setSellPrice(double sPrice);
+
+        double getNumShares();
+
+        void setNumShares(double nShares);
 
         bool getIsClosed();
 
