@@ -2,23 +2,31 @@
 #define TRADINGSTRATEGY_H
 
 #include "../Position/Position.h"
-vector<double> DetermineProfits(vector<Position> &positions);
+#include <vector>
+#include <unordered_map>
+#include <map>
+
+class MaxMinPos {
+    public:
+        double maxOrMin;
+        int index;
+        string date;
+        MaxMinPos();
+        MaxMinPos(double val, int idx, string d);
+};
 
 class TradingStrategy {
     private:
-        double balance;
         bool containsOpenPosition;
         Position openPosition;
         vector<Position> closedPositions;
     public:
+        double balance;
+
         TradingStrategy();
-        virtual bool shouldExecuteTrade(const vector<double> &data) = 0;
+        TradingStrategy(double bal, bool cOP, Position pos, vector<Position> cPoses);
 
-        double getBalance();
-
-        void updateBalance(double update);
-
-        void setBalance(double bal);
+        virtual void ExecuteTrade(const StockData &data) = 0;
 
         bool getContainsOpenPosition();
 
@@ -35,6 +43,10 @@ class TradingStrategy {
         void appendClosedPosition(Position p);
 
         void setClosedPositions(vector<Position> cP);
+
+        vector<double> getAllReturns();
+
+        map<int, vector<double>> getYearlyReturns();
 
         virtual ~TradingStrategy() = default;
 };
