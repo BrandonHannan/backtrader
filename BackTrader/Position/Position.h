@@ -6,6 +6,18 @@
 
 using namespace std;
 
+enum TradeType {
+    HVS,
+    HNVSL,
+    HNVHL,
+    HNVHHVL,
+    LVL, 
+    LNVSS,
+    LNVLS,
+    LNVLHVS,
+    NOTHING
+};
+
 enum PositionType{
     SHORT,
     LONG,

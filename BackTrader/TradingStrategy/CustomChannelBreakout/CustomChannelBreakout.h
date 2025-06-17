@@ -2,6 +2,7 @@
 #define CUSTOMCHANNELBREAKOUT_H
 
 #include "../TradingStrategy.h"
+#include "../../StockData/StockData.h"
 
 class CustomChannelBreakout: private TradingStrategy{
     private:

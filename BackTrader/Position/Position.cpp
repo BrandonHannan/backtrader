@@ -4,6 +4,7 @@
 class Position{
     private:
         PositionType positionType;
+        TradeType tradeType;
         string purchaseDate;
         string sellDate;
         double purchasePrice;
@@ -38,10 +39,11 @@ class Position{
             return length;
         }
     public:
-        Position(): positionType(NONE), purchaseDate(""), sellDate(""), purchasePrice(-1), sellPrice(-1), isClosed(false) {}
-        Position(PositionType pType, string pDate, string sDate, double pPrice, double sPrice, double nShares, bool isC): 
-        positionType(pType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), sellPrice(sPrice), numShares(nShares), 
-        isClosed(isC) {}
+        Position(): positionType(NONE), tradeType(NOTHING), purchaseDate(""), sellDate(""), purchasePrice(-1), 
+        sellPrice(-1), isClosed(false) {}
+        Position(PositionType pType, TradeType tType, string pDate, string sDate, double pPrice, double sPrice, 
+        double nShares, bool isC): positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), 
+        purchasePrice(pPrice), sellPrice(sPrice), numShares(nShares), isClosed(isC) {}
 
         PositionType getPositionType(){
             return this->positionType;
@@ -49,6 +51,14 @@ class Position{
 
         void setPositionType(PositionType pType){
             this->positionType = pType;
+        }
+
+        TradeType getTradeType(){
+            return this->tradeType;
+        }
+
+        void setTradeType(TradeType tType){
+            this->tradeType = tType;
         }
 
         string getPurchaseDate(){
