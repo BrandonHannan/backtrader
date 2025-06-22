@@ -8,6 +8,7 @@ class Position{
         string purchaseDate;
         string sellDate;
         double purchasePrice;
+        double stopLossPrice;
         double sellPrice;
         double numShares;
         bool isClosed;
@@ -40,10 +41,11 @@ class Position{
         }
     public:
         Position(): positionType(NONE), tradeType(NOTHING), purchaseDate(""), sellDate(""), purchasePrice(-1), 
-        sellPrice(-1), isClosed(false) {}
-        Position(PositionType pType, TradeType tType, string pDate, string sDate, double pPrice, double sPrice, 
-        double nShares, bool isC): positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), 
-        purchasePrice(pPrice), sellPrice(sPrice), numShares(nShares), isClosed(isC) {}
+        stopLossPrice(-1), sellPrice(-1), isClosed(false) {}
+        Position(PositionType pType, TradeType tType, string pDate, string sDate, double pPrice, double sLP,
+        double sPrice, double nShares, bool isC): positionType(pType), tradeType(tType), purchaseDate(pDate), 
+        sellDate(sDate), purchasePrice(pPrice), stopLossPrice(sLP), sellPrice(sPrice), numShares(nShares), 
+        isClosed(isC) {}
 
         PositionType getPositionType(){
             return this->positionType;
@@ -85,6 +87,14 @@ class Position{
             this->purchasePrice = pPrice;
         }
 
+        double getStopLossPrice(){
+            return this->stopLossPrice;
+        }
+
+        void setStopLossPrice(double sLP){
+            this->stopLossPrice = sLP;
+        }
+
         double getSellPrice(){
             return this->sellPrice;
         }
@@ -112,5 +122,20 @@ class Position{
         int LengthOfTrade(){
             // Returns -1 if an invalid position
             return LengthOfTradeBetweenDates();
+        }
+
+        Position& operator=(const Position &obj){
+            if (this != &obj){
+                this->setTradeType(obj.tradeType);
+                this->setPositionType(obj.positionType);
+                this->setNumShares(obj.numShares);
+                this->setPurchaseDate(obj.purchaseDate);
+                this->setSellDate(obj.sellDate);
+                this->setPurchasePrice(obj.purchasePrice);
+                this->setSellPrice(obj.sellPrice);
+                this->setStopLossPrice(obj.stopLossPrice);
+                this->setIsClosed(obj.isClosed);
+            }
+            return *this;
         }
 };

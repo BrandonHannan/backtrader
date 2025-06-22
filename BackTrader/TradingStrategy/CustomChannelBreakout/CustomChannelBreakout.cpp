@@ -3,9 +3,14 @@
 
 class CustomChannelBreakout: private TradingStrategy{
     private:
+        double ATRMultiplier; // E.g. 1.1 - 3 Multiplier
+        double RiskAmount; // E.g. 0.001 - 0.1 Multiplier
+
         LookBack lookBack;
-        double priceVolatilityLongThreshold; // E.g. 1 - 100 Comparison
-        double priceVolatilityShortThreshold; // E.g. 1 - 100 Comparison
+        double priceVolatilityLongThreshold1; // E.g. 1 - 100 Comparison
+        double priceVolatilityLongThreshold2; // E.g. 1 - 100 Comparison
+        double priceVolatilityShortThreshold1; // E.g. 1 - 100 Comparison
+        double priceVolatilityShortThreshold2; // E.g. 1 - 100 Comparison
         double volumeVolatilityLongThreshold; // E.g. 1 - 100 Comparison
         double volumeVolatilityShortThreshold; // E.g. 1 - 100 Comparison
         double volumeDropThreshold; // E.g. 0 - 1 Multiplier
@@ -13,9 +18,12 @@ class CustomChannelBreakout: private TradingStrategy{
         double volumeComparison; // E.g. 0.01 - 0.25 Multiplier
         double volumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
         double priceSurge; // E.g. 1.05 - 1.5 Multiplier
-        double dropSurge; // E.g. 0.75 - 0.99 Multiplier
+        double dropPriceSurge; // E.g. 0.75 - 0.99 Multiplier
         double volumeComparisonPriceSurge; // E.g. 0.01 - 0.5 Multiplier
         double volumeComparisonDropSurge; // E.g. 0.01 - 0.5 Multiplier
+
+        double priceDiffLongCompare;
+        double priceDiffShortCompare;
 
         double HVSComparison; // E.g. 0.01 - 0.25 Multiplier
         double HNVSLComparison; // E.g. 1 - 100 Comparison
@@ -23,27 +31,68 @@ class CustomChannelBreakout: private TradingStrategy{
         double LVLComparison; // E.g. 0.01 - 0.24 Multiplier
         double LNVSSComparison; // E.g. 1 - 100 Comparison
         double LNVLHVSComparison; // E.g. 0.01 - 0.25 Multiplier
+
+        bool HVSSignal;
+        int HVSCount;
+        int HVSWaitingPeriod;
+        double HVSVolumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
+
+        bool LVLSignal;
+        int LVLCount;
+        int LVLWaitingPeriod;
+        double LVLVolumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
+
+        double HVSExitComparison; // E.g. 0.01 - 0.25 Multiplier
+        double HNVSLExitThreshold; // E.g. 1 - 100 Comparison
+        double HNVHHVLExitComparison; // E.g. 0.01 - 0.25 Multiplier
+        int HNVHHVLHighCounter = 0;
+        double HNVHHVLHighRunningSum;
+        double LVLExitComparison; // E.g. 0.01 - 0.25 Multiplier
+        double LNVSSExitThreshold; // E.g. 1 - 100 Comparison
+        double LNVLHVSExitComparison; // E.g. 0.01 - 0.25 Multiplier
+        int LNVLHVSLowCounter = 0;
+        double LNVLHVSLowRunningSum;
     public:
         CustomChannelBreakout(double bal, bool cOP, Position pos, vector<Position> cPoses, int lbPeriod,
-        double pVLT, double pVST, double vVLT, double vVST, double vDT, int wPeriod, double vC, double vDC, double pS, 
-        double vCPS, double vCDS, double dS,
-        double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, double LNVLHVS):
-        TradingStrategy(bal, cOP, pos, cPoses), lookBack(LookBack(lbPeriod)), priceVolatilityLongThreshold(pVLT),
-        priceVolatilityShortThreshold(pVST),
+        int ATRP, double ATRM, double rM,
+        double pVLT1, double pVLT2, double pVST1, double pVST2, double vVLT, double vVST, double vDT, int wPeriod, double vC, 
+        double vDC, double pS, 
+        double vCPS, double vCDS, double pDLC, double pDSC, double dPS,
+        double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, double LNVLHVS, int HVSWP, double HVSVDC,
+        int LVLWP, double LVLVC):
+        TradingStrategy(bal, cOP, pos, cPoses), ATRMultiplier(ATRM), RiskAmount(rM),
+        lookBack(LookBack(lbPeriod, ATRP)), priceVolatilityLongThreshold1(pVLT1),
+        priceVolatilityLongThreshold2(pVLT2), priceVolatilityShortThreshold1(pVST1), priceVolatilityShortThreshold2(pVST2),
         volumeVolatilityLongThreshold(vVLT), volumeVolatilityShortThreshold(vVST), volumeDropThreshold(vDT), 
         waitingPeriod(wPeriod), volumeComparison(vC),
-        volumeDropComparison(vDC), priceSurge(pS), dropSurge(dS), volumeComparisonPriceSurge(vCPS), 
-        volumeComparisonDropSurge(vCDS), HVSComparison(HVS),
+        volumeDropComparison(vDC), priceSurge(pS), dropPriceSurge(dPS), volumeComparisonPriceSurge(vCPS), 
+        volumeComparisonDropSurge(vCDS), priceDiffLongCompare(pDLC), priceDiffShortCompare(pDSC), HVSComparison(HVS),
         HNVSLComparison(HNVSL), HNVHHVLComparison(HNVHHVL), LVLComparison(LVL), LNVSSComparison(LNVSS),
-        LNVLHVSComparison(LNVLHVS) {}
+        LNVLHVSComparison(LNVLHVS), HVSWaitingPeriod(HVSWP), HVSSignal(false), HVSCount(0),
+        HVSVolumeDropComparison(HVSVDC), LVLWaitingPeriod(LVLWP), LVLSignal(false), LVLCount(0), LVLVolumeDropComparison(LVLVC) {}
+
+        double DetermineShares(double currentPrice){
+            double dollarRisk = this->balance * RiskAmount;
+            if (dollarRisk <= 0){
+                return 0.0;
+            }
+            double stopLoss = currentPrice - (lookBack.DetermineATR() * ATRMultiplier);
+            double riskPerShare = currentPrice - stopLoss;
+            if (riskPerShare <= 0){
+                return 0.0;
+            }
+            return (dollarRisk/riskPerShare);
+        }
 
         void ExecuteStrategy(const StockData &data) override {
             int length = data.close.size();
             int lookbackPeriod = this->lookBack.lookbackPeriod;
             int doubleLookbackPeriod = 2 * lookbackPeriod;
-            if (length <= doubleLookbackPeriod || lookbackPeriod <= 1){
+            int ATRLookbackPeriod = this->lookBack.ATRLookbackPeriod;
+            if (length <= doubleLookbackPeriod || lookbackPeriod <= 1 || length <= ATRLookbackPeriod){
                 return;
             }
+
             double maxPrice = -9999999;
             double minPrice = 9999999;
             double maxVol = -9999999;
@@ -54,11 +103,17 @@ class CustomChannelBreakout: private TradingStrategy{
                 lookBack.sumSQPricePrev += data.close[i] * data.close[i];
                 lookBack.sumVolPrev += data.volume[i];
                 lookBack.sumSQVolPrev += data.volume[i] * data.volume[i];
+                lookBack.sumDiffPricePrev += (data.high[i] - data.low[i])/2;
                 
                 maxPrice = max(maxPrice, data.close[i]);
                 minPrice = min(minPrice, data.close[i]);
                 maxVol = max(maxVol, data.volume[i]);
                 minVol = min(minVol, data.volume[i]);
+
+                double high_minus_low = data.high[i] - data.low[i];
+                double high_minus_prev_close = abs(data.high[i] - data.close[i - 1]);
+                double low_minus_prev_close = abs(data.low[i] - data.close[i - 1]);
+                lookBack.updateATR(max(high_minus_low, high_minus_prev_close, low_minus_prev_close));
             }
 
             for (int i = lookbackPeriod; i< doubleLookbackPeriod; i++){
@@ -66,11 +121,50 @@ class CustomChannelBreakout: private TradingStrategy{
                 lookBack.sumSQPrice += data.close[i] * data.close[i];
                 lookBack.sumVol += data.volume[i];
                 lookBack.sumSQVol += data.volume[i] * data.volume[i];
+                lookBack.sumDiffPrice += (data.high[i] - data.low[i])/2;
 
                 maxPrice = max(maxPrice, data.close[i]);
                 minPrice = min(minPrice, data.close[i]);
                 maxVol = max(maxVol, data.volume[i]);
                 minVol = min(minVol, data.volume[i]);
+
+                double high_minus_low = data.high[i] - data.low[i];
+                double high_minus_prev_close = abs(data.high[i] - data.close[i - 1]);
+                double low_minus_prev_close = abs(data.low[i] - data.close[i - 1]);
+                lookBack.updateATR(max(high_minus_low, high_minus_prev_close, low_minus_prev_close));
+            }
+
+            int startingIndex = doubleLookbackPeriod;
+
+            if (ATRLookbackPeriod > doubleLookbackPeriod){
+                for (int i = startingIndex; i<ATRLookbackPeriod; i++){
+                    double currentPrice = data.close[i];
+                    double currentVol = data.volume[i];
+                    double prevPrice = data.close[i - lookbackPeriod];
+                    double prevVol = data.volume[i - lookbackPeriod];
+                    double prevPrevPrice = data.close[i - doubleLookbackPeriod];
+                    double prevPrevVol = data.volume[i - doubleLookbackPeriod];
+                    double currentDiffPrice = (data.high[i] - data.low[i])/2;
+                    double prevDiffPrice = (data.high[i - lookbackPeriod] - data.low[i - lookbackPeriod])/2;
+                    double prevPrevDiffPrice = (data.high[i - doubleLookbackPeriod] - data.low[i - doubleLookbackPeriod])/2;
+
+                    // Update LookBack
+                    lookBack.updateLookBackSumPrice(currentPrice, prevPrice, prevPrevPrice);
+                    lookBack.updateLookBackSumVolume(currentVol, prevVol, prevPrevVol);
+                    lookBack.updateLookBackSumDiffPrice(currentDiffPrice, prevDiffPrice, prevPrevDiffPrice);
+
+                    lookBack.updateMaxPrice(currentPrice);
+                    lookBack.updateMinPrice(currentPrice);
+                    lookBack.updateMaxVolume(currentVol);
+                    lookBack.updateMinVolume(currentVol);
+
+                    // Update ATR
+                    double high_minus_low = data.high[i] - data.low[i];
+                    double high_minus_prev_close = abs(data.high[i] - data.close[i - 1]);
+                    double low_minus_prev_close = abs(data.low[i] - data.close[i - 1]);
+                    lookBack.updateATR(max(high_minus_low, high_minus_prev_close, low_minus_prev_close));
+                }
+                startingIndex = ATRLookbackPeriod;
             }
 
             lookBack.updateMaxPrice(maxPrice);
@@ -80,97 +174,284 @@ class CustomChannelBreakout: private TradingStrategy{
 
             // Execute the trades
 
-            for (int i = doubleLookbackPeriod; i<length; i++){
+            for (int i = startingIndex; i<length; i++){
                 double currentPrice = data.close[i];
                 double currentVol = data.volume[i];
                 double prevPrice = data.close[i - lookbackPeriod];
                 double prevVol = data.volume[i - lookbackPeriod];
                 double prevPrevPrice = data.close[i - doubleLookbackPeriod];
                 double prevPrevVol = data.volume[i - doubleLookbackPeriod];
+                double currentDiffPrice = (data.high[i] - data.low[i])/2;
+                double prevDiffPrice = (data.high[i - lookbackPeriod] - data.low[i - lookbackPeriod])/2;
+                double prevPrevDiffPrice = (data.high[i - doubleLookbackPeriod] - data.low[i - doubleLookbackPeriod])/2;
 
                 // Update LookBack
                 lookBack.updateLookBackSumPrice(currentPrice, prevPrice, prevPrevPrice);
                 lookBack.updateLookBackSumVolume(currentVol, prevVol, prevPrevVol);
+                lookBack.updateLookBackSumDiffPrice(currentDiffPrice, prevDiffPrice, prevPrevDiffPrice);
+
+                // Update ATR
+                double high_minus_low = data.high[i] - data.low[i];
+                double high_minus_prev_close = abs(data.high[i] - data.close[i - 1]);
+                double low_minus_prev_close = abs(data.low[i] - data.close[i - 1]);
+                lookBack.updateATR(max(high_minus_low, high_minus_prev_close, low_minus_prev_close));
 
                 // Determine if a trade should be executed
                 if (this->getContainsOpenPosition()){
-                    ;
+                    Position currentPosition = this->getOpenPosition();
+                    double stopLossPrice = currentPosition.getStopLossPrice();
+                    if ((currentPosition.getPositionType() == LONG && currentPrice <= stopLossPrice) ||
+                        (currentPosition.getPositionType() == SHORT && currentPrice >= stopLossPrice)){
+                        this->setContainsOpenPosition(false);
+                        currentPosition.setIsClosed(true);
+                        currentPosition.setSellDate(data.date[i]);
+                        if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
+                            (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                            currentPosition.setSellPrice(data.open[i]);
+                        }
+                        else{
+                            currentPosition.setSellPrice(currentPrice);
+                        }
+                        this->setOpenPosition(currentPosition);
+                        this->appendClosedPosition(currentPosition);
+                        if (currentPosition.getPositionType() == LONG){
+                            this->balance += (currentPosition.getSellPrice() - currentPosition.getPurchasePrice()) 
+                            * currentPosition.getNumShares();
+                        }
+                        else if (currentPosition.getPositionType() == SHORT){
+                            this->balance += (currentPosition.getPurchasePrice() - currentPosition.getSellPrice()) 
+                            * currentPosition.getNumShares();
+                        }
+                        continue;
+                    }
+                    TradeType tradeType = currentPosition.getTradeType();
+                    if (tradeType == HVS){
+                        ;
+                    }
+                    else if (tradeType == HNVHL){
+                        ;
+                    }
+                    else if (tradeType == HNVHHVL){
+                        this->HNVHHVLHighCounter += 1;
+                        this->HNVHHVLHighRunningSum += currentVol;
+                    }
+                    else if (tradeType == HNVSL){
+                        ;
+                    }
+                    else if (tradeType == LVL){
+                        ;
+                    }
+                    else if (tradeType == LNVLS){
+                        ;
+                    }
+                    else if (tradeType == LNVLHVS){
+                        this->LNVLHVSLowCounter += 1;
+                        this->LNVLHVSLowRunningSum += currentVol;
+                    }
+                    else if (tradeType == LNVSS){
+                        ;
+                    }
                 }
                 else{
-                    if (currentPrice > lookBack.maxPrice.maxOrMin){
+                    if (this->HVSSignal || currentPrice > lookBack.maxPrice.maxOrMin){
                         // Update Max Price
                         lookBack.updateMaxPrice(currentPrice);
                         double meanPrice = lookBack.DetermineMeanPrice();
                         double stdPrice = lookBack.DetermineSTDPrice();
-                        if ((meanPrice/stdPrice) > priceVolatilityLongThreshold){
+                        double meanDiffPrice = lookBack.DetermineMeanDiffPrice();
+                        double meanCompare = lookBack.DetermineProbGreaterDiffPrice(meanPrice + meanDiffPrice);
+                        if (this->HVSSignal || (meanPrice/stdPrice) < this->priceVolatilityLongThreshold1){
                             // HVS
-                            ;
+                            if (!this->HVSSignal){
+                                this->HVSSignal = true;
+                                continue;
+                            }
+                            this->HVSCount = this->HVSCount + 1;
+                            if (this->HVSCount > this->HVSWaitingPeriod){
+                                this->HVSSignal = false;
+                                this->HVSCount = 0;
+                                continue;
+                            }
+                            if (currentPrice < lookBack.maxPrice.maxOrMin){
+                                double prevVolume = data.volume[i - 1];
+                                if (currentVol <= this->HVSVolumeDropComparison * prevVolume){
+                                    double numShares = this->DetermineShares(currentPrice);
+                                    if (numShares == 0){ 
+                                        continue; 
+                                    }
+                                    double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                                    Position newPosition(SHORT, HVS, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                            numShares, false);
+                                    this->setOpenPosition(newPosition);
+                                    this->setContainsOpenPosition(true);
+                                    this->balance -= numShares * currentPrice;
+                                }
+                            }
                         }
-                        else{
+                        else if (((meanPrice/stdPrice) >= this->priceVolatilityLongThreshold2) && 
+                                meanCompare < this->priceDiffLongCompare){
                             double meanVol = lookBack.DetermineMeanVolume();
                             double stdVol = lookBack.DetermineSTDVolume();
                             double meanPrev = lookBack.DetermineMeanPricePrev();
-                            if (currentPrice * priceSurge > meanPrice){
-                                double comparisonVol = meanVol + meanVol * volumeComparisonPriceSurge;
+                            if (currentPrice >= (meanPrice * priceSurge)){
+                                double comparisonVol = meanVol + meanVol * this->volumeComparisonPriceSurge;
                                 if (currentVol <= comparisonVol){
                                     // HNVHL
-                                    ;
+                                    double numShares = this->DetermineShares(currentPrice);
+                                    if (numShares == 0){ 
+                                        continue; 
+                                    }
+                                    double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                                    Position newPosition(LONG, HNVHL, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                            numShares, false);
+                                    this->setOpenPosition(newPosition);
+                                    this->setContainsOpenPosition(true);
+                                    this->balance -= numShares * currentPrice;
                                 }
                                 else{
                                     // HNVHHVL
-                                    ;
+                                    this->HNVHHVLHighCounter += 1;
+                                    this->HNVHHVLHighRunningSum += currentVol;
+                                    double numShares = this->DetermineShares(currentPrice);
+                                    if (numShares == 0){ 
+                                        continue; 
+                                    }
+                                    double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                                    Position newPosition(LONG, HNVHHVL, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                            numShares, false);
+                                    this->setOpenPosition(newPosition);
+                                    this->setContainsOpenPosition(true);
+                                    this->balance -= numShares * currentPrice;
                                 }
                             }
                             else if (meanPrice > meanPrev){
-                                if (meanVol/stdVol >= volumeVolatilityLongThreshold){
+                                if ((meanVol/stdVol) >= this->volumeVolatilityLongThreshold){
                                     double meanVolPrev = lookBack.DetermineMeanVolumePrev();
-                                    double topComparisonVol = meanVolPrev + meanVolPrev * volumeDropComparison;
-                                    double bottomComparisonVol = meanVolPrev - meanVolPrev * volumeDropComparison;
+                                    double topComparisonVol = meanVolPrev + meanVolPrev * this->volumeComparison;
+                                    double bottomComparisonVol = meanVolPrev - meanVolPrev * this->volumeComparison;
                                     if (bottomComparisonVol <= meanVol && meanVol <= topComparisonVol){
-                                        double dropVolume = data.close[i - 1] * volumeDropComparison;
-                                        if (dropVolume >=)
-                                        // HNVSL
+                                        double prevVolume = this->volumeDropComparison * data.volume[i - 1];
+                                        if (currentVol < prevVolume){
+                                            // HNVSL
+                                            double numShares = this->DetermineShares(currentPrice);
+                                            if (numShares == 0){ 
+                                                continue; 
+                                            }
+                                            double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                                            Position newPosition(LONG, HNVSL, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                                    numShares, false);
+                                            this->setOpenPosition(newPosition);
+                                            this->setContainsOpenPosition(true);
+                                            this->balance -= numShares * currentPrice;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    else if (currentPrice < lookBack.minPrice.maxOrMin){
+                    else if (this->LVLSignal || currentPrice < lookBack.minPrice.maxOrMin){
                         // Update Min Price
                         lookBack.updateMinPrice(currentPrice);
                         double meanPrice = lookBack.DetermineMeanPrice();
                         double stdPrice = lookBack.DetermineSTDPrice();
-                        if ((meanPrice/stdPrice) > priceVolatilityShortThreshold){
+                        double meanDiffPrice = lookBack.DetermineMeanDiffPrice();
+                        double meanCompare = lookBack.DetermineProbGreaterDiffPrice(meanPrice + meanDiffPrice);
+                        if (this->LVLSignal || (meanPrice/stdPrice) < this->priceVolatilityShortThreshold1){
                             // LVL
+                            if (!this->LVLSignal){
+                                this->LVLSignal = true;
+                                continue;
+                            }
+                            this->LVLCount = this->LVLCount + 1;
+                            if (this->LVLCount > this->LVLWaitingPeriod){
+                                this->LVLSignal = false;
+                                this->LVLCount = 0;
+                                continue;
+                            }
+                            if (currentPrice > lookBack.minPrice.maxOrMin){
+                                double prevVolume = data.volume[i - 1];
+                                if (currentVol <= this->LVLVolumeDropComparison * prevVolume){
+                                    double numShares = this->DetermineShares(currentPrice);
+                                    if (numShares == 0){ 
+                                        continue; 
+                                    }
+                                    double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                                    Position newPosition(LONG, LVL, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                            numShares, false);
+                                    this->setOpenPosition(newPosition);
+                                    this->setContainsOpenPosition(true);
+                                    this->balance -= numShares * currentPrice;
+                                }
+                            }
                         }
-                        else{
+                        else if (((meanPrice/stdPrice) >= this->priceVolatilityShortThreshold2) && 
+                                meanCompare < this->priceDiffShortCompare){
                             double meanVol = lookBack.DetermineMeanVolume();
                             double stdVol = lookBack.DetermineSTDVolume();
                             double meanPrev = lookBack.DetermineMeanPricePrev();
-                            if (currentPrice * dropSurge <= meanPrice){
+                            if (currentPrice <= (meanPrice * this->dropPriceSurge)){
                                 double comparisonVol = meanVol + meanVol * this->volumeComparisonDropSurge;
                                 if (currentVol <= comparisonVol){
                                     // LNVLS
-                                    ;
+                                    double numShares = this->DetermineShares(currentPrice);
+                                    if (numShares == 0){ 
+                                        continue; 
+                                    }
+                                    double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                                    Position newPosition(SHORT, LNVLS, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                            numShares, false);
+                                    this->setOpenPosition(newPosition);
+                                    this->setContainsOpenPosition(true);
+                                    this->balance -= numShares * currentPrice;
                                 }
                                 else{
                                     // LNVLHVS
-                                    ;
+                                    this->LNVLHVSLowCounter += 1;
+                                    this->LNVLHVSLowRunningSum += currentVol;
+                                    double numShares = this->DetermineShares(currentPrice);
+                                    if (numShares == 0){ 
+                                        continue; 
+                                    }
+                                    double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                                    Position newPosition(SHORT, LNVLHVS, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                            numShares, false);
+                                    this->setOpenPosition(newPosition);
+                                    this->setContainsOpenPosition(true);
+                                    this->balance -= numShares * currentPrice;
                                 }
                             }
-                            else if ((meanVol/stdVol) >= volumeVolatilityShortThreshold){
+                            else if ((meanVol/stdVol) >= this->volumeVolatilityShortThreshold){
                                 double meanVolPrev = lookBack.DetermineMeanVolumePrev();
-                                double topComparisonVol = meanVolPrev + meanVolPrev * volumeDropComparison;
-                                double bottomComparisonVol = meanVolPrev - meanVolPrev * volumeDropComparison;
+                                double topComparisonVol = meanVolPrev + meanVolPrev * this->volumeDropComparison;
+                                double bottomComparisonVol = meanVolPrev - meanVolPrev * this->volumeDropComparison;
                                 if (bottomComparisonVol <= meanVol && meanVol <= topComparisonVol){
-                                    // LNVSS
+                                    double prevVolume = this->volumeDropComparison * data.volume[i - 1];
+                                    if (currentVol < prevVolume){
+                                        // LNVSS
+                                        double numShares = this->DetermineShares(currentPrice);
+                                        if (numShares == 0){ 
+                                            continue; 
+                                        }
+                                        double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                                        Position newPosition(SHORT, LNVSS, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                                numShares, false);
+                                        this->setOpenPosition(newPosition);
+                                        this->setContainsOpenPosition(true);
+                                        this->balance -= numShares * currentPrice;
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
+                lookBack.updateMaxPrice(maxPrice);
+                lookBack.updateMinPrice(minPrice);
+                lookBack.updateMaxVolume(maxVol);
+                lookBack.updateMinVolume(minVol);
+
             }
+            
 
         }
 };

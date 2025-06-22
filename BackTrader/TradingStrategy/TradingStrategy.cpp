@@ -1,11 +1,16 @@
 #include "../StockData/StockData.h"
 #include "../Position/Position.h"
 #include <unordered_map>
+#include <cmath>
+#include <random>
+#include <deque>
 #include <map>
 #include <vector>
 #include <algorithm>
 #include <numeric>
 #include <limits>
+
+using namespace std;
 
 class MaxMinPos {
     public:
@@ -19,15 +24,22 @@ class MaxMinPos {
 class LookBack {
     public:
         int lookbackPeriod;
+        int ATRLookbackPeriod;
         MaxMinPos maxPrice;
         MaxMinPos minPrice;
         MaxMinPos maxVol;
         MaxMinPos minVol;
 
+        double sumATR;
+        deque<double> trueRangeWindow;
+
         double sumPrice;
         double sumSQPrice;
         double sumVol;
         double sumSQVol;
+
+        double sumDiffPrice;
+        double sumDiffPricePrev;
 
         double sumPricePrev;
         double sumSQPricePrev;
@@ -35,8 +47,8 @@ class LookBack {
         double sumSQVolPrev;
 
         LookBack() {}
-        LookBack(int lbP): lookbackPeriod(lbP), maxPrice(MaxMinPos(-99999999, -1, "")), minPrice(MaxMinPos(99999999, -1, "")),
-        maxVol(MaxMinPos(-99999999, -1, "")), minVol(MaxMinPos(99999999, -1, "")) {}
+        LookBack(int lbP, int ATRlbP): lookbackPeriod(lbP), ATRLookbackPeriod(ATRlbP), maxPrice(MaxMinPos(-99999999, -1, "")), 
+        minPrice(MaxMinPos(99999999, -1, "")), maxVol(MaxMinPos(-99999999, -1, "")), minVol(MaxMinPos(99999999, -1, "")) {}
 
         void updateLookBackSumPrice(double currentPrice, double prevPrice, double prevPrevPrice){
             this->sumPricePrev = this->sumPricePrev - prevPrevPrice + prevPrice;
@@ -50,6 +62,20 @@ class LookBack {
             this->sumSQVolPrev = this->sumSQVolPrev - prevPrevVol * prevPrevVol + prevVol * prevVol;
             this->sumVol = this->sumVol - prevVol + currentVol;
             this->sumSQVol = this->sumSQVol - prevVol * prevVol + currentVol * currentVol;
+        }
+
+        void updateLookBackSumDiffPrice(double currentDiffPrice, double prevDiffPrice, double prevPrevDiffPrice){
+            this->sumDiffPrice = this->sumDiffPrice - prevDiffPrice + currentDiffPrice;
+            this->sumDiffPricePrev = this->sumDiffPricePrev - prevPrevDiffPrice + prevDiffPrice;
+        }
+
+        void updateATR(double maximum){
+            this->sumATR += maximum;
+            this->trueRangeWindow.push_back(maximum);
+            if (this->trueRangeWindow.size() > ATRLookbackPeriod){
+                this->sumATR -= this->trueRangeWindow.front();
+                this->trueRangeWindow.pop_front();
+            }
         }
 
         void updateMaxPrice(double p){
@@ -68,12 +94,24 @@ class LookBack {
             this->minVol.maxOrMin = min(this->minVol.maxOrMin, v);
         }
 
+        double DetermineATR(){
+            return (this->sumATR)/ATRLookbackPeriod;
+        }
+
         double DetermineMeanPrice(){
             return (this->sumPrice)/lookbackPeriod;
         }
 
         double DetermineMeanPricePrev(){
             return (this->sumPricePrev)/lookbackPeriod;
+        }
+
+        double DetermineMeanDiffPrice(){
+            return (this->sumDiffPrice)/lookbackPeriod;
+        }
+
+        double DetermineMeanDiffPricePrev(){
+            return (this->sumDiffPricePrev)/lookbackPeriod;
         }
 
         double DetermineMeanVolume(){
@@ -89,6 +127,11 @@ class LookBack {
             double variance = (this->sumSQPrice - (this->sumPrice * this->sumPrice) / lookbackPeriod)/(lookbackPeriod - 1);
             double std = sqrt(variance);
             return std;
+        }
+
+        double DetermineProbGreaterDiffPrice(double val){
+            double zScore = (val - this->DetermineMeanPrice())/this->DetermineSTDPrice();
+            return (1.0 - 0.5 * (1.0 + erf(zScore / sqrt(2.0))));
         }
 
         double DetermineSTDPricePrev(){
@@ -139,7 +182,7 @@ class TradingStrategy {
             return this->openPosition;
         }
 
-        void setOpenPosition(Position p){
+        void setOpenPosition(Position &p){
             this->openPosition = p;
         }
 

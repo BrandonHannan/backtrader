@@ -5,6 +5,9 @@
 #include "../Position/Position.h"
 #include <vector>
 #include <unordered_map>
+#include <cmath>
+#include <random>
+#include <deque>
 #include <map>
 
 class MaxMinPos {
@@ -19,14 +22,22 @@ class MaxMinPos {
 class LookBack {
     public:
         int lookbackPeriod;
+        int ATRLookbackPeriod;
         MaxMinPos maxPrice;
         MaxMinPos minPrice;
-        double sumPrice;
-        double sumSQPrice;
         MaxMinPos maxVol;
         MaxMinPos minVol;
+
+        double sumATR;
+        deque<double> trueRangeWindow;
+
+        double sumPrice;
+        double sumSQPrice;
         double sumVol;
         double sumSQVol;
+
+        double sumDiffPrice;
+        double sumDiffPricePrev;
 
         double sumPricePrev;
         double sumSQPricePrev;
@@ -34,11 +45,15 @@ class LookBack {
         double sumSQVolPrev;
 
         LookBack() {}
-        LookBack(int lbP);
+        LookBack(int lbP, int ATRlbP);
 
         void updateLookBackSumPrice(double currentPrice, double prevPrice, double prevPrevPrice);
 
         void updateLookBackSumVolume(double currentVol, double prevVol, double prevPrevVol);
+
+        void updateLookBackSumDiffPrice(double currentDiffPrice, double prevDiffPrice, double prevPrevDiffPrice);
+
+        void updateATR(double maximum);
 
         void updateMaxPrice(double p);
 
@@ -48,15 +63,23 @@ class LookBack {
 
         void updateMinVolume(double v);
 
+        double DetermineATR();
+
         double DetermineMeanPrice();
 
         double DetermineMeanPricePrev();
+
+        double DetermineMeanDiffPrice();
+
+        double DetermineMeanDiffPricePrev();
 
         double DetermineMeanVolume();
 
         double DetermineMeanVolumePrev();
 
         double DetermineSTDPrice();
+
+        double DetermineProbGreaterDiffPrice(double val);
 
         double DetermineSTDPricePrev();
 

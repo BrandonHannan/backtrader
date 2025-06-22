@@ -27,9 +27,11 @@ enum PositionType{
 class Position{
     private:
         PositionType positionType;
+        TradeType tradeType;
         string purchaseDate;
         string sellDate;
         double purchasePrice;
+        double stopLossPrice;
         double sellPrice;
         double numShares;
         bool isClosed;
@@ -40,11 +42,16 @@ class Position{
 
     public:
         Position();
-        Position(PositionType pType, string pDate, string sDate, double pPrice, double sPrice, double nShares, bool isC);
+        Position(PositionType pType, TradeType tType, string pDate, string sDate, double pPrice, double sLP,
+        double sPrice, double nShares, bool isC);
 
         PositionType getPositionType();
 
         void setPositionType(PositionType pType);
+
+        TradeType getTradeType();
+
+        void setTradeType(TradeType tType);
 
         string getPurchaseDate();
 
@@ -57,6 +64,10 @@ class Position{
         double getPurchasePrice();
 
         void setPurchasePrice(double pPrice);
+
+        double getStopLossPrice();
+
+        void setStopLossPrice(double sLP);
 
         double getSellPrice();
 
