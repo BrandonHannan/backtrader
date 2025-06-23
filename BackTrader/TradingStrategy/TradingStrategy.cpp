@@ -123,7 +123,6 @@ class LookBack {
         }
 
         double DetermineSTDPrice(){
-            double mean = this->DetermineMeanPrice();
             double variance = (this->sumSQPrice - (this->sumPrice * this->sumPrice) / lookbackPeriod)/(lookbackPeriod - 1);
             double std = sqrt(variance);
             return std;
@@ -135,7 +134,6 @@ class LookBack {
         }
 
         double DetermineSTDPricePrev(){
-            double mean = this->DetermineMeanPricePrev();
             double variance = (this->sumSQPricePrev - (this->sumPricePrev * this->sumPricePrev) / 
             lookbackPeriod)/(lookbackPeriod - 1);
             double std = sqrt(variance);
@@ -143,14 +141,12 @@ class LookBack {
         }
 
         double DetermineSTDVolume(){
-            double mean = this->DetermineMeanVolume();
             double variance = (this->sumSQVol - (this->sumVol * this->sumVol) / lookbackPeriod)/(lookbackPeriod - 1);
             double std = sqrt(variance);
             return std;
         }
 
         double DetermineSTDVolumePrev(){
-            double mean = this->DetermineMeanVolumePrev();
             double variance = (this->sumSQVolPrev - (this->sumVolPrev * this->sumVolPrev) / 
             lookbackPeriod)/(lookbackPeriod - 1);
             double std = sqrt(variance);

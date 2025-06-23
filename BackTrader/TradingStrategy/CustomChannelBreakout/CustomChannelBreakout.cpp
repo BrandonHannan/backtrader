@@ -44,11 +44,17 @@ class CustomChannelBreakout: private TradingStrategy{
 
         double HVSExitComparison; // E.g. 0.01 - 0.25 Multiplier
         double HNVSLExitThreshold; // E.g. 1 - 100 Comparison
+        int HNVSLCounter;
+        double HNVSLRunningSum;
+        double HNVSLRunningSumSquared;
         double HNVHHVLExitComparison; // E.g. 0.01 - 0.25 Multiplier
         int HNVHHVLHighCounter = 0;
         double HNVHHVLHighRunningSum;
         double LVLExitComparison; // E.g. 0.01 - 0.25 Multiplier
         double LNVSSExitThreshold; // E.g. 1 - 100 Comparison
+        int LNVSSCounter;
+        double LNVSSRunningSum;
+        double LNVSSRunningSumSquared;
         double LNVLHVSExitComparison; // E.g. 0.01 - 0.25 Multiplier
         int LNVLHVSLowCounter = 0;
         double LNVLHVSLowRunningSum;
@@ -82,6 +88,24 @@ class CustomChannelBreakout: private TradingStrategy{
                 return 0.0;
             }
             return (dollarRisk/riskPerShare);
+        }
+
+        void sellPosition(double sellPrice, string sellDate){
+            Position currentPosition = this->getOpenPosition();
+            currentPosition.setIsClosed(true);
+            currentPosition.setSellDate(sellDate);
+            currentPosition.setSellPrice(sellPrice);
+            if (currentPosition.getPositionType() == LONG){
+                    this->balance += (currentPosition.getSellPrice() - currentPosition.getPurchasePrice()) 
+                    * currentPosition.getNumShares();
+            }
+            else if (currentPosition.getPositionType() == SHORT){
+                this->balance += (currentPosition.getPurchasePrice() - currentPosition.getSellPrice()) 
+                * currentPosition.getNumShares();
+            }
+            this->setOpenPosition(currentPosition);
+            this->setContainsOpenPosition(false);
+            this->appendClosedPosition(currentPosition);
         }
 
         void ExecuteStrategy(const StockData &data) override {
@@ -202,26 +226,12 @@ class CustomChannelBreakout: private TradingStrategy{
                     double stopLossPrice = currentPosition.getStopLossPrice();
                     if ((currentPosition.getPositionType() == LONG && currentPrice <= stopLossPrice) ||
                         (currentPosition.getPositionType() == SHORT && currentPrice >= stopLossPrice)){
-                        this->setContainsOpenPosition(false);
-                        currentPosition.setIsClosed(true);
-                        currentPosition.setSellDate(data.date[i]);
+                        double sellPrice = currentPrice;
                         if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
                             (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
                             currentPosition.setSellPrice(data.open[i]);
                         }
-                        else{
-                            currentPosition.setSellPrice(currentPrice);
-                        }
-                        this->setOpenPosition(currentPosition);
-                        this->appendClosedPosition(currentPosition);
-                        if (currentPosition.getPositionType() == LONG){
-                            this->balance += (currentPosition.getSellPrice() - currentPosition.getPurchasePrice()) 
-                            * currentPosition.getNumShares();
-                        }
-                        else if (currentPosition.getPositionType() == SHORT){
-                            this->balance += (currentPosition.getPurchasePrice() - currentPosition.getSellPrice()) 
-                            * currentPosition.getNumShares();
-                        }
+                        this->sellPosition(sellPrice, data.date[i]);
                         continue;
                     }
                     TradeType tradeType = currentPosition.getTradeType();
@@ -234,9 +244,33 @@ class CustomChannelBreakout: private TradingStrategy{
                     else if (tradeType == HNVHHVL){
                         this->HNVHHVLHighCounter += 1;
                         this->HNVHHVLHighRunningSum += currentVol;
+                        double meanHigh = (this->HNVHHVLHighRunningSum/this->HNVHHVLHighCounter) + 
+                               (this->HNVHHVLHighRunningSum/this->HNVHHVLHighCounter) * this->HNVHHVLExitComparison;
+                        if (currentVol < meanHigh){
+                            double sellPrice = currentPrice;
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                                currentPosition.setSellPrice(data.open[i]);
+                            }
+                            this->sellPosition(sellPrice, data.date[i]);
+                        }
                     }
                     else if (tradeType == HNVSL){
-                        ;
+                        this->HNVSLCounter += 1;
+                        this->HNVSLRunningSum += currentVol;
+                        this->HNVSLRunningSumSquared += currentVol * currentVol;
+                        double HNVSLMean = (this->HNVSLRunningSum/this->HNVSLCounter);
+                        double HNVSLVariance = (this->HNVSLRunningSumSquared - (this->HNVSLRunningSum * 
+                        this->HNVSLRunningSum)/this->HNVSLCounter)/(this->HNVSLCounter - 1);
+                        double HNVSLSTD = sqrt(HNVSLVariance);
+                        if (HNVSLMean/HNVSLSTD < HNVSLExitThreshold){
+                            double sellPrice = currentPrice;
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                                currentPosition.setSellPrice(data.open[i]);
+                            }
+                            this->sellPosition(sellPrice, data.date[i]);
+                        }
                     }
                     else if (tradeType == LVL){
                         ;
@@ -247,9 +281,33 @@ class CustomChannelBreakout: private TradingStrategy{
                     else if (tradeType == LNVLHVS){
                         this->LNVLHVSLowCounter += 1;
                         this->LNVLHVSLowRunningSum += currentVol;
+                        double meanHigh = (this->LNVLHVSLowRunningSum/this->LNVLHVSLowCounter) + 
+                               (this->LNVLHVSLowRunningSum/this->LNVLHVSLowCounter) * this->LNVLHVSExitComparison;
+                        if (currentVol < meanHigh){
+                            double sellPrice = currentPrice;
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                                currentPosition.setSellPrice(data.open[i]);
+                            }
+                            this->sellPosition(sellPrice, data.date[i]);
+                        }
                     }
                     else if (tradeType == LNVSS){
-                        ;
+                        this->LNVSSCounter += 1;
+                        this->LNVSSRunningSum += currentVol;
+                        this->LNVSSRunningSumSquared += currentVol * currentVol;
+                        double LNVSSMean = (this->LNVSSRunningSum/this->LNVSSCounter);
+                        double LNVSSVariance = (this->LNVSSRunningSumSquared - (this->LNVSSRunningSum * 
+                        this->LNVSSRunningSum)/this->LNVSSCounter)/(this->LNVSSCounter - 1);
+                        double LNVSSSTD = sqrt(LNVSSVariance);
+                        if (LNVSSMean/LNVSSSTD < LNVSSExitThreshold){
+                            double sellPrice = currentPrice;
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                                currentPosition.setSellPrice(data.open[i]);
+                            }
+                            this->sellPosition(sellPrice, data.date[i]);
+                        }
                     }
                 }
                 else{
@@ -333,6 +391,9 @@ class CustomChannelBreakout: private TradingStrategy{
                                         double prevVolume = this->volumeDropComparison * data.volume[i - 1];
                                         if (currentVol < prevVolume){
                                             // HNVSL
+                                            this->HNVSLCounter += 1;
+                                            this->HNVSLRunningSum += currentVol;
+                                            this->HNVSLRunningSumSquared += currentVol * currentVol;
                                             double numShares = this->DetermineShares(currentPrice);
                                             if (numShares == 0){ 
                                                 continue; 
@@ -428,6 +489,9 @@ class CustomChannelBreakout: private TradingStrategy{
                                     double prevVolume = this->volumeDropComparison * data.volume[i - 1];
                                     if (currentVol < prevVolume){
                                         // LNVSS
+                                        this->LNVSSCounter += 1;
+                                        this->LNVSSRunningSum += currentVol;
+                                        this->LNVSSRunningSumSquared += currentVol * currentVol;
                                         double numShares = this->DetermineShares(currentPrice);
                                         if (numShares == 0){ 
                                             continue; 
