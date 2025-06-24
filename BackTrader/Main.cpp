@@ -1,5 +1,6 @@
 #include "DataReader/DataReader.h"
 #include "TradingStrategy/TradingStrategy.h"
+#include "TradingStrategy/CustomChannelBreakout/CustomChannelBreakout.h"
 #include "Position/Position.h"
 #include <iostream>
 #include <algorithm>
