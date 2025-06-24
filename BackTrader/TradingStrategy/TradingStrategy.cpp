@@ -30,21 +30,21 @@ class LookBack {
         MaxMinPos maxVol;
         MaxMinPos minVol;
 
-        double sumATR;
+        double sumATR = 0;
         deque<double> trueRangeWindow;
 
-        double sumPrice;
-        double sumSQPrice;
-        double sumVol;
-        double sumSQVol;
+        double sumPrice = 0;
+        double sumSQPrice = 0;
+        double sumVol= 0;
+        double sumSQVol = 0;
 
-        double sumDiffPrice;
-        double sumDiffPricePrev;
+        double sumDiffPrice = 0;
+        double sumDiffPricePrev = 0;
 
-        double sumPricePrev;
-        double sumSQPricePrev;
-        double sumVolPrev;
-        double sumSQVolPrev;
+        double sumPricePrev = 0;
+        double sumSQPricePrev = 0;
+        double sumVolPrev = 0;
+        double sumSQVolPrev = 0;
 
         LookBack() {}
         LookBack(int lbP, int ATRlbP): lookbackPeriod(lbP), ATRLookbackPeriod(ATRlbP), maxPrice(MaxMinPos(-99999999, -1, "")), 
@@ -205,7 +205,14 @@ class TradingStrategy {
             int n = this->closedPositions.size();
             vector<double> profits(n, 0);
             for (int i = 0; i < n; i++){
-                profits[i] = this->closedPositions[i].getSellPrice() - this->closedPositions[i].getPurchasePrice();
+                if (this->closedPositions[i].getPositionType() == LONG){
+                    profits[i] = (this->closedPositions[i].getSellPrice() - this->closedPositions[i].getPurchasePrice()) *
+                                this->closedPositions[i].getNumShares();
+                }
+                else if (this->closedPositions[i].getPositionType() == SHORT){
+                    profits[i] = (this->closedPositions[i].getPurchasePrice() - this->closedPositions[i].getSellPrice()) *
+                                this->closedPositions[i].getNumShares();
+                }
             }
             return profits;
         }
@@ -215,7 +222,15 @@ class TradingStrategy {
             map<int, vector<double>> returns;
             for (int i = 0; i < n; i++){
                 int year = stoi(this->closedPositions[i].getSellDate().substr(0, 4));
-                double profit = this->closedPositions[i].getSellPrice() - this->closedPositions[i].getPurchasePrice();
+                double profit = 0;
+                if (this->closedPositions[i].getPositionType() == LONG){
+                    profit = (this->closedPositions[i].getSellPrice() - this->closedPositions[i].getPurchasePrice()) *
+                                this->closedPositions[i].getNumShares();
+                }
+                else if (this->closedPositions[i].getPositionType() == SHORT){
+                    profit = (this->closedPositions[i].getPurchasePrice() - this->closedPositions[i].getSellPrice()) *
+                                this->closedPositions[i].getNumShares();
+                }
                 if (returns.find(year) == returns.end()){
                     returns[year] = {profit};
                 }

@@ -14,7 +14,7 @@ class CustomChannelBreakout: private TradingStrategy{
         double volumeVolatilityLongThreshold; // E.g. 1 - 100 Comparison
         double volumeVolatilityShortThreshold; // E.g. 1 - 100 Comparison
         double volumeDropThreshold; // E.g. 0 - 1 Multiplier
-        int waitingPeriod; // E.g. 1 - 10 Days
+        int waitingPeriod = 0; // E.g. 1 - 10 Days
         double volumeComparison; // E.g. 0.01 - 0.25 Multiplier
         double volumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
         double priceSurge; // E.g. 1.05 - 1.5 Multiplier
@@ -22,8 +22,8 @@ class CustomChannelBreakout: private TradingStrategy{
         double volumeComparisonPriceSurge; // E.g. 0.01 - 0.5 Multiplier
         double volumeComparisonDropSurge; // E.g. 0.01 - 0.5 Multiplier
 
-        double priceDiffLongCompare;
-        double priceDiffShortCompare;
+        double priceDiffLongCompare; // E.g. 0.5 - 0.9 Comparison
+        double priceDiffShortCompare; // E.g. 0.5 - 0.9 Comparison
 
         double HVSComparison; // E.g. 0.01 - 0.25 Multiplier
         double HNVSLComparison; // E.g. 1 - 100 Comparison
@@ -32,57 +32,59 @@ class CustomChannelBreakout: private TradingStrategy{
         double LNVSSComparison; // E.g. 1 - 100 Comparison
         double LNVLHVSComparison; // E.g. 0.01 - 0.25 Multiplier
 
-        bool HVSSignal;
-        int HVSCount;
-        int HVSWaitingPeriod;
+        bool HVSSignal = false;
+        int HVSCount = 0;
+        int HVSWaitingPeriod = 0;
         double HVSVolumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
 
-        bool LVLSignal;
-        int LVLCount;
-        int LVLWaitingPeriod;
+        bool LVLSignal = false;
+        int LVLCount = 0;
+        int LVLWaitingPeriod = 0;
         double LVLVolumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
 
         double HVSExitComparison; // E.g. 0.01 - 0.25 Multiplier
+        double HVSPrevMean = 0;
         double HNVSLExitThreshold; // E.g. 1 - 100 Comparison
-        int HNVSLCounter;
-        double HNVSLRunningSum;
-        double HNVSLRunningSumSquared;
+        int HNVSLCounter = 0;
+        double HNVSLRunningSum = 0;
+        double HNVSLRunningSumSquared = 0;
         double HNVHHVLExitComparison; // E.g. 0.01 - 0.25 Multiplier
         int HNVHHVLHighCounter = 0;
-        double HNVHHVLHighRunningSum;
+        double HNVHHVLHighRunningSum = 0;
         double LVLExitComparison; // E.g. 0.01 - 0.25 Multiplier
+        double LVLPrevMean = 0;
         double LNVSSExitThreshold; // E.g. 1 - 100 Comparison
-        int LNVSSCounter;
-        double LNVSSRunningSum;
-        double LNVSSRunningSumSquared;
+        int LNVSSCounter = 0;
+        double LNVSSRunningSum = 0;
+        double LNVSSRunningSumSquared = 0;
         double LNVLHVSExitComparison; // E.g. 0.01 - 0.25 Multiplier
         int LNVLHVSLowCounter = 0;
-        double LNVLHVSLowRunningSum;
+        double LNVLHVSLowRunningSum = 0;
     public:
         CustomChannelBreakout(double bal, bool cOP, Position pos, vector<Position> cPoses, int lbPeriod,
-        int ATRP, double ATRM, double rM,
-        double pVLT1, double pVLT2, double pVST1, double pVST2, double vVLT, double vVST, double vDT, int wPeriod, double vC, 
-        double vDC, double pS, 
-        double vCPS, double vCDS, double pDLC, double pDSC, double dPS,
-        double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, double LNVLHVS, int HVSWP, double HVSVDC,
-        int LVLWP, double LVLVC):
-        TradingStrategy(bal, cOP, pos, cPoses), ATRMultiplier(ATRM), RiskAmount(rM),
-        lookBack(LookBack(lbPeriod, ATRP)), priceVolatilityLongThreshold1(pVLT1),
-        priceVolatilityLongThreshold2(pVLT2), priceVolatilityShortThreshold1(pVST1), priceVolatilityShortThreshold2(pVST2),
-        volumeVolatilityLongThreshold(vVLT), volumeVolatilityShortThreshold(vVST), volumeDropThreshold(vDT), 
-        waitingPeriod(wPeriod), volumeComparison(vC),
-        volumeDropComparison(vDC), priceSurge(pS), dropPriceSurge(dPS), volumeComparisonPriceSurge(vCPS), 
-        volumeComparisonDropSurge(vCDS), priceDiffLongCompare(pDLC), priceDiffShortCompare(pDSC), HVSComparison(HVS),
-        HNVSLComparison(HNVSL), HNVHHVLComparison(HNVHHVL), LVLComparison(LVL), LNVSSComparison(LNVSS),
-        LNVLHVSComparison(LNVLHVS), HVSWaitingPeriod(HVSWP), HVSSignal(false), HVSCount(0),
-        HVSVolumeDropComparison(HVSVDC), LVLWaitingPeriod(LVLWP), LVLSignal(false), LVLCount(0), LVLVolumeDropComparison(LVLVC) {}
+        int ATRP, double ATRM, double rM, double pVLT1, double pVLT2, double pVST1, double pVST2, double vVLT, 
+        double vVST, double vDT, int wPeriod, double vC, double vDC, double pS, double vCPS, double vCDS, 
+        double pDLC, double pDSC, double dPS, double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, 
+        double LNVLHVS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC, double HNVSLET, 
+        double HNVHHVLEC, double LVLEC, double LNVSSET, double LNVLHVSEC):
+        TradingStrategy(bal, cOP, pos, cPoses), ATRMultiplier(ATRM), RiskAmount(rM), lookBack(LookBack(lbPeriod, ATRP)), 
+        priceVolatilityLongThreshold1(pVLT1), priceVolatilityLongThreshold2(pVLT2), priceVolatilityShortThreshold1(pVST1), 
+        priceVolatilityShortThreshold2(pVST2), volumeVolatilityLongThreshold(vVLT), volumeVolatilityShortThreshold(vVST), 
+        volumeDropThreshold(vDT), waitingPeriod(wPeriod), volumeComparison(vC), volumeDropComparison(vDC), priceSurge(pS), 
+        dropPriceSurge(dPS), volumeComparisonPriceSurge(vCPS), volumeComparisonDropSurge(vCDS), priceDiffLongCompare(pDLC), 
+        priceDiffShortCompare(pDSC), HVSComparison(HVS), HNVSLComparison(HNVSL), HNVHHVLComparison(HNVHHVL), 
+        LVLComparison(LVL), LNVSSComparison(LNVSS), LNVLHVSComparison(LNVLHVS), HVSWaitingPeriod(HVSWP), 
+        HVSCount(0), HVSVolumeDropComparison(HVSVDC), LVLWaitingPeriod(LVLWP), LVLSignal(false), LVLCount(0), 
+        LVLVolumeDropComparison(LVLVC), HVSExitComparison(HVSEC), HNVSLExitThreshold(HNVSLET), 
+        HNVHHVLExitComparison(HNVHHVLEC), LVLExitComparison(LVLEC), LNVSSExitThreshold(LNVSSET), 
+        LNVLHVSExitComparison(LNVLHVSEC) {}
 
         double DetermineShares(double currentPrice){
-            double dollarRisk = this->balance * RiskAmount;
+            double dollarRisk = this->balance * this->RiskAmount;
             if (dollarRisk <= 0){
                 return 0.0;
             }
-            double stopLoss = currentPrice - (lookBack.DetermineATR() * ATRMultiplier);
+            double stopLoss = currentPrice - (lookBack.DetermineATR() * this->ATRMultiplier);
             double riskPerShare = currentPrice - stopLoss;
             if (riskPerShare <= 0){
                 return 0.0;
@@ -113,7 +115,8 @@ class CustomChannelBreakout: private TradingStrategy{
             int lookbackPeriod = this->lookBack.lookbackPeriod;
             int doubleLookbackPeriod = 2 * lookbackPeriod;
             int ATRLookbackPeriod = this->lookBack.ATRLookbackPeriod;
-            if (length <= doubleLookbackPeriod || lookbackPeriod <= 1 || length <= ATRLookbackPeriod){
+            if (length <= doubleLookbackPeriod || lookbackPeriod <= 1 
+                || length <= ATRLookbackPeriod || ATRLookbackPeriod < 1){
                 return;
             }
 
@@ -140,7 +143,7 @@ class CustomChannelBreakout: private TradingStrategy{
                 lookBack.updateATR(max(high_minus_low, high_minus_prev_close, low_minus_prev_close));
             }
 
-            for (int i = lookbackPeriod; i< doubleLookbackPeriod; i++){
+            for (int i = lookbackPeriod; i < doubleLookbackPeriod; i++){
                 lookBack.sumPrice += data.close[i];
                 lookBack.sumSQPrice += data.close[i] * data.close[i];
                 lookBack.sumVol += data.volume[i];
@@ -158,10 +161,15 @@ class CustomChannelBreakout: private TradingStrategy{
                 lookBack.updateATR(max(high_minus_low, high_minus_prev_close, low_minus_prev_close));
             }
 
+            lookBack.updateMaxPrice(maxPrice);
+            lookBack.updateMinPrice(minPrice);
+            lookBack.updateMaxVolume(maxVol);
+            lookBack.updateMinVolume(minVol);
+
             int startingIndex = doubleLookbackPeriod;
 
             if (ATRLookbackPeriod > doubleLookbackPeriod){
-                for (int i = startingIndex; i<ATRLookbackPeriod; i++){
+                for (int i = startingIndex; i < ATRLookbackPeriod; i++){
                     double currentPrice = data.close[i];
                     double currentVol = data.volume[i];
                     double prevPrice = data.close[i - lookbackPeriod];
@@ -191,14 +199,8 @@ class CustomChannelBreakout: private TradingStrategy{
                 startingIndex = ATRLookbackPeriod;
             }
 
-            lookBack.updateMaxPrice(maxPrice);
-            lookBack.updateMinPrice(minPrice);
-            lookBack.updateMaxVolume(maxVol);
-            lookBack.updateMinVolume(minVol);
-
             // Execute the trades
-
-            for (int i = startingIndex; i<length; i++){
+            for (int i = startingIndex; i < length; i++){
                 double currentPrice = data.close[i];
                 double currentVol = data.volume[i];
                 double prevPrice = data.close[i - lookbackPeriod];
@@ -224,19 +226,43 @@ class CustomChannelBreakout: private TradingStrategy{
                 if (this->getContainsOpenPosition()){
                     Position currentPosition = this->getOpenPosition();
                     double stopLossPrice = currentPosition.getStopLossPrice();
+                    if (i >= length - 1){
+                        this->sellPosition(currentPrice, data.date[i]);
+                        // Goes to the next day
+                        lookBack.updateMaxPrice(maxPrice);
+                        lookBack.updateMinPrice(minPrice);
+                        lookBack.updateMaxVolume(maxVol);
+                        lookBack.updateMinVolume(minVol);
+                    }
+                    // Sells position based on its stop loss price
                     if ((currentPosition.getPositionType() == LONG && currentPrice <= stopLossPrice) ||
                         (currentPosition.getPositionType() == SHORT && currentPrice >= stopLossPrice)){
                         double sellPrice = currentPrice;
-                        if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
-                            (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                        if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                            (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
                             currentPosition.setSellPrice(data.open[i]);
                         }
                         this->sellPosition(sellPrice, data.date[i]);
+                        // Goes to the next day
+                        lookBack.updateMaxPrice(maxPrice);
+                        lookBack.updateMinPrice(minPrice);
+                        lookBack.updateMaxVolume(maxVol);
+                        lookBack.updateMinVolume(minVol);
                         continue;
                     }
+
                     TradeType tradeType = currentPosition.getTradeType();
+
                     if (tradeType == HVS){
-                        ;
+                        double bottomMeanPrice = this->HVSPrevMean + this->HVSPrevMean * this->HVSExitComparison;
+                        if (bottomMeanPrice >= currentPrice){
+                            double sellPrice = currentPrice;
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
+                                currentPosition.setSellPrice(data.open[i]);
+                            }
+                            this->sellPosition(sellPrice, data.date[i]);
+                        }
                     }
                     else if (tradeType == HNVHL){
                         ;
@@ -246,13 +272,15 @@ class CustomChannelBreakout: private TradingStrategy{
                         this->HNVHHVLHighRunningSum += currentVol;
                         double meanHigh = (this->HNVHHVLHighRunningSum/this->HNVHHVLHighCounter) + 
                                (this->HNVHHVLHighRunningSum/this->HNVHHVLHighCounter) * this->HNVHHVLExitComparison;
-                        if (currentVol < meanHigh){
+                        if (currentVol <= meanHigh){
                             double sellPrice = currentPrice;
-                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
-                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
                                 currentPosition.setSellPrice(data.open[i]);
                             }
                             this->sellPosition(sellPrice, data.date[i]);
+                            this->HNVHHVLHighCounter = 0;
+                            this->HNVHHVLHighRunningSum = 0;
                         }
                     }
                     else if (tradeType == HNVSL){
@@ -265,15 +293,26 @@ class CustomChannelBreakout: private TradingStrategy{
                         double HNVSLSTD = sqrt(HNVSLVariance);
                         if (HNVSLMean/HNVSLSTD < HNVSLExitThreshold){
                             double sellPrice = currentPrice;
-                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
-                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
+                                currentPosition.setSellPrice(data.open[i]);
+                            }
+                            this->sellPosition(sellPrice, data.date[i]);
+                            this->HNVSLCounter = 0;
+                            this->HNVSLRunningSum = 0;
+                            this->HNVSLRunningSumSquared = 0;
+                        }
+                    }
+                    else if (tradeType == LVL){
+                        double bottomMeanPrice = this->LVLPrevMean - this->LVLPrevMean * this->LVLExitComparison;
+                        if (bottomMeanPrice < currentPrice){
+                            double sellPrice = currentPrice;
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
                                 currentPosition.setSellPrice(data.open[i]);
                             }
                             this->sellPosition(sellPrice, data.date[i]);
                         }
-                    }
-                    else if (tradeType == LVL){
-                        ;
                     }
                     else if (tradeType == LNVLS){
                         ;
@@ -283,13 +322,15 @@ class CustomChannelBreakout: private TradingStrategy{
                         this->LNVLHVSLowRunningSum += currentVol;
                         double meanHigh = (this->LNVLHVSLowRunningSum/this->LNVLHVSLowCounter) + 
                                (this->LNVLHVSLowRunningSum/this->LNVLHVSLowCounter) * this->LNVLHVSExitComparison;
-                        if (currentVol < meanHigh){
+                        if (currentVol <= meanHigh){
                             double sellPrice = currentPrice;
-                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
-                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
                                 currentPosition.setSellPrice(data.open[i]);
                             }
                             this->sellPosition(sellPrice, data.date[i]);
+                            this->LNVLHVSLowCounter = 0;
+                            this->LNVLHVSLowRunningSum = 0;
                         }
                     }
                     else if (tradeType == LNVSS){
@@ -302,15 +343,18 @@ class CustomChannelBreakout: private TradingStrategy{
                         double LNVSSSTD = sqrt(LNVSSVariance);
                         if (LNVSSMean/LNVSSSTD < LNVSSExitThreshold){
                             double sellPrice = currentPrice;
-                            if ((currentPosition.getPositionType() == LONG && data.open[i] <= stopLossPrice) ||
-                                (currentPosition.getPositionType() == SHORT && data.open[i] >= stopLossPrice)){
+                            if ((currentPosition.getPositionType() == LONG && data.open[i] < currentPrice && data.open[i] <= stopLossPrice) ||
+                                (currentPosition.getPositionType() == SHORT && data.open[i] > currentPrice && data.open[i] >= stopLossPrice)){
                                 currentPosition.setSellPrice(data.open[i]);
                             }
                             this->sellPosition(sellPrice, data.date[i]);
+                            this->LNVSSCounter = 0;
+                            this->LNVSSRunningSum = 0;
+                            this->LNVSSRunningSumSquared = 0;
                         }
                     }
                 }
-                else{
+                else{ // May Possibly Purchase a Position
                     if (this->HVSSignal || currentPrice > lookBack.maxPrice.maxOrMin){
                         // Update Max Price
                         lookBack.updateMaxPrice(currentPrice);
@@ -322,19 +366,30 @@ class CustomChannelBreakout: private TradingStrategy{
                             // HVS
                             if (!this->HVSSignal){
                                 this->HVSSignal = true;
+                                lookBack.updateMaxVolume(maxVol);
+                                lookBack.updateMinVolume(minVol);
                                 continue;
                             }
                             this->HVSCount = this->HVSCount + 1;
                             if (this->HVSCount > this->HVSWaitingPeriod){
                                 this->HVSSignal = false;
                                 this->HVSCount = 0;
+                                lookBack.updateMinPrice(minPrice);
+                                lookBack.updateMaxVolume(maxVol);
+                                lookBack.updateMinVolume(minVol);
                                 continue;
                             }
-                            if (currentPrice < lookBack.maxPrice.maxOrMin){
+                            double bottomMeanPrice = meanPrice + meanPrice * this->HVSExitComparison;
+                            if (currentPrice < lookBack.maxPrice.maxOrMin && currentPrice > bottomMeanPrice){
                                 double prevVolume = data.volume[i - 1];
                                 if (currentVol <= this->HVSVolumeDropComparison * prevVolume){
                                     double numShares = this->DetermineShares(currentPrice);
                                     if (numShares == 0){ 
+                                        this->HVSSignal = false;
+                                        this->HVSCount = 0;
+                                        lookBack.updateMinPrice(minPrice);
+                                        lookBack.updateMaxVolume(maxVol);
+                                        lookBack.updateMinVolume(minVol);
                                         continue; 
                                     }
                                     double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
@@ -343,6 +398,9 @@ class CustomChannelBreakout: private TradingStrategy{
                                     this->setOpenPosition(newPosition);
                                     this->setContainsOpenPosition(true);
                                     this->balance -= numShares * currentPrice;
+                                    this->HVSPrevMean = meanPrice;
+                                    this->HVSCount = 0;
+                                    this->HVSSignal = false;
                                 }
                             }
                         }
@@ -357,6 +415,8 @@ class CustomChannelBreakout: private TradingStrategy{
                                     // HNVHL
                                     double numShares = this->DetermineShares(currentPrice);
                                     if (numShares == 0){ 
+                                        lookBack.updateMaxVolume(maxVol);
+                                        lookBack.updateMinVolume(minVol);
                                         continue; 
                                     }
                                     double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
@@ -368,10 +428,10 @@ class CustomChannelBreakout: private TradingStrategy{
                                 }
                                 else{
                                     // HNVHHVL
-                                    this->HNVHHVLHighCounter += 1;
-                                    this->HNVHHVLHighRunningSum += currentVol;
                                     double numShares = this->DetermineShares(currentPrice);
                                     if (numShares == 0){ 
+                                        lookBack.updateMaxVolume(maxVol);
+                                        lookBack.updateMinVolume(minVol);
                                         continue; 
                                     }
                                     double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
@@ -380,6 +440,8 @@ class CustomChannelBreakout: private TradingStrategy{
                                     this->setOpenPosition(newPosition);
                                     this->setContainsOpenPosition(true);
                                     this->balance -= numShares * currentPrice;
+                                    this->HNVHHVLHighCounter += 1;
+                                    this->HNVHHVLHighRunningSum += currentVol;
                                 }
                             }
                             else if (meanPrice > meanPrev){
@@ -391,11 +453,10 @@ class CustomChannelBreakout: private TradingStrategy{
                                         double prevVolume = this->volumeDropComparison * data.volume[i - 1];
                                         if (currentVol < prevVolume){
                                             // HNVSL
-                                            this->HNVSLCounter += 1;
-                                            this->HNVSLRunningSum += currentVol;
-                                            this->HNVSLRunningSumSquared += currentVol * currentVol;
                                             double numShares = this->DetermineShares(currentPrice);
                                             if (numShares == 0){ 
+                                                lookBack.updateMaxVolume(maxVol);
+                                                lookBack.updateMinVolume(minVol);
                                                 continue; 
                                             }
                                             double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
@@ -404,6 +465,9 @@ class CustomChannelBreakout: private TradingStrategy{
                                             this->setOpenPosition(newPosition);
                                             this->setContainsOpenPosition(true);
                                             this->balance -= numShares * currentPrice;
+                                            this->HNVSLCounter += 1;
+                                            this->HNVSLRunningSum += currentVol;
+                                            this->HNVSLRunningSumSquared += currentVol * currentVol;
                                         }
                                     }
                                 }
@@ -421,19 +485,30 @@ class CustomChannelBreakout: private TradingStrategy{
                             // LVL
                             if (!this->LVLSignal){
                                 this->LVLSignal = true;
+                                lookBack.updateMaxVolume(maxVol);
+                                lookBack.updateMinVolume(minVol);
                                 continue;
                             }
                             this->LVLCount = this->LVLCount + 1;
                             if (this->LVLCount > this->LVLWaitingPeriod){
                                 this->LVLSignal = false;
                                 this->LVLCount = 0;
+                                lookBack.updateMaxPrice(minPrice);
+                                lookBack.updateMaxVolume(maxVol);
+                                lookBack.updateMinVolume(minVol);
                                 continue;
                             }
-                            if (currentPrice > lookBack.minPrice.maxOrMin){
+                            double bottomMeanPrice = meanPrice - meanPrice * this->LVLExitComparison;
+                            if (currentPrice > lookBack.minPrice.maxOrMin && currentPrice < bottomMeanPrice){
                                 double prevVolume = data.volume[i - 1];
                                 if (currentVol <= this->LVLVolumeDropComparison * prevVolume){
                                     double numShares = this->DetermineShares(currentPrice);
                                     if (numShares == 0){ 
+                                        lookBack.updateMaxPrice(minPrice);
+                                        lookBack.updateMaxVolume(maxVol);
+                                        lookBack.updateMinVolume(minVol);
+                                        this->LVLSignal = false;
+                                        this->LVLCount = 0;
                                         continue; 
                                     }
                                     double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
@@ -442,6 +517,9 @@ class CustomChannelBreakout: private TradingStrategy{
                                     this->setOpenPosition(newPosition);
                                     this->setContainsOpenPosition(true);
                                     this->balance -= numShares * currentPrice;
+                                    this->LVLPrevMean = meanPrice;
+                                    this->LVLCount = 0;
+                                    this->LVLSignal = false;
                                 }
                             }
                         }
@@ -456,6 +534,8 @@ class CustomChannelBreakout: private TradingStrategy{
                                     // LNVLS
                                     double numShares = this->DetermineShares(currentPrice);
                                     if (numShares == 0){ 
+                                        lookBack.updateMaxVolume(maxVol);
+                                        lookBack.updateMinVolume(minVol);
                                         continue; 
                                     }
                                     double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
@@ -467,10 +547,10 @@ class CustomChannelBreakout: private TradingStrategy{
                                 }
                                 else{
                                     // LNVLHVS
-                                    this->LNVLHVSLowCounter += 1;
-                                    this->LNVLHVSLowRunningSum += currentVol;
                                     double numShares = this->DetermineShares(currentPrice);
-                                    if (numShares == 0){ 
+                                    if (numShares == 0){
+                                        lookBack.updateMaxVolume(maxVol);
+                                        lookBack.updateMinVolume(minVol);
                                         continue; 
                                     }
                                     double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
@@ -479,6 +559,8 @@ class CustomChannelBreakout: private TradingStrategy{
                                     this->setOpenPosition(newPosition);
                                     this->setContainsOpenPosition(true);
                                     this->balance -= numShares * currentPrice;
+                                    this->LNVLHVSLowCounter += 1;
+                                    this->LNVLHVSLowRunningSum += currentVol;
                                 }
                             }
                             else if ((meanVol/stdVol) >= this->volumeVolatilityShortThreshold){
@@ -489,11 +571,10 @@ class CustomChannelBreakout: private TradingStrategy{
                                     double prevVolume = this->volumeDropComparison * data.volume[i - 1];
                                     if (currentVol < prevVolume){
                                         // LNVSS
-                                        this->LNVSSCounter += 1;
-                                        this->LNVSSRunningSum += currentVol;
-                                        this->LNVSSRunningSumSquared += currentVol * currentVol;
                                         double numShares = this->DetermineShares(currentPrice);
                                         if (numShares == 0){ 
+                                            lookBack.updateMaxVolume(maxVol);
+                                            lookBack.updateMinVolume(minVol);
                                             continue; 
                                         }
                                         double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
@@ -502,6 +583,9 @@ class CustomChannelBreakout: private TradingStrategy{
                                         this->setOpenPosition(newPosition);
                                         this->setContainsOpenPosition(true);
                                         this->balance -= numShares * currentPrice;
+                                        this->LNVSSCounter += 1;
+                                        this->LNVSSRunningSum += currentVol;
+                                        this->LNVSSRunningSumSquared += currentVol * currentVol;
                                     }
                                 }
                             }
@@ -515,7 +599,5 @@ class CustomChannelBreakout: private TradingStrategy{
                 lookBack.updateMinVolume(minVol);
 
             }
-            
-
         }
 };

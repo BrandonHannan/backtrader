@@ -3,12 +3,17 @@
 
 #include "../StockData/StockData.h"
 #include "../Position/Position.h"
-#include <vector>
 #include <unordered_map>
 #include <cmath>
 #include <random>
 #include <deque>
 #include <map>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <limits>
+
+using namespace std;
 
 class MaxMinPos {
     public:
@@ -44,7 +49,7 @@ class LookBack {
         double sumVolPrev;
         double sumSQVolPrev;
 
-        LookBack() {}
+        LookBack();
         LookBack(int lbP, int ATRlbP);
 
         void updateLookBackSumPrice(double currentPrice, double prevPrice, double prevPrevPrice);
@@ -95,10 +100,8 @@ class TradingStrategy {
         vector<Position> closedPositions;
     public:
         double balance;
-
         TradingStrategy();
         TradingStrategy(double bal, bool cOP, Position pos, vector<Position> cPoses);
-
         virtual void ExecuteStrategy(const StockData &data) = 0;
 
         bool getContainsOpenPosition();
@@ -107,7 +110,7 @@ class TradingStrategy {
 
         Position getOpenPosition();
 
-        void setOpenPosition(Position p);
+        void setOpenPosition(Position &p);
 
         vector<Position> getClosedPositions();
 

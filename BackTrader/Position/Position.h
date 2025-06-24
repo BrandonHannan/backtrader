@@ -82,6 +82,8 @@ class Position{
         void setIsClosed(bool isC);
 
         int LengthOfTrade();
+
+        Position& operator=(const Position &obj);
 };
 
 #endif
