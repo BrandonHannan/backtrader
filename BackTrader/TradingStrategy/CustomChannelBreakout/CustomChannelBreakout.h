@@ -66,7 +66,7 @@ class CustomChannelBreakout: private TradingStrategy{
     public:
         CustomChannelBreakout(double bal, bool cOP, Position pos, vector<Position> cPoses, int lbPeriod,
         int ATRP, double ATRM, double rM, double pVLT1, double pVLT2, double pVST1, double pVST2, double vVLT, 
-        double vVST, double vDT, int wPeriod, double vC, double vDC, double pS, double vCPS, double vCDS, 
+        double vVST, double vDT, double vC, double vDC, double pS, double vCPS, double vCDS, 
         double pDLC, double pDSC, double dPS, double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, 
         double LNVLHVS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC, double HNVSLET, 
         double HNVHHVLEC, double LVLEC, double LNVSSET, double LNVLHVSEC);

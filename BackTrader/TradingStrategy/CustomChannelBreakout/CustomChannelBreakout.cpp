@@ -14,7 +14,6 @@ class CustomChannelBreakout: private TradingStrategy{
         double volumeVolatilityLongThreshold; // E.g. 1 - 100 Comparison
         double volumeVolatilityShortThreshold; // E.g. 1 - 100 Comparison
         double volumeDropThreshold; // E.g. 0 - 1 Multiplier
-        int waitingPeriod = 0; // E.g. 1 - 10 Days
         double volumeComparison; // E.g. 0.01 - 0.25 Multiplier
         double volumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
         double priceSurge; // E.g. 1.05 - 1.5 Multiplier
@@ -63,14 +62,14 @@ class CustomChannelBreakout: private TradingStrategy{
     public:
         CustomChannelBreakout(double bal, bool cOP, Position pos, vector<Position> cPoses, int lbPeriod,
         int ATRP, double ATRM, double rM, double pVLT1, double pVLT2, double pVST1, double pVST2, double vVLT, 
-        double vVST, double vDT, int wPeriod, double vC, double vDC, double pS, double vCPS, double vCDS, 
+        double vVST, double vDT, double vC, double vDC, double pS, double vCPS, double vCDS, 
         double pDLC, double pDSC, double dPS, double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, 
         double LNVLHVS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC, double HNVSLET, 
         double HNVHHVLEC, double LVLEC, double LNVSSET, double LNVLHVSEC):
         TradingStrategy(bal, cOP, pos, cPoses), ATRMultiplier(ATRM), RiskAmount(rM), lookBack(LookBack(lbPeriod, ATRP)), 
         priceVolatilityLongThreshold1(pVLT1), priceVolatilityLongThreshold2(pVLT2), priceVolatilityShortThreshold1(pVST1), 
         priceVolatilityShortThreshold2(pVST2), volumeVolatilityLongThreshold(vVLT), volumeVolatilityShortThreshold(vVST), 
-        volumeDropThreshold(vDT), waitingPeriod(wPeriod), volumeComparison(vC), volumeDropComparison(vDC), priceSurge(pS), 
+        volumeDropThreshold(vDT), volumeComparison(vC), volumeDropComparison(vDC), priceSurge(pS), 
         dropPriceSurge(dPS), volumeComparisonPriceSurge(vCPS), volumeComparisonDropSurge(vCDS), priceDiffLongCompare(pDLC), 
         priceDiffShortCompare(pDSC), HVSComparison(HVS), HNVSLComparison(HNVSL), HNVHHVLComparison(HNVHHVL), 
         LVLComparison(LVL), LNVSSComparison(LNVSS), LNVLHVSComparison(LNVLHVS), HVSWaitingPeriod(HVSWP), 
