@@ -17,7 +17,6 @@ class CustomChannelBreakout: private TradingStrategy{
         double volumeVolatilityLongThreshold; // E.g. 1 - 100 Comparison
         double volumeVolatilityShortThreshold; // E.g. 1 - 100 Comparison
         double volumeDropThreshold; // E.g. 0 - 1 Multiplier
-        int waitingPeriod; // E.g. 1 - 10 Days
         double volumeComparison; // E.g. 0.01 - 0.25 Multiplier
         double volumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
         double priceSurge; // E.g. 1.05 - 1.5 Multiplier
@@ -25,22 +24,15 @@ class CustomChannelBreakout: private TradingStrategy{
         double volumeComparisonPriceSurge; // E.g. 0.01 - 0.5 Multiplier
         double volumeComparisonDropSurge; // E.g. 0.01 - 0.5 Multiplier
 
-        double priceDiffLongCompare;
-        double priceDiffShortCompare;
+        double priceDiffLongCompare; // E.g. 0.5 - 0.9 Comparison
+        double priceDiffShortCompare; // E.g. 0.5 - 0.9 Comparison
 
-        double HVSComparison; // E.g. 0.01 - 0.25 Multiplier
-        double HNVSLComparison; // E.g. 1 - 100 Comparison
-        double HNVHHVLComparison; // E.g. 0.01 - 0.25 Multiplier
-        double LVLComparison; // E.g. 0.01 - 0.24 Multiplier
-        double LNVSSComparison; // E.g. 1 - 100 Comparison
-        double LNVLHVSComparison; // E.g. 0.01 - 0.25 Multiplier
-
-        bool HVSSignal;
+        bool HVSSignal = false;
         int HVSCount;
         int HVSWaitingPeriod;
         double HVSVolumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
 
-        bool LVLSignal;
+        bool LVLSignal = false;
         int LVLCount;
         int LVLWaitingPeriod;
         double LVLVolumeDropComparison; // E.g. 0.05 - 0.5 Multiplier
@@ -67,9 +59,8 @@ class CustomChannelBreakout: private TradingStrategy{
         CustomChannelBreakout(double bal, bool cOP, Position pos, vector<Position> cPoses, int lbPeriod,
         int ATRP, double ATRM, double rM, double pVLT1, double pVLT2, double pVST1, double pVST2, double vVLT, 
         double vVST, double vDT, double vC, double vDC, double pS, double vCPS, double vCDS, 
-        double pDLC, double pDSC, double dPS, double HVS, double HNVSL, double HNVHHVL, double LVL, double LNVSS, 
-        double LNVLHVS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC, double HNVSLET, 
-        double HNVHHVLEC, double LVLEC, double LNVSSET, double LNVLHVSEC);
+        double pDLC, double pDSC, double dPS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC, 
+        double HNVSLET, double HNVHHVLEC, double LVLEC, double LNVSSET, double LNVLHVSEC);
 
         double DetermineShares(double currentPrice);
 
