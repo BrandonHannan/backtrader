@@ -8,7 +8,7 @@ CXXFLAGS = -std=c++20 -Wall
 TARGET = a
 
 # The source files for your program
-SRCS = Main.cpp datareader.cpp Position.cpp TradingStrategy.cpp CustomChannelBreakout.cpp
+SRCS = Main.cpp DataReader/datareader.cpp Position/Position.cpp TradingStrategy/TradingStrategy.cpp TradingStrategy/CustomChannelBreakout/CustomChannelBreakout.cpp
 
 # --- Makefile Rules ---
 

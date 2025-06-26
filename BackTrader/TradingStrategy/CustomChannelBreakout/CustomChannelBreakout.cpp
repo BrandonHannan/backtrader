@@ -1,7 +1,7 @@
 #include "../TradingStrategy.h"
 #include "../../StockData/StockData.h"
 
-class CustomChannelBreakout: private TradingStrategy{
+class CustomChannelBreakout: public TradingStrategy{
     private:
         double ATRMultiplier; // E.g. 1.1 - 3 Multiplier
         double RiskAmount; // E.g. 0.001 - 0.1 Multiplier
