@@ -28,10 +28,14 @@ class LookBack {
     public:
         int lookbackPeriod;
         int ATRLookbackPeriod;
-        MaxMinPos maxPrice;
-        MaxMinPos minPrice;
-        MaxMinPos maxVol;
-        MaxMinPos minVol;
+        double maxPrice;
+        double minPrice;
+        double maxVol;
+        double minVol;
+        deque<double> priceMaxWindow;
+        deque<double> priceMinWindow;
+        deque<double> volumeMaxWindow;
+        deque<double> volumeMinWindow;
 
         double sumATR;
         deque<double> trueRangeWindow;
@@ -60,13 +64,13 @@ class LookBack {
 
         void updateATR(double maximum);
 
-        void updateMaxPrice(double p);
+        void updateMaxPrice(const vector<double> &data, int index);
 
-        void updateMinPrice(double p);
+        void updateMinPrice(const vector<double> &data, int index);
 
-        void updateMaxVolume(double v);
+        void updateMaxVolume(const vector<double> &data, int index);
 
-        void updateMinVolume(double v);
+        void updateMinVolume(const vector<double> &data, int index);
 
         double DetermineATR();
 
@@ -91,6 +95,8 @@ class LookBack {
         double DetermineSTDVolume();
 
         double DetermineSTDVolumePrev();
+
+        LookBack& operator=(const LookBack &obj);
 };
 
 class TradingStrategy {

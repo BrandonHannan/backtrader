@@ -52,6 +52,7 @@ for stock_name, stock_data in data.items():
 
 file.close()
 # 24:200
+dates = [x for x in range(0, 200)]
 doubles = data["CL=F"]["Close"][0:200]
 prev_avg_p = np.mean(doubles[0:30])
 prev_std_p = np.std(doubles[0:30])
@@ -66,21 +67,14 @@ print(f"Prev Avg Price: ${prev_avg_p}\nCurrent Avg Price: ${curr_avg_p}")
 print(f"Prev STD Price: {prev_std_p}\nCurrent STD Price: {curr_std_p}")
 print(f"Prev Avg Volume: {prev_avg_v}\nCurrent Avg Volume: {curr_avg_v}")
 print(f"Prev STD Volume: {prev_std_v}\nCurrent STD Volume: {curr_std_v}")
-dates = data["CL=F"].index[0:200]
-dates = [str(date.date()) for date in dates]
-dates = [datetime.strptime(date, "%Y-%m-%d") for date in dates]
 plt.figure(figsize=(8, 6))
 plt.subplot(2, 1, 1)
 plt.plot(dates, doubles, marker='o')
 plt.title('Price')
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-plt.xticks(rotation=45)
 
 plt.subplot(2, 1, 2)
 plt.plot(dates, volumes, marker='o', color='red')
 plt.title('Volume')
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-plt.xticks(rotation=45)
 
 plt.tight_layout()
 plt.show()

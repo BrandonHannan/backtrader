@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug (g++)",
+        "type": "cppdbg",
+        "request": "launch",
+        // This is the path to the program you want to debug.
+        // It must match the TARGET in your Makefile.
+        "program": "${workspaceFolder}/a",
+        "args": [], // Add command-line arguments here, e.g., ["arg1", "arg2"]
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false,
+        // Since your previous errors mentioned "arm64" and clang, you are on macOS.
+        // Use "lldb" for macOS. If you were on Linux/WSL, you would use "gdb".
+        "MIMode": "lldb",
+        // This line is crucial! It runs your build task before launching the debugger.
+        "preLaunchTask": "Build with Make"
+      }
+    ]
+  }
