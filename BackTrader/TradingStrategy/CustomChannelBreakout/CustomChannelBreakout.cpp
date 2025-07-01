@@ -94,7 +94,8 @@ void CustomChannelBreakout::sellPosition(double sellPrice, string sellDate) {
     else if (currentPosition.getPositionType() == SHORT) {
         this->balance -= currentPosition.getSellPrice() * currentPosition.getNumShares();
     }
-    this->setOpenPosition(currentPosition);
+    Position emptyPosition;
+    this->setOpenPosition(emptyPosition);
     this->setContainsOpenPosition(false);
     this->appendClosedPosition(currentPosition);
 }
