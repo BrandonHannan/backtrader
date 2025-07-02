@@ -9,9 +9,9 @@
 
 int main(){
     // Use this For MacOS
-    //unordered_map<string, StockData> data = ReadData("../data.txt");
+    unordered_map<string, StockData> data = ReadData("../data.txt");
     // Use this For Windows
-    unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
+    //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
     cout << "Number of Stocks: " << data.size() << endl;
 
     // for (auto stockData : data){
@@ -91,7 +91,7 @@ int main(){
     volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
 
     vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "GC=F", "SI=F", "PL=F", "PA=F", "HG=F", "ZC=F"};
-    for (int i = 0; i<stocks.size(); i++){
+    for (int i = 7; i<stocks.size(); i++){
         strategy.ExecuteStrategy(data[stocks[i]]);
     }
 

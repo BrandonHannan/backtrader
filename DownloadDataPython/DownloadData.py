@@ -1,4 +1,5 @@
 import yfinance as yf
+import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -51,18 +52,25 @@ for stock_name, stock_data in data.items():
     file.write(f"{format_array([str(date.date()) for date in stock_data.index])}\n\n")
 
 file.close()
+
+start_date = '2008-09-11'
+end_date = '2008-10-15'
+end_location = data["PA=F"].index.asof(pd.to_datetime(end_date))
+end_location = data["PA=F"].index.get_loc(end_location)
+start_location = max(0, end_location - 105)
+sliced_data = data["PA=F"].iloc[start_location : end_location + 1]
 # 24:200
-dates = [x for x in range(0, 200)]
-doubles = data["CL=F"]["Close"][0:200]
-prev_avg_p = np.mean(doubles[0:30])
-prev_std_p = np.std(doubles[0:30])
-curr_avg_p = np.mean(doubles[30:60])
-curr_std_p = np.std(doubles[30:60])
-volumes = data['CL=F']['Volume'][0:200]
-prev_avg_v = np.mean(volumes[0:30])
-prev_std_v = np.std(volumes[0:30])
-curr_avg_v = np.mean(volumes[30:60])
-curr_std_v = np.std(volumes[30:60])
+dates = [x for x in range(0, len(sliced_data))]
+doubles = sliced_data["Close"]
+prev_avg_p = np.mean(doubles[0:20])
+prev_std_p = np.std(doubles[0:35])
+curr_avg_p = np.mean(doubles[35:70])
+curr_std_p = np.std(doubles[35:70])
+volumes = sliced_data['Volume']
+prev_avg_v = np.mean(volumes[0:35])
+prev_std_v = np.std(volumes[0:35])
+curr_avg_v = np.mean(volumes[35:70])
+curr_std_v = np.std(volumes[35:70])
 print(f"Prev Avg Price: ${prev_avg_p}\nCurrent Avg Price: ${curr_avg_p}")
 print(f"Prev STD Price: {prev_std_p}\nCurrent STD Price: {curr_std_p}")
 print(f"Prev Avg Volume: {prev_avg_v}\nCurrent Avg Volume: {curr_avg_v}")
