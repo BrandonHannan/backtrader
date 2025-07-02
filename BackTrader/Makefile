@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags. -std=c++20 for the standard, -Wall for all warnings.
-CXXFLAGS = -std=c++20 -Wall #-g
+CXXFLAGS = -std=c++20 -Wall -g
 
 # The name of your final executable file
 TARGET = a

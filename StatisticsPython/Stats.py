@@ -59,7 +59,9 @@ def parse_returns_file(file_path):
 if __name__ == '__main__':
     # --- Configuration ---
     # MACOS
-    INPUT_FILE = "/Users/brandonhannan/Documents/Repos/backtrader/BackTrader/Returns.txt"
+    # INPUT_FILE = "/Users/brandonhannan/Documents/Repos/backtrader/BackTrader/Returns.txt"
+    # WINDOWS
+    INPUT_FILE = "C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\BackTrader\\Returns.txt"
     OUTPUT_CSV = 'strategy_lookback_optimization_results.csv'
     INITIAL_CAPITAL = 10000.0
     

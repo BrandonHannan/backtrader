@@ -9,9 +9,9 @@
 
 int main(){
     // Use this For MacOS
-    unordered_map<string, StockData> data = ReadData("../data.txt");
+    //unordered_map<string, StockData> data = ReadData("../data.txt");
     // Use this For Windows
-    //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
+    unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
     cout << "Number of Stocks: " << data.size() << endl;
 
     // for (auto stockData : data){
@@ -44,7 +44,7 @@ int main(){
     int lookbackPeriod = lookbackPeriodArray[6];
 
     double ATRMultiplier = ATRMultiplierArray[5];
-    int ATRPeriod = waitingPeriodArray[15];
+    int ATRPeriod = 60;
     double RiskAmount = RiskAmountArray[3];
 
     double volumeComparison = volumeComparisonArray[4];
@@ -74,7 +74,7 @@ int main(){
     double pricePercentageShortThreshold = priceDiffCompareArray[9];
     double volumePercentageLongComparison = priceSurgeArray[0];
     double volumePercentageShortComparison = priceSurgeArray[0];
-    double volumePercentageLongThreshold = priceDiffCompareArray[9];
+    double volumePercentageLongThreshold = 0.99;
     double volumePercentageShortThreshold = priceDiffCompareArray[9];
 
     double balance = 10000;
@@ -97,7 +97,7 @@ int main(){
 
     clock_t start = clock();
     // Look Back
-    file << "Lookback\n";
+    /*file << "Lookback\n";
     for (int i = 0; i < lookbackPeriodArray.size(); i++){
         file << lookbackPeriodArray[i] << "\n^\n";
         CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriodArray[i], ATRPeriod, ATRMultiplier, RiskAmount,
@@ -1018,7 +1018,7 @@ int main(){
             }
         }
         file << "%\n";
-    }
+    }*/
 
 
     file.close();
