@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <numeric>
 #include <limits>
+#include "boost/math/distributions/students_t.hpp"
 
 using namespace std;
 
@@ -40,6 +41,9 @@ class LookBack {
         double sumATR;
         deque<double> trueRangeWindow;
 
+        double sumX;
+        double sumSQX;
+        double sumXY;
         double sumPrice;
         double sumSQPrice;
         double sumVol;
@@ -48,10 +52,16 @@ class LookBack {
         double sumDiffPrice;
         double sumDiffPricePrev;
 
+        double sumXYPrev;
         double sumPricePrev;
         double sumSQPricePrev;
         double sumVolPrev;
         double sumSQVolPrev;
+
+        double pricePVal;
+        double priceSlope;
+        double pricePValPrev;
+        double priceSlopePrev;
 
         LookBack();
         LookBack(int lbP, int ATRlbP);

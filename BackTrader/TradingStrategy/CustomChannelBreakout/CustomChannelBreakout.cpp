@@ -10,7 +10,7 @@ CustomChannelBreakout::CustomChannelBreakout(double bal, bool cOP, Position pos,
         double pDLC, double pDSC, double dPS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC,
         double HNVSLET, double HNVSLEC, double HNVHHVLEC, double LVLEC, double LNVSSEC, double LNVSSET, 
         double LNVLHVSEC, double pPLC, double pPLT, double pPSC, double pPST, double vPLC, double vPSC, 
-        double vPLT, double vPST)
+        double vPLT, double vPST, double pPLNVC, double pPLNVT, double pPSNVC, double pPSNVT)
     // Initialize in the order of declaration in the .h file
     : TradingStrategy(bal, cOP, pos, cPoses),
       ATRMultiplier(ATRM),
@@ -59,7 +59,11 @@ CustomChannelBreakout::CustomChannelBreakout(double bal, bool cOP, Position pos,
       volumePercentageLongComparison(vPLC),
       volumePercentageShortComparison(vPSC),
       volumePercentageLongThreshold(vPLT),
-      volumePercentageShortThreshold(vPST) {}
+      volumePercentageShortThreshold(vPST),
+      pricePercentageLongNVComparison(pPLNVC),
+      pricePercentageLongNVThreshold(pPLNVT),
+      pricePercentageShortNVComparison(pPSNVC),
+      pricePercentageShortNVThreshold(pPSNVT) {}
 
 
 double CustomChannelBreakout::DetermineShares(double currentPrice) {
@@ -112,6 +116,9 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
 
     // Determine mean and standard deviation and max and mins
     for (int i = 0; i < lookbackPeriod; i++){
+        lookBack.sumX += i + 1;
+        lookBack.sumSQX += (i + 1) * (i + 1);
+        lookBack.sumXY += (i + 1) * data.close[i];
         lookBack.sumPricePrev += data.close[i];
         lookBack.sumSQPricePrev += data.close[i] * data.close[i];
         lookBack.sumVolPrev += data.volume[i];
@@ -129,7 +136,42 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         lookBack.updateMinVolume(data.volume, i);
     }
 
+    const double denominator = lookbackPeriod * lookBack.sumSQX - lookBack.sumX * lookBack.sumX;
+
+    // Determine slope p value
+    double numerator = lookbackPeriod * lookBack.sumXYPrev - lookBack.sumX * lookBack.sumPricePrev;
+    
+    double m = (denominator == 0) ? 0 : numerator / denominator;
+    lookBack.priceSlopePrev = m/lookBack.DetermineMeanPricePrev();
+    double b = (lookBack.sumPricePrev - m * lookBack.sumX) / lookbackPeriod;
+
+    double rss = 0;
+    for (int i = 0; i<lookbackPeriod; ++i){
+        double predicted_y = m * (i + 1) + b;
+        double error = data.close[i] - predicted_y;
+        rss += error * error;
+    }
+
+    double std_error_slope = 0;
+    if (denominator != 0) {
+        std_error_slope = sqrt(rss / (lookbackPeriod - 2)) / sqrt(lookBack.sumSQX - (lookBack.sumX * lookBack.sumX) / lookbackPeriod);
+    }
+
+    double t_stat = (std_error_slope == 0) ? 0 : m / std_error_slope;
+
+    double p_val = 1.0; // Default to non-significant
+    boost::math::students_t dist(lookbackPeriod - 2); // Degrees of freedom
+    if (std::isnan(t_stat)) {
+        p_val = 1.0; // Calculation failed, assume not significant
+    } else if (std::isinf(t_stat)) {
+        p_val = 0.0; // Infinite evidence, perfectly significant
+    } else {
+        p_val = 2 * cdf(complement(dist, std::abs(t_stat)));
+    }
+    lookBack.pricePValPrev = p_val;
+
     for (int i = lookbackPeriod; i < doubleLookbackPeriod; i++){
+        lookBack.sumXYPrev += (i - lookbackPeriod + 1) * data.close[i];
         lookBack.sumPrice += data.close[i];
         lookBack.sumSQPrice += data.close[i] * data.close[i];
         lookBack.sumVol += data.volume[i];
@@ -147,6 +189,37 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         lookBack.updateMinVolume(data.volume, i);
     }
 
+    // Determine slope p value
+    numerator = lookbackPeriod * lookBack.sumXY - lookBack.sumX * lookBack.sumPrice;
+    
+    m = (denominator == 0) ? 0 : numerator / denominator;
+    lookBack.priceSlope = m/lookBack.DetermineMeanPrice();
+    b = (lookBack.sumPrice - m * lookBack.sumX) / lookbackPeriod;
+
+    rss = 0;
+    for (int i = lookbackPeriod; i<doubleLookbackPeriod; ++i){
+        double predicted_y = m * (i - lookbackPeriod + 1) + b;
+        double error = data.close[i] - predicted_y;
+        rss += error * error;
+    }
+
+    std_error_slope = 0;
+    if (denominator != 0) {
+        std_error_slope = sqrt(rss / (lookbackPeriod - 2)) / sqrt(lookBack.sumSQX - (lookBack.sumX * lookBack.sumX) / lookbackPeriod);
+    }
+
+    t_stat = (std_error_slope == 0) ? 0 : m / std_error_slope;
+
+    p_val = 1.0; // Default to non-significant
+    if (std::isnan(t_stat)) {
+        p_val = 1.0; // Calculation failed, assume not significant
+    } else if (std::isinf(t_stat)) {
+        p_val = 0.0; // Infinite evidence, perfectly significant
+    } else {
+        p_val = 2 * cdf(complement(dist, std::abs(t_stat)));
+    }
+    lookBack.pricePVal = p_val;
+
     int startingIndex = doubleLookbackPeriod;
 
     if (ATRLookbackPeriod > doubleLookbackPeriod){
@@ -160,6 +233,16 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
             double currentDiffPrice = (data.high[i] - data.low[i])/2;
             double prevDiffPrice = (data.high[i - lookbackPeriod] - data.low[i - lookbackPeriod])/2;
             double prevPrevDiffPrice = (data.high[i - doubleLookbackPeriod] - data.low[i - doubleLookbackPeriod])/2;
+
+            // Update sumXY and sumXYPrev
+            lookBack.sumXY = 0;
+            lookBack.sumXYPrev = 0;
+            for (int j = 0; j<lookbackPeriod; j++){
+                double y = data.close[i - lookbackPeriod + j];
+                double y2 = data.close[i - doubleLookbackPeriod + j];
+                lookBack.sumXY += (j + 1) * y;
+                lookBack.sumXYPrev += (j + 1) * y2;
+            }
 
             // Update LookBack
             lookBack.updateLookBackSumPrice(currentPrice, prevPrice, prevPrevPrice);
@@ -176,6 +259,64 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
             double high_minus_prev_close = abs(data.high[i] - data.close[i - 1]);
             double low_minus_prev_close = abs(data.low[i] - data.close[i - 1]);
             lookBack.updateATR(max({high_minus_low, high_minus_prev_close, low_minus_prev_close}));
+
+            // Update P values
+            numerator = lookbackPeriod * lookBack.sumXYPrev - lookBack.sumX * lookBack.sumPricePrev;
+            m = (denominator == 0) ? 0 : numerator / denominator;
+            lookBack.priceSlopePrev = m/lookBack.DetermineMeanPricePrev();
+            b = (lookBack.sumPricePrev - m * lookBack.sumX) / lookbackPeriod;
+
+            rss = 0;
+            for (int j = 0; j<lookbackPeriod; ++j){
+                double predicted_y = m * (j + 1) + b;
+                double error = data.close[i - doubleLookbackPeriod + j] - predicted_y;
+                rss += error * error;
+            }
+
+            std_error_slope = 0;
+            if (denominator != 0) {
+                std_error_slope = sqrt(rss / (lookbackPeriod - 2)) / sqrt(lookBack.sumSQX - (lookBack.sumX * lookBack.sumX) / lookbackPeriod);
+            }
+
+            t_stat = (std_error_slope == 0) ? 0 : m / std_error_slope;
+
+            p_val = 1.0; // Default to non-significant
+            if (std::isnan(t_stat)) {
+                p_val = 1.0; // Calculation failed, assume not significant
+            } else if (std::isinf(t_stat)) {
+                p_val = 0.0; // Infinite evidence, perfectly significant
+            } else {
+                p_val = 2 * cdf(complement(dist, std::abs(t_stat)));
+            }
+            lookBack.pricePValPrev = p_val;
+
+            numerator = lookbackPeriod * lookBack.sumXY - lookBack.sumX * lookBack.sumPrice;
+            m = (denominator == 0) ? 0 : numerator / denominator;
+            lookBack.priceSlope = m/lookBack.DetermineMeanPrice();
+            b = (lookBack.sumPrice - m * lookBack.sumX) / lookbackPeriod;
+            rss = 0;
+            for (int j = 0; j<lookbackPeriod; ++j){
+                double predicted_y = m * (j + 1) + b;
+                double error = data.close[i - lookbackPeriod + j] - predicted_y;
+                rss += error * error;
+            }
+            std_error_slope = 0;
+            if (denominator != 0) {
+                std_error_slope = sqrt(rss / (lookbackPeriod - 2)) / sqrt(lookBack.sumSQX - (lookBack.sumX * lookBack.sumX) / lookbackPeriod);
+            }
+
+            t_stat = (std_error_slope == 0) ? 0 : m / std_error_slope;
+
+            p_val = 1.0; // Default to non-significant
+            if (std::isnan(t_stat)) {
+                p_val = 1.0; // Calculation failed, assume not significant
+            } else if (std::isinf(t_stat)) {
+                p_val = 0.0; // Infinite evidence, perfectly significant
+            } else {
+                p_val = 2 * cdf(complement(dist, std::abs(t_stat)));
+            }
+            lookBack.pricePVal = p_val;
+
         }
         startingIndex = ATRLookbackPeriod;
     }
@@ -192,6 +333,16 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         double prevDiffPrice = (data.high[i - lookbackPeriod] - data.low[i - lookbackPeriod])/2;
         double prevPrevDiffPrice = (data.high[i - doubleLookbackPeriod] - data.low[i - doubleLookbackPeriod])/2;
 
+        // Update sumXY and sumXYPrev
+        lookBack.sumXY = 0;
+        lookBack.sumXYPrev = 0;
+        for (int j = 0; j<lookbackPeriod; j++){
+            double y = data.close[i - lookbackPeriod + j];
+            double y2 = data.close[i - doubleLookbackPeriod + j];
+            lookBack.sumXY += (j + 1) * y;
+            lookBack.sumXYPrev += (j + 1) * y2;
+        }
+
         // Update LookBack
         lookBack.updateLookBackSumPrice(currentPrice, prevPrice, prevPrevPrice);
         lookBack.updateLookBackSumVolume(currentVol, prevVol, prevPrevVol);
@@ -203,12 +354,76 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         double low_minus_prev_close = abs(data.low[i] - data.close[i - 1]);
         lookBack.updateATR(max({high_minus_low, high_minus_prev_close, low_minus_prev_close}));
 
+        // Update P values
+        numerator = lookbackPeriod * lookBack.sumXYPrev - lookBack.sumX * lookBack.sumPricePrev;
+        m = (denominator == 0) ? 0 : numerator / denominator;
+        lookBack.priceSlopePrev = m/lookBack.DetermineMeanPricePrev();
+        b = (lookBack.sumPricePrev - m * lookBack.sumX) / lookbackPeriod;
+
+        rss = 0;
+        for (int j = 0; j<lookbackPeriod; ++j){
+            double predicted_y = m * (j + 1) + b;
+            double error = data.close[i - doubleLookbackPeriod + j] - predicted_y;
+            rss += error * error;
+        }
+
+        std_error_slope = 0;
+        if (denominator != 0) {
+            std_error_slope = sqrt(rss / (lookbackPeriod - 2)) / sqrt(lookBack.sumSQX - (lookBack.sumX * lookBack.sumX) / lookbackPeriod);
+        }
+
+        t_stat = (std_error_slope == 0) ? 0 : m / std_error_slope;
+
+        p_val = 1.0; // Default to non-significant
+        if (std::isnan(t_stat)) {
+            p_val = 1.0; // Calculation failed, assume not significant
+        } else if (std::isinf(t_stat)) {
+            p_val = 0.0; // Infinite evidence, perfectly significant
+        } else {
+            p_val = 2 * cdf(complement(dist, std::abs(t_stat)));
+        }
+        lookBack.pricePValPrev = p_val;
+
+        numerator = lookbackPeriod * lookBack.sumXY - lookBack.sumX * lookBack.sumPrice;
+        m = (denominator == 0) ? 0 : numerator / denominator;
+        lookBack.priceSlope = m/lookBack.DetermineMeanPrice();
+        b = (lookBack.sumPrice - m * lookBack.sumX) / lookbackPeriod;
+        rss = 0;
+        for (int j = 0; j<lookbackPeriod; ++j){
+            double predicted_y = m * (j + 1) + b;
+            double error = data.close[i - lookbackPeriod + j] - predicted_y;
+            rss += error * error;
+        }
+        std_error_slope = 0;
+        if (denominator != 0) {
+            std_error_slope = sqrt(rss / (lookbackPeriod - 2)) / sqrt(lookBack.sumSQX - (lookBack.sumX * lookBack.sumX) / lookbackPeriod);
+        }
+
+        t_stat = (std_error_slope == 0) ? 0 : m / std_error_slope;
+
+        p_val = 1.0; // Default to non-significant
+        if (std::isnan(t_stat)) {
+            p_val = 1.0; // Calculation failed, assume not significant
+        } else if (std::isinf(t_stat)) {
+            p_val = 0.0; // Infinite evidence, perfectly significant
+        } else {
+            p_val = 2 * cdf(complement(dist, std::abs(t_stat)));
+        }
+        lookBack.pricePVal = p_val;
+
         if (i >= length - 1){
             if (this->getContainsOpenPosition()){
                 this->sellPosition(currentPrice, data.date[i]);
             }
             continue;
         }
+
+        // If p val < 0.05 and p val 2 < 0.05 then 
+        // if |slope| greater than 0.01 and (slope < 0 and prev slope < 0) don't make the trade
+        // if |slope| less than 0.01 and (slope > 0 and prev slope > 0) don't make the trade
+
+        // If p val < 0.05 and p val 2 > 0.05 then
+        // if |slope| greater than 0.01 then don't make the trade
 
         // Determine if a trade should be executed
         if (this->getContainsOpenPosition()){
@@ -340,8 +555,6 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         }
         else{ // May Possibly Purchase a Position
             if (this->HVSSignal || currentPrice > lookBack.maxPrice){
-                // Update Max Price
-                lookBack.updateMaxPrice(data.close, i);
                 double meanPrice = lookBack.DetermineMeanPrice();
                 double stdPrice = lookBack.DetermineSTDPrice();
                 double meanDiffPrice = lookBack.DetermineMeanDiffPrice();
@@ -353,6 +566,11 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         this->HVSSignal = true;
                         lookBack.updateMaxVolume(data.volume, i);
                         lookBack.updateMinVolume(data.volume, i);
+                        continue;
+                    }
+                    if (currentPrice > lookBack.maxPrice){
+                        // Update Max Price
+                        lookBack.updateMaxPrice(data.close, i);
                         continue;
                     }
                     this->HVSCount = this->HVSCount + 1;
@@ -390,8 +608,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                     }
                 }
                 else if (((this->ProbabilityVolatility(meanPrice, stdPrice,
-                        meanPrice * this->pricePercentageLongComparison)) < this->pricePercentageLongThreshold) && 
+                        meanPrice * this->pricePercentageLongNVComparison)) < this->pricePercentageLongNVThreshold) && 
                         meanCompare < this->priceDiffLongCompare){
+                    // Update Max Price
+                    lookBack.updateMaxPrice(data.close, i);
                     double meanVol = lookBack.DetermineMeanVolume();
                     double stdVol = lookBack.DetermineSTDVolume();
                     double meanPrev = lookBack.DetermineMeanPricePrev();
@@ -431,7 +651,23 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         }
                     }
                     else if (meanPrice > meanPrev){
-                        if ((this->ProbabilityVolatility(meanVol, stdVol, 
+                        // HNVSL
+                        double numShares = this->DetermineShares(currentPrice);
+                        if (numShares == 0){ 
+                            lookBack.updateMaxVolume(data.volume, i);
+                            lookBack.updateMinVolume(data.volume, i);
+                            continue; 
+                        }
+                        double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                        Position newPosition(LONG, HNVSL, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                numShares, false);
+                        this->setOpenPosition(newPosition);
+                        this->setContainsOpenPosition(true);
+                        this->balance -= numShares * currentPrice;
+                        this->HNVSLCounter += 1;
+                        this->HNVSLRunningSum += currentVol;
+                        this->HNVSLRunningSumSquared += currentVol * currentVol;
+                        /*if ((this->ProbabilityVolatility(meanVol, stdVol, 
                             meanVol * this->volumePercentageLongComparison)) < this->volumePercentageLongThreshold){
                             double meanVolPrev = lookBack.DetermineMeanVolumePrev();
                             double topComparisonVol = meanVolPrev + meanVolPrev * this->volumeComparison;
@@ -457,13 +693,11 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                     this->HNVSLRunningSumSquared += currentVol * currentVol;
                                 }
                             }
-                        }
+                        }*/
                     }
                 }
             }
             else if (this->LVLSignal || currentPrice < lookBack.minPrice){
-                // Update Min Price
-                lookBack.updateMinPrice(data.close, i);
                 double meanPrice = lookBack.DetermineMeanPrice();
                 double stdPrice = lookBack.DetermineSTDPrice();
                 double meanDiffPrice = lookBack.DetermineMeanDiffPrice();
@@ -475,6 +709,11 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         this->LVLSignal = true;
                         lookBack.updateMaxVolume(data.volume, i);
                         lookBack.updateMinVolume(data.volume, i);
+                        continue;
+                    }
+                    if (currentPrice < lookBack.minPrice){
+                        // Update Min Price
+                        lookBack.updateMinPrice(data.close, i);
                         continue;
                     }
                     this->LVLCount = this->LVLCount + 1;
@@ -512,8 +751,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                     }
                 }
                 else if (((this->ProbabilityVolatility(meanPrice, stdPrice, 
-                        meanPrice * this->pricePercentageShortComparison)) < this->pricePercentageShortThreshold) && 
+                        meanPrice * this->pricePercentageShortNVComparison)) < this->pricePercentageShortNVThreshold) && 
                         meanCompare < this->priceDiffShortCompare){
+                    // Update Min Price
+                    lookBack.updateMinPrice(data.close, i);
                     double meanVol = lookBack.DetermineMeanVolume();
                     double stdVol = lookBack.DetermineSTDVolume();
                     double meanPrev = lookBack.DetermineMeanPricePrev();
@@ -553,7 +794,23 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         }
                     }
                     else if (meanPrice < meanPrev){
-                        if ((this->ProbabilityVolatility(meanVol, stdVol, 
+                        // LNVSS
+                        double numShares = this->DetermineShares(currentPrice);
+                        if (numShares == 0){ 
+                            lookBack.updateMaxVolume(data.volume, i);
+                            lookBack.updateMinVolume(data.volume, i);
+                            continue; 
+                        }
+                        double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                        Position newPosition(SHORT, LNVSS, data.date[i], "", currentPrice, stopLossPrice, 0, 
+                                numShares, false);
+                        this->setOpenPosition(newPosition);
+                        this->setContainsOpenPosition(true);
+                        this->balance += numShares * currentPrice;
+                        this->LNVSSCounter += 1;
+                        this->LNVSSRunningSum += currentVol;
+                        this->LNVSSRunningSumSquared += currentVol * currentVol;
+                        /*if ((this->ProbabilityVolatility(meanVol, stdVol, 
                             meanVol * this->volumePercentageShortComparison)) < this->volumePercentageShortThreshold){
                             double meanVolPrev = lookBack.DetermineMeanVolumePrev();
                             double topComparisonVol = meanVolPrev + meanVolPrev * this->volumeDropComparison;
@@ -579,7 +836,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                     this->LNVSSRunningSumSquared += currentVol * currentVol;
                                 }
                             }
-                        }
+                        }*/
                     }
                 }
             }

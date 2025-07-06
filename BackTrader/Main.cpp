@@ -76,6 +76,10 @@ int main(){
     double volumePercentageShortComparison = priceSurgeArray[0];
     double volumePercentageLongThreshold = 0.99;
     double volumePercentageShortThreshold = priceDiffCompareArray[9];
+    double pricePercentageLongNVComparison = priceSurgeArray[0];
+    double pricePercentageLongNVThreshold = priceDiffCompareArray[9];
+    double pricePercentageShortNVComparison = priceSurgeArray[0];
+    double pricePercentageShortNVThreshold = priceDiffCompareArray[9];
 
     double balance = 10000;
     Position emptyPosition;
@@ -88,10 +92,11 @@ int main(){
     LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
     HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
     pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-    volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
+    volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold, 
+    pricePercentageLongNVComparison, pricePercentageLongNVThreshold, pricePercentageShortNVComparison, pricePercentageShortNVThreshold);
 
     vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "GC=F", "SI=F", "PL=F", "PA=F", "HG=F", "ZC=F"};
-    for (int i = 7; i<stocks.size(); i++){
+    for (int i = 1; i<stocks.size(); i++){
         strategy.ExecuteStrategy(data[stocks[i]]);
     }
 

@@ -2,6 +2,7 @@
 #define CUSTOMCHANNELBREAKOUT_H
 
 #include "../TradingStrategy.h"
+#include "boost/math/distributions/students_t.hpp"
 
 class CustomChannelBreakout: public TradingStrategy{
     private:
@@ -60,6 +61,11 @@ class CustomChannelBreakout: public TradingStrategy{
         double volumePercentageLongThreshold; // E.g. 0.05 - 0.99 Comparison
         double volumePercentageShortThreshold; // E.g. 0.05 - 0.99 Comparison
 
+        double pricePercentageLongNVComparison; // E.g. 1.01 - 1.1 Multiplier
+        double pricePercentageLongNVThreshold; // E.g. 0.05 - 0.99 Comparison
+        double pricePercentageShortNVComparison; // E.g. 1.01 - 1.1 Multiplier
+        double pricePercentageShortNVThreshold; // E.g. 0.05 - 0.99 Comparison
+
         double DetermineShares(double currentPrice);
 
         double ProbabilityVolatility(double mean, double std, double val);
@@ -71,7 +77,7 @@ class CustomChannelBreakout: public TradingStrategy{
         double pDLC, double pDSC, double dPS, int HVSWP, double HVSVDC, int LVLWP, double LVLVC, double HVSEC,
         double HNVSLET, double HNVSLEC, double HNVHHVLEC, double LVLEC, double LNVSSEC, double LNVSSET, 
         double LNVLHVSEC, double pPLC, double pPLT, double pPSC, double pPST, double vPLC, double vPSC, 
-        double vPLT, double vPST);
+        double vPLT, double vPST, double pPLNVC, double pPLNVT, double pPSNVC, double pPSNVT);
 
         void ExecuteStrategy(const StockData &data) override;
 };

@@ -6,12 +6,13 @@ MaxMinPos::MaxMinPos() : maxOrMin(0), index(-1), date("") {}
 MaxMinPos::MaxMinPos(double val, int idx, string d) : maxOrMin(val), index(idx), date(d) {}
 
 LookBack::LookBack() : lookbackPeriod(0), ATRLookbackPeriod(0), sumATR(0), sumPrice(0), sumSQPrice(0), sumVol(0), sumSQVol(0),
-                       sumDiffPrice(0), sumDiffPricePrev(0), sumPricePrev(0), sumSQPricePrev(0), sumVolPrev(0), sumSQVolPrev(0) {}
+                       sumDiffPrice(0), sumDiffPricePrev(0), sumPricePrev(0), sumSQPricePrev(0), sumVolPrev(0), sumSQVolPrev(0),
+                       sumX(0), sumSQX(0), priceSlope(0), priceSlopePrev(0) {}
 
 LookBack::LookBack(int lbP, int ATRlbP): lookbackPeriod(lbP), ATRLookbackPeriod(ATRlbP), maxPrice(-99999999),
     minPrice(99999999), maxVol(-99999999), minVol(99999999), sumATR(0), sumPrice(0), sumSQPrice(0), sumVol(0), 
     sumSQVol(0), sumDiffPrice(0), sumDiffPricePrev(0), sumPricePrev(0), sumSQPricePrev(0), sumVolPrev(0), 
-    sumSQVolPrev(0) {}
+    sumSQVolPrev(0), sumX(0), sumSQX(0), priceSlope(0), priceSlopePrev(0) {}
 
 void LookBack::updateLookBackSumPrice(double currentPrice, double prevPrice, double prevPrevPrice){
     this->sumPricePrev = this->sumPricePrev - prevPrevPrice + prevPrice;
@@ -144,6 +145,12 @@ LookBack& LookBack::operator=(const LookBack &obj){
         this->sumSQPricePrev = obj.sumSQPricePrev;
         this->sumVolPrev = obj.sumVolPrev;
         this->sumSQVolPrev = obj.sumSQVolPrev;
+        this->sumX = obj.sumX;
+        this->sumSQX = obj.sumSQX;
+        this->sumXY = obj.sumXY;
+        this->sumXYPrev = obj.sumXYPrev;
+        this->priceSlope = obj.priceSlope;
+        this->priceSlopePrev = obj.priceSlopePrev;
     }
     return *this;
 }
