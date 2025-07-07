@@ -8,6 +8,11 @@ CXXFLAGS = -std=c++20 -Wall -arch x86_64 -g
 BOOST_INCLUDE_PATH = -I/usr/local/include
 BOOST_LIB_PATH = -L/usr/local/lib
 
+# For Windows
+# VCPKG_ROOT = C:/path/to/your/vcpkg
+# BOOST_INCLUDE_PATH = -I$(VCPKG_ROOT)/installed/x64-windows/include
+# BOOST_LIB_PATH = -L$(VCPKG_ROOT)/installed/x64-windows/lib
+
 # Libraries to link. Add more as needed, e.g., -lboost_thread
 # Note: For the p-value code, linking isn't strictly necessary, but this is the correct way to do it.
 BOOST_LIBS = -lboost_system
