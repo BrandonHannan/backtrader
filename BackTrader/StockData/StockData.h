@@ -18,4 +18,14 @@ struct StockData{
     vector<string> d): open(o), close(c), high(h), low(l), volume(v), date(d) {}
 };
 
+struct StockDataInstance{
+    int index;
+    double open;
+    double close;
+    double high;
+    double low;
+    double volume;
+    string date;
+};
+
 #endif

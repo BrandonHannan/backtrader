@@ -24,6 +24,18 @@ enum PositionType{
     NONE
 };
 
+class PositionStats{
+    public:
+        double pValue;
+        double pValuePrev;
+        double priceSlope;
+        double priceSlopePrev;
+        double prev;
+        double current;
+        PositionStats();
+        PositionStats(double pV, double pVP, double pS, double pSP, double p, double c);
+};
+
 class Position{
     private:
         PositionType positionType;
@@ -35,6 +47,7 @@ class Position{
         double sellPrice;
         double numShares;
         bool isClosed;
+        PositionStats stats;
 
         int toJulian(int y, int m, int d);
 
@@ -43,7 +56,7 @@ class Position{
     public:
         Position();
         Position(PositionType pType, TradeType tType, string pDate, string sDate, double pPrice, double sLP,
-        double sPrice, double nShares, bool isC);
+        double sPrice, double nShares, bool isC, PositionStats s);
 
         PositionType getPositionType();
 
@@ -82,6 +95,10 @@ class Position{
         void setIsClosed(bool isC);
 
         int LengthOfTrade();
+
+        PositionStats getStats();
+
+        void setStats(PositionStats s);
 
         Position& operator=(const Position &obj);
 };

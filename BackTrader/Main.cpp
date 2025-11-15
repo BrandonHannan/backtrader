@@ -7,6 +7,24 @@
 #include <time.h>
 #include <fstream>
 
+string PositionTypeReader(PositionType pT){
+    if (pT == SHORT){ return "Short"; }
+    else if (pT == LONG){ return "Long"; }
+    else { return "No Position Type"; }
+}
+
+string TradeTypeReader(TradeType tT){
+    if (tT == HVS){ return "HVS"; }
+    else if (tT == HNVHL){ return "HNVHL"; }
+    else if (tT == HNVSL){ return "HNVSL"; }
+    else if (tT == HNVHHVL){ return "HNVHHVL"; }
+    else if (tT == LVL){ return "LVL"; }
+    else if (tT == LNVLS){ return "LNVLS"; }
+    else if (tT == LNVSS){ return "LNVSS"; }
+    else if (tT == LNVLHVS){ return "LNVLHVS"; }
+    else { return "No Trade Type"; }
+}
+
 int main(){
     // Use this For MacOS
     unordered_map<string, StockData> data = ReadData("../data.txt");
@@ -86,6 +104,7 @@ int main(){
 
     ofstream file("Returns.txt");
 
+    clock_t start = clock();
     CustomChannelBreakout strategy(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
     volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
     priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
@@ -95,12 +114,17 @@ int main(){
     volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold, 
     pricePercentageLongNVComparison, pricePercentageLongNVThreshold, pricePercentageShortNVComparison, pricePercentageShortNVThreshold);
 
-    vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "GC=F", "SI=F", "PL=F", "PA=F", "HG=F", "ZC=F"};
-    for (int i = 1; i<stocks.size(); i++){
+
+    vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
+                             "GC=F", "SI=F", "PL=F", "PA=F", "HG=F",
+                             "ZC=F", "ZW=F", "ZS=F", "ZM=F", "ZL=F",
+                             "KC=F", "CC=F", "SB=F", "CT=F", "OJ=F",
+                             "LBS=F", "ZO=F", "ZR=F", "LE=F", "HE=F",
+                             "GF=F", "ALI=F", "TIO=F", "ETH=F", "DC=F", "CSC=F", "GNF=F"};
+    for (int i = 0; i<stocks.size(); i++){
         strategy.ExecuteStrategy(data[stocks[i]]);
     }
 
-    clock_t start = clock();
     // Look Back
     /*file << "Lookback\n";
     for (int i = 0; i < lookbackPeriodArray.size(); i++){
@@ -1031,13 +1055,54 @@ int main(){
     clock_t end = clock();
     double timeSpent = (double)(end - start)/CLOCKS_PER_SEC;
 
+    ofstream file1("Analysis.csv");
+    ostringstream oss;
+    file1 << "Trade Number,Trade Type,Position Type,Purchase Date,Sell Date,LookBack Period,Slope P Value,Previous Slope P Value,Price Slope,Previous Price Slope,Old Maximum Price in LookBack Period (Before trade was made),New Maximum PRice in LookBack Period (When trade was made),Old Minimum Price in LookBack Period (Before trade was made),New Minimum Price in LookBack Period (When trade was made),Profit/Loss\n";
+
     vector<Position> r = strategy.getClosedPositions();
     double sum = 0;
     for (int i = 0; i<r.size(); i++){
+        string stringResult = "";
         cout << "Position " << i << ":" << endl;
-        cout << "Trade Type: " << r[i].getTradeType() << " | ";
-        cout << "Position Type: " << r[i].getPositionType() << endl;
+        stringResult += (to_string(i + 1) + ",");
+        cout << "Trade Type: " << TradeTypeReader(r[i].getTradeType()) << " | ";
+        stringResult += (TradeTypeReader(r[i].getTradeType()) + ",");
+        cout << "Position Type: " << PositionTypeReader(r[i].getPositionType()) << endl;
+        stringResult += (PositionTypeReader(r[i].getPositionType()) + ",");
         cout << "Purchase Date: " << r[i].getPurchaseDate() << " | " << "Sell Date: " << r[i].getSellDate() << endl;
+        stringResult += (r[i].getPurchaseDate() + ",");
+        stringResult += (r[i].getSellDate() + ",");
+        stringResult += (to_string(lookbackPeriod) + ",");
+        if (r[i].getTradeType() == 0 || r[i].getTradeType() == 4){
+            PositionStats x = r[i].getStats();
+            cout << "P Value: " << x.pValue << " P Value Prev: " << x.pValuePrev << endl;
+            oss.str(""); oss.clear();
+            oss << std::scientific << std::setprecision(6) << x.pValue;
+            stringResult += (oss.str() + ",");
+            oss.str(""); oss.clear();
+            oss << std::scientific << std::setprecision(6) << x.pValuePrev;
+            stringResult += (oss.str() + ",");
+            cout << "Price Slope: " << x.priceSlope << " Price Slope Prev: " << x.priceSlopePrev << endl;
+            oss.str(""); oss.clear();
+            oss << std::scientific << std::setprecision(6) << x.priceSlope;
+            stringResult += (oss.str() + ",");
+            oss.str(""); oss.clear();
+            oss << std::scientific << std::setprecision(6) << x.priceSlopePrev;
+            stringResult += (oss.str() + ",");
+            if (r[i].getTradeType() == 0){
+                cout << "Old Maximum Price in LookBack Period (Before trade was made): " << x.prev << endl;
+                cout << "New Maximum Price in LookBack Period (When trade was made): " << x.current << endl;
+                stringResult += (to_string(x.prev) + "," + to_string(x.current) + ",,,");
+            }
+            else{
+                cout << "Old Minimum Price in LookBack Period (Before trade was made): " << x.prev << endl;
+                cout << "New Minimum Price in LookBack Period (When trade was made): " << x.current << endl;
+                stringResult += (",," + to_string(x.prev) + "," + to_string(x.current) + ",");
+            }
+        }
+        else{
+            stringResult += ",,,,,,,,";
+        }
         cout << "Profit/Loss: ";
         double profit = 0;
         if (r[i].getPositionType() == LONG){
@@ -1049,11 +1114,14 @@ int main(){
                         r[i].getNumShares();
         }
         cout << "$" << profit << endl << endl;
+        stringResult += (to_string(profit) + "\n");
+        file1 << stringResult;
         sum = sum + profit;
     }
     cout << "Total Profit/Loss: $" << sum << endl;
     cout << "Balance: $" << strategy.balance << endl << endl;
     cout << "Execution Time: " << timeSpent << "s" << endl;
+    file1.close();
     // map<int, vector<double>> results = strategy.getYearlyReturns();
 
     // for (auto const& x : results){

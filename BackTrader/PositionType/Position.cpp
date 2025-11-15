@@ -1,10 +1,10 @@
-#include <iostream>
 #include "Position.h"
 
-PositionStats::PositionStats(): pValue(0), pValuePrev(0), priceSlope(0), priceSlopePrev(0), prev(0), current(0) {}
+Position::Position(): isClosed(true) {}
 
-PositionStats::PositionStats(double pV, double pVP, double pS, double pSP, double p, double c): 
-    pValue(pV), pValuePrev(pVP), priceSlope(pS), priceSlopePrev(pSP), prev(p), current(c) {}
+Position::Position(string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
+                positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice) {}
 
 int Position::toJulian(int y, int m, int d) {
     if (m <= 2) {
@@ -33,15 +33,6 @@ int Position::LengthOfTradeBetweenDates(){
     return length;
 }
 
-Position::Position(): positionType(NONE), tradeType(NOTHING), purchaseDate(""), sellDate(""), purchasePrice(-1), 
-stopLossPrice(-1), sellPrice(-1), numShares(0), isClosed(false) {} // Initialized numShares to 0 as a good practice
-
-Position::Position(PositionType pType, TradeType tType, string pDate, string sDate, double pPrice, double sLP,
-double sPrice, double nShares, bool isC, PositionStats s): positionType(pType), tradeType(tType), purchaseDate(pDate), 
-sellDate(sDate), purchasePrice(pPrice), stopLossPrice(sLP), sellPrice(sPrice), numShares(nShares), 
-isClosed(isC), stats(s) {}
-
-// Scope all other member functions with Position::
 PositionType Position::getPositionType(){
     return this->positionType;
 }
@@ -50,11 +41,11 @@ void Position::setPositionType(PositionType pType){
     this->positionType = pType;
 }
 
-TradeType Position::getTradeType(){
+string Position::getTradeType(){
     return this->tradeType;
 }
 
-void Position::setTradeType(TradeType tType){
+void Position::setTradeType(string tType){
     this->tradeType = tType;
 }
 
@@ -119,14 +110,6 @@ int Position::LengthOfTrade(){
     return LengthOfTradeBetweenDates();
 }
 
-PositionStats Position::getStats(){
-    return this->stats;
-}
-
-void Position::setStats(PositionStats s){
-    this->stats = s;
-}
-
 Position& Position::operator=(const Position &obj){
     if (this != &obj){
         this->setTradeType(obj.tradeType);
@@ -138,7 +121,6 @@ Position& Position::operator=(const Position &obj){
         this->setSellPrice(obj.sellPrice);
         this->setStopLossPrice(obj.stopLossPrice);
         this->setIsClosed(obj.isClosed);
-        this->setStats(obj.stats);
     }
     return *this;
 }

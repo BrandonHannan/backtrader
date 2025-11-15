@@ -321,6 +321,9 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         startingIndex = ATRLookbackPeriod;
     }
 
+    this->HVSMax = lookBack.maxPrice;
+    this->LVLMin = lookBack.minPrice;
+
     // Execute the trades
     for (int i = startingIndex; i < length; i++){
         double currentPrice = data.close[i];
@@ -554,7 +557,9 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
             }
         }
         else{ // May Possibly Purchase a Position
-            if (this->HVSSignal || currentPrice > lookBack.maxPrice){
+            if ((this->HVSSignal && currentPrice > lookBack.minPrice) || currentPrice > lookBack.maxPrice){
+                this->LVLSignal = false;
+                this->LVLCount = 0;
                 double meanPrice = lookBack.DetermineMeanPrice();
                 double stdPrice = lookBack.DetermineSTDPrice();
                 double meanDiffPrice = lookBack.DetermineMeanDiffPrice();
@@ -564,6 +569,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                     // HVS
                     if (!this->HVSSignal){
                         this->HVSSignal = true;
+                        lookBack.updateMaxPrice(data.close, i);
                         lookBack.updateMaxVolume(data.volume, i);
                         lookBack.updateMinVolume(data.volume, i);
                         continue;
@@ -571,6 +577,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                     if (currentPrice > lookBack.maxPrice){
                         // Update Max Price
                         lookBack.updateMaxPrice(data.close, i);
+                        this->HVSCount = 0;
                         continue;
                     }
                     this->HVSCount = this->HVSCount + 1;
@@ -580,6 +587,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         lookBack.updateMinPrice(data.close, i);
                         lookBack.updateMaxVolume(data.volume, i);
                         lookBack.updateMinVolume(data.volume, i);
+                        this->LVLMin = lookBack.minPrice;
                         continue;
                     }
                     double bottomMeanPrice = meanPrice + meanPrice * this->HVSExitComparison;
@@ -593,11 +601,14 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                 lookBack.updateMinPrice(data.close, i);
                                 lookBack.updateMaxVolume(data.volume, i);
                                 lookBack.updateMinVolume(data.volume, i);
+                                this->LVLMin = lookBack.minPrice;
                                 continue; 
                             }
                             double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                            PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                                HVSMax, lookBack.maxPrice);
                             Position newPosition(SHORT, HVS, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                    numShares, false);
+                                    numShares, false, stats);
                             this->setOpenPosition(newPosition);
                             this->setContainsOpenPosition(true);
                             this->balance += numShares * currentPrice;
@@ -612,6 +623,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         meanCompare < this->priceDiffLongCompare){
                     // Update Max Price
                     lookBack.updateMaxPrice(data.close, i);
+                    this->HVSMax = lookBack.maxPrice;
                     double meanVol = lookBack.DetermineMeanVolume();
                     double stdVol = lookBack.DetermineSTDVolume();
                     double meanPrev = lookBack.DetermineMeanPricePrev();
@@ -626,8 +638,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                 continue; 
                             }
                             double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                            PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                                HVSMax, lookBack.maxPrice);
                             Position newPosition(LONG, HNVHL, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                    numShares, false);
+                                    numShares, false, stats);
                             this->setOpenPosition(newPosition);
                             this->setContainsOpenPosition(true);
                             this->balance -= numShares * currentPrice;
@@ -641,8 +655,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                 continue; 
                             }
                             double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                            PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                                HVSMax, lookBack.maxPrice);
                             Position newPosition(LONG, HNVHHVL, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                    numShares, false);
+                                    numShares, false, stats);
                             this->setOpenPosition(newPosition);
                             this->setContainsOpenPosition(true);
                             this->balance -= numShares * currentPrice;
@@ -659,8 +675,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                             continue; 
                         }
                         double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                        PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                            HVSMax, lookBack.maxPrice);
                         Position newPosition(LONG, HNVSL, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                numShares, false);
+                                numShares, false, stats);
                         this->setOpenPosition(newPosition);
                         this->setContainsOpenPosition(true);
                         this->balance -= numShares * currentPrice;
@@ -698,6 +716,8 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                 }
             }
             else if (this->LVLSignal || currentPrice < lookBack.minPrice){
+                this->HVSSignal = false;
+                this->HVSCount = 0;
                 double meanPrice = lookBack.DetermineMeanPrice();
                 double stdPrice = lookBack.DetermineSTDPrice();
                 double meanDiffPrice = lookBack.DetermineMeanDiffPrice();
@@ -707,6 +727,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                     // LVL
                     if (!this->LVLSignal){
                         this->LVLSignal = true;
+                        lookBack.updateMinPrice(data.close, i);
                         lookBack.updateMaxVolume(data.volume, i);
                         lookBack.updateMinVolume(data.volume, i);
                         continue;
@@ -714,6 +735,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                     if (currentPrice < lookBack.minPrice){
                         // Update Min Price
                         lookBack.updateMinPrice(data.close, i);
+                        this->LVLCount = 0;
                         continue;
                     }
                     this->LVLCount = this->LVLCount + 1;
@@ -723,6 +745,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         lookBack.updateMaxPrice(data.close, i);
                         lookBack.updateMaxVolume(data.volume, i);
                         lookBack.updateMinVolume(data.volume, i);
+                        this->HVSMax = lookBack.maxPrice;
                         continue;
                     }
                     double bottomMeanPrice = meanPrice - meanPrice * this->LVLExitComparison;
@@ -734,13 +757,16 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                 lookBack.updateMaxPrice(data.close, i);
                                 lookBack.updateMaxVolume(data.volume, i);
                                 lookBack.updateMinVolume(data.volume, i);
+                                this->HVSMax = lookBack.maxPrice;
                                 this->LVLSignal = false;
                                 this->LVLCount = 0;
                                 continue; 
                             }
                             double stopLossPrice = currentPrice - lookBack.DetermineATR() * ATRMultiplier;
+                            PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                                LVLMin, lookBack.minPrice);
                             Position newPosition(LONG, LVL, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                    numShares, false);
+                                    numShares, false, stats);
                             this->setOpenPosition(newPosition);
                             this->setContainsOpenPosition(true);
                             this->balance -= numShares * currentPrice;
@@ -755,6 +781,7 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                         meanCompare < this->priceDiffShortCompare){
                     // Update Min Price
                     lookBack.updateMinPrice(data.close, i);
+                    this->LVLMin = lookBack.minPrice;
                     double meanVol = lookBack.DetermineMeanVolume();
                     double stdVol = lookBack.DetermineSTDVolume();
                     double meanPrev = lookBack.DetermineMeanPricePrev();
@@ -769,8 +796,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                 continue; 
                             }
                             double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                            PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                                LVLMin, lookBack.minPrice);
                             Position newPosition(SHORT, LNVLS, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                    numShares, false);
+                                    numShares, false, stats);
                             this->setOpenPosition(newPosition);
                             this->setContainsOpenPosition(true);
                             this->balance += numShares * currentPrice;
@@ -784,8 +813,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                                 continue; 
                             }
                             double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                            PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                                LVLMin, lookBack.minPrice);
                             Position newPosition(SHORT, LNVLHVS, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                    numShares, false);
+                                    numShares, false, stats);
                             this->setOpenPosition(newPosition);
                             this->setContainsOpenPosition(true);
                             this->balance += numShares * currentPrice;
@@ -802,8 +833,10 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
                             continue; 
                         }
                         double stopLossPrice = currentPrice + lookBack.DetermineATR() * ATRMultiplier;
+                        PositionStats stats(lookBack.pricePVal, lookBack.pricePValPrev, lookBack.priceSlope, lookBack.priceSlopePrev,
+                            LVLMin, lookBack.minPrice);
                         Position newPosition(SHORT, LNVSS, data.date[i], "", currentPrice, stopLossPrice, 0, 
-                                numShares, false);
+                                numShares, false, stats);
                         this->setOpenPosition(newPosition);
                         this->setContainsOpenPosition(true);
                         this->balance += numShares * currentPrice;
@@ -846,6 +879,16 @@ void CustomChannelBreakout::ExecuteStrategy(const StockData &data){
         lookBack.updateMinPrice(data.close, i);
         lookBack.updateMaxVolume(data.volume, i);
         lookBack.updateMinVolume(data.volume, i);
+        if (!this->HVSSignal && !this->LVLSignal){
+            this->HVSMax = lookBack.maxPrice;
+            this->LVLMin = lookBack.minPrice;
+        }
+        else if (!this->LVLSignal){
+            this->LVLMin = lookBack.minPrice;
+        }
+        else if (!this->HVSSignal){
+            this->HVSMax = lookBack.maxPrice;
+        }
     }
     lookBack = LookBack(lookBack.lookbackPeriod, lookBack.ATRLookbackPeriod);
 }

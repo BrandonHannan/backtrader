@@ -14,7 +14,14 @@ def format_array(data):
     string = string[0:len(string) - 2]
     return string
 
-tickers = ['CL=F', 'BZ=F', 'NG=F', 'HO=F', 'GC=F', 'SI=F', 'PL=F', "PA=F", 'HG=F', 'ZC=F']
+tickers = [
+    'CL=F', 'BZ=F', 'NG=F', 'HO=F', 'RB=F',
+    'GC=F', 'SI=F', 'PL=F', 'PA=F', 'HG=F',
+    'ZC=F', 'ZW=F', 'ZS=F', 'ZM=F', 'ZL=F',
+    'KC=F', 'CC=F', 'SB=F', 'CT=F', 'OJ=F',
+    'LBS=F', 'ZO=F', 'ZR=F', 'LE=F', 'HE=F',
+    'GF=F', 'ALI=F', 'TIO=F', 'ETH=F', 'DC=F', 'CSC=F', 'GNF=F'
+]
 data = dict()
 
 for ticker in tickers:

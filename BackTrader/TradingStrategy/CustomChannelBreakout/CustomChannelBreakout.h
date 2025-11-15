@@ -66,6 +66,9 @@ class CustomChannelBreakout: public TradingStrategy{
         double pricePercentageShortNVComparison; // E.g. 1.01 - 1.1 Multiplier
         double pricePercentageShortNVThreshold; // E.g. 0.05 - 0.99 Comparison
 
+        double HVSMax; 
+        double LVLMin;
+
         double DetermineShares(double currentPrice);
 
         double ProbabilityVolatility(double mean, double std, double val);

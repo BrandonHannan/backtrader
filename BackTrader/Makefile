@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags. -std=c++20 for the standard, -Wall for all warnings.
-CXXFLAGS = -std=c++20 -Wall -arch x86_64 -g
+CXXFLAGS = -std=c++20 -Wall -arch x86_64 #-g
 
 # For Apple Silicon Macs (M1/M2/M3)
 BOOST_INCLUDE_PATH = -I/usr/local/include
