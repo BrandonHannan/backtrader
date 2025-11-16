@@ -6,6 +6,8 @@ Position::Position(string pType, string tType, string pDate, string sDate, doubl
                 positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
                 sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice) {}
 
+
+// Helper function to convert dates to a Julian Date number 
 int Position::toJulian(int y, int m, int d) {
     if (m <= 2) {
         y -= 1;
@@ -16,6 +18,7 @@ int Position::toJulian(int y, int m, int d) {
     return int(365.25 * (y + 4716)) + int(30.6001 * (m + 1)) + d + B - 1524;
 }
 
+// Helper function to determine the number of days between the purhcase date and the sell date
 int Position::LengthOfTradeBetweenDates(){
     if (purchaseDate == "" || sellDate == "" || purchaseDate.length() != 10 || sellDate.length() != 10){
         return -1;
@@ -33,6 +36,7 @@ int Position::LengthOfTradeBetweenDates(){
     return length;
 }
 
+// Returns whether the trade is a SHORT or a LONG
 PositionType Position::getPositionType(){
     return this->positionType;
 }
@@ -41,6 +45,11 @@ void Position::setPositionType(PositionType pType){
     this->positionType = pType;
 }
 
+void Position::setPositionType(string pType){
+    this->positionType = PositionType(pType);
+}
+
+// Returns the trade type
 string Position::getTradeType(){
     return this->tradeType;
 }

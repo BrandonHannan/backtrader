@@ -6,18 +6,24 @@ PositionType::PositionType(string pType): positionType(pType), null(false) {
     this->DeterminePositionType();
 }
 
+// Helper function for constructor 
 void PositionType::DeterminePositionType(){
     if (this->positionType != "SHORT" || this->positionType != "LONG"){
-        null = true;
+        this->setNull(true);
+        this->setPositionType("");
     }
 }
 
 string PositionType::getPositiontype(){
+    if (this->isNull()){
+        return "";
+    }
     return this->positionType;
 }
 
 void PositionType::setPositionType(string pType){
     this->positionType = pType;
+    this->setNull(false);
 }
 
 bool PositionType::isNull(){

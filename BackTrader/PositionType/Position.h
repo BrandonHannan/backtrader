@@ -9,8 +9,8 @@ using namespace std;
 
 class Position{
     private:
-        PositionType positionType;
-        string tradeType;
+        PositionType positionType; // Signals either a LONG or a SHORT trade
+        string tradeType; // Signals the type of trade
         string purchaseDate;
         string sellDate;
         double purchasePrice;
@@ -31,6 +31,8 @@ class Position{
         PositionType getPositionType();
 
         void setPositionType(PositionType pType);
+
+        void setPositionType(string pType);
 
         string getTradeType();
 

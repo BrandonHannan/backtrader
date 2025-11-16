@@ -4,6 +4,7 @@
 #include "../PositionType/PositionType.h"
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 class BasePositionSize{
     protected:
@@ -13,8 +14,10 @@ class BasePositionSize{
         BasePositionSize(double riskAmount);
 
         virtual ~BasePositionSize() = default;
-        virtual double calculatePositionSize(double balance, PositionType position) const = 0;
-        virtual void processNewData(StockDataInstance data) const = 0;
+        // Determines the number of shares to purchase before purchasing
+        virtual double calculatePositionSize(double balance, PositionType position, StockDataInstance &data) const = 0;
+        // Updates context on new data
+        virtual void processNewData(StockDataInstance &currentData, StockDataInstance &previousData) = 0;
 
 };
 
