@@ -53,3 +53,10 @@ void ATRPositionSize::processNewData(StockDataInstance &currentData, StockDataIn
         this->currentATR = 0.0;
     }
 }
+
+bool ATRPositionSize::isValid() const {
+    if (this->trueRangeWindow.size() != this->ATRPeriod){
+        return false;
+    }
+    return true;
+}

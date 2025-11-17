@@ -17,6 +17,10 @@ using namespace std;
 class BaseStrategy {
     private:
         double balance;
+        // Pass any class that inherits the class BasePositionSize using the make_unique<inheritedClass> function
+        // E.g. std::make_unique<ATRPositionSize>(risk, atrPeriod, atrMultiplier)
+        // And you can use it like this E.g. getPositionSizer()->processNewData(currentBar, previousBar);
+        // Note: You can only use the functions defined by the BasePositionSize class
         unique_ptr<BasePositionSize> positionSizer;
         Position position;
         vector<Position> closedPositions;

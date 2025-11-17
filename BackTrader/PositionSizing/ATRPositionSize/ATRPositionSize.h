@@ -16,6 +16,7 @@ class ATRPositionSize: public BasePositionSize{
         ATRPositionSize(double riskAmount, int ATRPeriod, double ATRMultiplier);
         double calculatePositionSize(double balance, PositionType position, StockDataInstance &data) const override;
         void processNewData(StockDataInstance &currentData, StockDataInstance &previousData) override;
+        bool isValid() const override;
 };
 
 #endif

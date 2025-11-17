@@ -18,6 +18,7 @@ class BasePositionSize{
         virtual double calculatePositionSize(double balance, PositionType position, StockDataInstance &data) const = 0;
         // Updates context on new data
         virtual void processNewData(StockDataInstance &currentData, StockDataInstance &previousData) = 0;
+        virtual bool isValid() const = 0;
 
 };
 
