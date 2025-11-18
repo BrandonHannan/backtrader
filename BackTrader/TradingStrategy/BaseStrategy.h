@@ -3,6 +3,7 @@
 #include "../PositionType/Position.h"
 #include "../StockData/StockData.h"
 #include "../PositionSizing/BasePositionSize.h"
+#include "../TradingContext/BaseContext.h"
 #include <unordered_map>
 #include <map>
 #include <cmath>
@@ -22,6 +23,7 @@ class BaseStrategy {
         // And you can use it like this E.g. getPositionSizer()->processNewData(currentBar, previousBar);
         // Note: You can only use the functions defined by the BasePositionSize class
         unique_ptr<BasePositionSize> positionSizer;
+        unique_ptr<BaseContext> strategyContext;
         Position position;
         vector<Position> closedPositions;
     public:
