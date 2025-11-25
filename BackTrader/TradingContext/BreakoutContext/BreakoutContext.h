@@ -36,7 +36,7 @@ class BreakoutContext: public BaseContext {
         queue<double> volumeSTDs;
 
     public:
-        BreakoutContext(double ADXThreshold);
+        BreakoutContext(int lookbackPeriod, double ADXThreshold);
 
         void updateContext(StockDataInstance &currentData, StockDataInstance &previousData) override;
         unique_ptr<string> shouldExecuteTrade(StockDataInstance &data) const override;

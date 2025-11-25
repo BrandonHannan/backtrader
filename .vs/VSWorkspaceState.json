@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\BackTrader",
+    "\\BackTrader\\TradingContext",
+    "\\BackTrader\\TradingContext\\BreakoutContext",
+    "\\BackTrader\\TradingContext\\Functions",
+    "\\BackTrader\\TradingStrategy"
+  ],
+  "SelectedNode": "\\BackTrader\\TradingContext\\Functions\\WindowStatistics.cpp",
+  "PreviewInSolutionExplorer": false
+}

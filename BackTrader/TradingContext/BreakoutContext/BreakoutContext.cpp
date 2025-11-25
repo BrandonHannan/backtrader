@@ -1,6 +1,6 @@
 #include "BreakoutContext.h"
 
-BreakoutContext::BreakoutContext(double ADXThreshold): ADXThreshold(ADXThreshold), priceStat(0), volumeStat(0) {
+BreakoutContext::BreakoutContext(int lookbackPeriod, double ADXThreshold): BaseContext(lookbackPeriod), ADXThreshold(ADXThreshold), priceStat(0), volumeStat(0) {
     // LookbackPeriod must be >= 2
     for (int i = 0; i<this->lookBackPeriod; i++){
         double x = double(i);
