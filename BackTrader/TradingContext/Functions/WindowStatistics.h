@@ -13,7 +13,6 @@ class WindowStatistics {
 		queue<double> dataPoints;
 		double sum;
 		double sumSQ;
-		double sumY;
 		double sumXY;
 		double indexSum;
 		double indexSumSQ;
@@ -21,6 +20,12 @@ class WindowStatistics {
 		unique_ptr<double> std;
 		unique_ptr<double> slope;
 		unique_ptr<double> slopeSE;
+		unique_ptr<double> slopeRSQ;
+		unique_ptr<double> slopeTStatistic;
+
+		static constexpr double EPS = 1e-14;
+
+		void updateVariables();
 	public:
 		WindowStatistics(int windowSize);
 
