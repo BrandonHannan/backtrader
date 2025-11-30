@@ -2,44 +2,33 @@
 #define BREAKOUTCONTEXT_H
 
 #include "../BaseContext.h"
-#include <memory>
+#include "../Functions/WindowStatistics.h"
+#include "../Functions/InverseNormalCDF.h"
 #include <cmath>
 #include <queue>
 
 using namespace std;
 
-struct Statistic{
-    double sum;
-    double sumSQ;
-
-    double sumSTD;
-    double sumXSTD;
-    unique_ptr<double> mean;
-    unique_ptr<double> std;
-    unique_ptr<double> stdSlope;
-    unique_ptr<double> stdSE;
-
-    Statistic(double sum): sum(sum), sumSQ(sum) {}
-};
-
 class BreakoutContext: public BaseContext {
     private:
-        double indexSum;
-        double indexSumSQ;
+        double priceHighZ;
+        double priceLowZ;
+        double volumeHighZ;
+        double volumeLowZ;
 
-        double ADXThreshold;
-        Statistic priceStat;
-        Statistic volumeStat;
-        queue<double> prices;
-        queue<double> volume;
-        queue<double> priceSTDs;
-        queue<double> volumeSTDs;
+        WindowStatistics priceStatistics;
+        WindowStatistics volumeStatistics;
 
     public:
-        BreakoutContext(int lookbackPeriod, double ADXThreshold);
+        // A lookbackPeriod represents the number of days that the strategy takes into consideration
+        // A priceHighPercentageThreshold represents the percentage of prices that the current price has to be greater than. E.g. A current price of $5 must be greater than 85% of prices in a normal distribution
+        // A volumeHighPercentageThreshold represents the percentage of volumes that the current volume has to be greater than
+        // A priceLowPercentageThreshold represents the percentage of prices that the current price has to be lower than
+        // A volumeLowPercentageThrehold represents the percentage of volumes that the current volume has to be lower than
+        BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold);
 
         void updateContext(StockDataInstance &currentData, StockDataInstance &previousData) override;
-        unique_ptr<string> shouldExecuteTrade(StockDataInstance &data) const override;
+        string shouldExecuteTrade(StockDataInstance &data) const override;
 };
 
 #endif

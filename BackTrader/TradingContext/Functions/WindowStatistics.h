@@ -2,6 +2,7 @@
 #define WINDOWSTATISTICS_H
 
 #include <queue>
+#include <set>
 #include <memory>
 #include <cmath>
 
@@ -11,29 +12,40 @@ class WindowStatistics {
 	private:
 		int windowSize;
 		queue<double> dataPoints;
+		multiset<double> sortedWindow;
 		double sum;
 		double sumSQ;
 		double sumXY;
 		double indexSum;
 		double indexSumSQ;
-		unique_ptr<double> mean;
-		unique_ptr<double> std;
-		unique_ptr<double> slope;
-		unique_ptr<double> slopeSE;
-		unique_ptr<double> slopeRSQ;
-		unique_ptr<double> slopeTStatistic;
+
+		double mean;
+		double std;
+		double slope;
+		double slopeSE;
+		double slopeRSQ;
+		double slopeTStatistic;
 
 		static constexpr double EPS = 1e-14;
+		static constexpr double PValue = 0.01;
 
 		void updateVariables();
 	public:
 		WindowStatistics(int windowSize);
 
 		void addDataPoint(double value);
-		unique_ptr<double> getMean() const;
-		unique_ptr<double> getStd() const;
-		unique_ptr<double> getSlope() const;
-		unique_ptr<double> getSlopeSE() const;
+		int getSize() const;
+		double getMean() const;
+		double getStd() const;
+		double getSlope() const;
+		double getSlopeSE() const;
+		double getSlopeRSQ() const;
+		bool getSlopeSignificance() const;
+
+		double getMin() const;
+        double getMax() const;
+
+		bool isReady() const;
 };
 
 #endif
