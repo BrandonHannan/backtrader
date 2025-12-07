@@ -27,7 +27,7 @@ class BaseStrategy {
         Position position;
         vector<Position> closedPositions;
     public:
-        BaseStrategy(double bal, unique_ptr<BasePositionSize> sizer);
+        BaseStrategy(double bal, unique_ptr<BasePositionSize> sizer, unique_ptr<BaseContext> context);
 
         virtual void ExecuteStrategy(const string &stockName, const StockData &data) = 0;
 
@@ -38,6 +38,10 @@ class BaseStrategy {
         BasePositionSize* getPositionSizer();
 
         void setPositionSizer(unique_ptr<BasePositionSize> sizer);
+
+        BaseContext* getContext();
+
+        void setContext(unique_ptr<BaseContext> context);
 
         Position getPosition();
 

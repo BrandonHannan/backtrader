@@ -7,6 +7,15 @@
 
 using namespace std;
 
+struct Trade {
+    string positionType;
+    string tradeType;
+    bool isValid;
+
+    Trade() : isValid(false) {}
+    Trade(string positionType, string tradeType): positionType(positionType), tradeType(tradeType) {}
+};
+
 class BaseContext {
     protected:
         int lookBackPeriod;
@@ -18,10 +27,14 @@ class BaseContext {
 
         void addTradeType(string tradeType);
 
-        virtual void updateContext(StockDataInstance &currentData, StockDataInstance &previousData) = 0;
+        virtual void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) = 0;
 
-        // Should return make_unique<string>(value) or nullptr if it should not execute the trade
-        virtual string shouldExecuteTrade(StockDataInstance &data) const = 0;
+        // Should return string or "" if it should not execute the trade
+        virtual Trade shouldExecuteTrade(const StockDataInstance &data) const = 0;
+
+        virtual bool isValid() const = 0;
+
+        virtual ~BaseContext() = default;
 };
 
 #endif

@@ -27,8 +27,9 @@ class BreakoutContext: public BaseContext {
         // A volumeLowPercentageThrehold represents the percentage of volumes that the current volume has to be lower than
         BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold);
 
-        void updateContext(StockDataInstance &currentData, StockDataInstance &previousData) override;
-        string shouldExecuteTrade(StockDataInstance &data) const override;
+        void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
+        Trade shouldExecuteTrade(const StockDataInstance &data) const override;
+        bool isValid() const override;
 };
 
 #endif

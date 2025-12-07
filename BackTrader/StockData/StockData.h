@@ -26,6 +26,9 @@ struct StockDataInstance{
     double low;
     double volume;
     string date;
+
+    StockDataInstance(int index, double open, double close, double high, double low, double volume, string date):
+    index(index), open(open), close(close), high(high), low(low), volume(volume), date(date) {}
 };
 
 #endif

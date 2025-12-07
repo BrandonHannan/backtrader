@@ -3,7 +3,7 @@
 ATRPositionSize::ATRPositionSize(double riskAmount, int ATRPeriod, double ATRMultiplier): BasePositionSize(riskAmount),
 ATRPeriod(ATRPeriod), ATRMultiplier(ATRMultiplier), trueRangeSum(0.0), currentATR(0.0) {}
 
-double ATRPositionSize::calculatePositionSize(double balance, PositionType position, StockDataInstance &data) const {
+double ATRPositionSize::calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const {
     if (this->currentATR <= 0 || position.isNull()){
         return 0.0;
     }
@@ -32,7 +32,7 @@ double ATRPositionSize::calculatePositionSize(double balance, PositionType posit
     }
 }
 
-void ATRPositionSize::processNewData(StockDataInstance &currentData, StockDataInstance &previousData) {
+void ATRPositionSize::processNewData(const StockDataInstance &currentData, const StockDataInstance &previousData) {
     double highMinusLow = currentData.high - currentData.low;
     double highMinusPrevClose = abs(currentData.high - previousData.close);
     double lowMinusPrevClose = abs(currentData.low - previousData.close);

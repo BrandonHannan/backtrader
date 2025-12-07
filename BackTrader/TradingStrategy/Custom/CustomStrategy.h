@@ -7,7 +7,9 @@ class CustomStrategy: public BaseStrategy {
     private:
         
     public:
-        CustomStrategy();
+        CustomStrategy(double balance, unique_ptr<BasePositionSize> sizer, unique_ptr<BaseContext> context);
+
+        void ExecuteStrategy(const string &stockName, const StockData &data) override;
 };
 
 #endif
