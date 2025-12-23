@@ -3,9 +3,9 @@
 ATRPositionSize::ATRPositionSize(double riskAmount, int ATRPeriod, double ATRMultiplier): BasePositionSize(riskAmount),
 ATRPeriod(ATRPeriod), ATRMultiplier(ATRMultiplier), trueRangeSum(0.0), currentATR(0.0) {}
 
-double ATRPositionSize::calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const {
+PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const {
     if (this->currentATR <= 0 || position.isNull()){
-        return 0.0;
+        return PositionPriceInfo(0.0, 0.0);
     }
 
     double dollarRisk = balance * this->riskAmount;
@@ -16,19 +16,33 @@ double ATRPositionSize::calculatePositionSize(double balance, PositionType posit
         riskPerShare = data.close - stopLossPrice;
         if (riskPerShare <= 0){
             // Avoid division by 0 or negative risk
-            return 0.0;
+            return PositionPriceInfo(0.0, 0.0);
         }
         double result = dollarRisk/riskPerShare;
-        return result;
+        return PositionPriceInfo(result, stopLossPrice);
     }
     else if (position.getPositiontype() == "SHORT"){
         stopLossPrice = data.close + (this->currentATR * this->ATRMultiplier);
         riskPerShare = stopLossPrice - data.close;
         if (riskPerShare <= 0){
-            return 0.0;
+            return PositionPriceInfo(0.0, 0.0);
         }
         double result = dollarRisk/riskPerShare;
-        return result;
+        return PositionPriceInfo(result, stopLossPrice);
+    }
+    else{
+        return PositionPriceInfo(0.0, 0.0);
+    }
+}
+
+Position ATRPositionSize::purchasePosition(double balance, PositionType position, const StockDataInstance &data) {
+    PositionPriceInfo positionPriceInfo = this->calculatePositionSize(balance, position, data);
+    if (position.getPositiontype() == "LONG" || position.getPositiontype() == "SHORT"){
+        Position newPosition(position.getPositiontype(), "", data.date, "", data.close, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice);
+        return newPosition;
+    }
+    else{
+        return Position("", "", "", "", -1, -1, 0, 0);
     }
 }
 
@@ -52,6 +66,10 @@ void ATRPositionSize::processNewData(const StockDataInstance &currentData, const
     else{
         this->currentATR = 0.0;
     }
+}
+
+void ATRPositionSize::updateStopLossPrice(Position &currentPosition, const StockDataInstance &data) const {
+
 }
 
 bool ATRPositionSize::isValid() const {

@@ -11,3 +11,23 @@ void BaseContext::addTradeType(string tradeType){
         this->allowedTradeTypes.insert(tradeType);
     }
 }
+
+bool BaseContext::checkStopLossPrice(const Position &currentPosition, const StockDataInstance &data) const {
+    bool result = false;
+    double currentPrice = data.close;
+    double stopLossPrice = currentPosition.getStopLossPrice();
+    PositionType positionType = currentPosition.getPositionType();
+
+    if (positionType.getPositiontype() == "LONG"){
+        if (currentPrice <= stopLossPrice){
+            return true;
+        }
+    }
+    else if (positionType.getPositiontype() == "SHORT"){
+        if (currentPrice >= stopLossPrice){
+            return true;
+        }
+    }
+
+    return false;
+}

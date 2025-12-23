@@ -2,6 +2,7 @@
 #define BASECONTEXT_H
 
 #include "../StockData/StockData.h"
+#include "../PositionType/Position.h"
 #include <unordered_set>
 #include <string>
 
@@ -13,13 +14,16 @@ struct Trade {
     bool isValid;
 
     Trade() : isValid(false) {}
-    Trade(string positionType, string tradeType): positionType(positionType), tradeType(tradeType) {}
+    Trade(string positionType, string tradeType): positionType(positionType), tradeType(tradeType), isValid(true) {}
 };
 
 class BaseContext {
     protected:
         int lookBackPeriod;
         unordered_set<string> allowedTradeTypes;
+
+        // Returns TRUE if the current stock price is >= to the stop loss price for LONG trades and <= to the stop loss price for SHORT trades
+        bool checkStopLossPrice(const Position &currentPosition, const StockDataInstance &data) const;
     public:
         BaseContext();
         BaseContext(int lookBackPeriod);
@@ -29,8 +33,13 @@ class BaseContext {
 
         virtual void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) = 0;
 
-        // Should return string or "" if it should not execute the trade
+        // Returns these attributes of a new Position:
+        // - Position Type (LONG or SHORT)
+        // - Trade Type
         virtual Trade shouldExecuteTrade(const StockDataInstance &data) const = 0;
+
+        // Should return TRUE to sell the current position or FALSE to not
+        virtual bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const = 0;
 
         virtual bool isValid() const = 0;
 

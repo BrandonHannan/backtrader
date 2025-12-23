@@ -67,19 +67,28 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
         
         // Check if the current price is less than the specified percentage of prices possible based on a normal distribution
         if (currentClose < (meanPrice - (priceLowZ * stdPrice))){
-            // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
-            // NOT IMPLEMENTED YET
 
-            // Trade Type: SHORT BREAKTHROUGH
-            return Trade("SHORT", "SHORT BREAKTHROUGH");
-        }
-        else{
+            // Check if the current volume is greater than the maximum volume of the lookback period
+            if (currentVolume > maxVol){
+                // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
+                // NOT IMPLEMENTED YET
 
-            // Trade Type: LONG REVERSAL
-            return Trade("LONG", "LONG REVERSAL");
+                // Trade Type: SHORT BREAKTHROUGH
+                return Trade("SHORT", "SHORT BREAKTHROUGH");
+            }
+            else{
+
+                // Trade Type: LONG REVERSAL
+                return Trade("LONG", "LONG REVERSAL");
+            }
         }
     }
     return Trade();
+}
+
+bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const {
+    bool shouldSell = this->checkStopLossPrice(currentPosition, data);
+    return shouldSell;
 }
 
 bool BreakoutContext::isValid() const {

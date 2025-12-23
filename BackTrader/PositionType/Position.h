@@ -28,41 +28,41 @@ class Position{
         Position();
         Position(string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice);
 
-        PositionType getPositionType();
+        PositionType getPositionType() const;
 
         void setPositionType(PositionType pType);
 
         void setPositionType(string pType);
 
-        string getTradeType();
+        string getTradeType() const;
 
         void setTradeType(string tradeType);
 
-        string getPurchaseDate();
+        string getPurchaseDate() const;
 
         void setPurchaseDate(string pDate);
 
-        string getSellDate();
+        string getSellDate() const;
 
         void setSellDate(string sellDate);
 
-        double getPurchasePrice();
+        double getPurchasePrice() const;
 
         void setPurchasePrice(double purchasePrice);
 
-        double getStopLossPrice();
+        double getStopLossPrice() const;
 
         void setStopLossPrice(double stopLossPrice);
 
-        double getSellPrice();
+        double getSellPrice() const;
 
         void setSellPrice(double sellPrice);
 
-        double getNumShares();
+        double getNumShares() const;
 
         void setNumShares(double numShares);
 
-        bool getIsClosed();
+        bool getIsClosed() const;
 
         void setIsClosed(bool isClosed);
 

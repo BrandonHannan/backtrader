@@ -28,7 +28,12 @@ class BreakoutContext: public BaseContext {
         BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold);
 
         void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
+
         Trade shouldExecuteTrade(const StockDataInstance &data) const override;
+
+        bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const override;
+
+
         bool isValid() const override;
 };
 

@@ -4,7 +4,7 @@ Position::Position(): isClosed(true) {}
 
 Position::Position(string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
                 positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
-                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice) {}
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), isClosed(false) {}
 
 
 // Helper function to convert dates to a Julian Date number 
@@ -37,7 +37,7 @@ int Position::LengthOfTradeBetweenDates(){
 }
 
 // Returns whether the trade is a SHORT or a LONG
-PositionType Position::getPositionType(){
+PositionType Position::getPositionType() const {
     return this->positionType;
 }
 
@@ -50,7 +50,7 @@ void Position::setPositionType(string pType){
 }
 
 // Returns the trade type
-string Position::getTradeType(){
+string Position::getTradeType() const {
     return this->tradeType;
 }
 
@@ -58,7 +58,7 @@ void Position::setTradeType(string tType){
     this->tradeType = tType;
 }
 
-string Position::getPurchaseDate(){
+string Position::getPurchaseDate() const {
     return this->purchaseDate;
 }
 
@@ -66,7 +66,7 @@ void Position::setPurchaseDate(string pDate){
     this->purchaseDate = pDate;
 }
 
-string Position::getSellDate(){
+string Position::getSellDate() const {
     return this->sellDate;
 }
 
@@ -74,7 +74,7 @@ void Position::setSellDate(string sDate){
     this->sellDate = sDate;
 }
 
-double Position::getPurchasePrice(){
+double Position::getPurchasePrice() const {
     return this->purchasePrice;
 }
 
@@ -82,7 +82,7 @@ void Position::setPurchasePrice(double pPrice){
     this->purchasePrice = pPrice;
 }
 
-double Position::getStopLossPrice(){
+double Position::getStopLossPrice() const {
     return this->stopLossPrice;
 }
 
@@ -90,7 +90,7 @@ void Position::setStopLossPrice(double sLP){
     this->stopLossPrice = sLP;
 }
 
-double Position::getSellPrice(){
+double Position::getSellPrice() const {
     return this->sellPrice;
 }
 
@@ -98,7 +98,7 @@ void Position::setSellPrice(double sPrice){
     this->sellPrice = sPrice;
 }
 
-double Position::getNumShares(){
+double Position::getNumShares() const {
     return this->numShares;
 }
 
@@ -106,7 +106,7 @@ void Position::setNumShares(double nShares){
     this->numShares = nShares;
 }
 
-bool Position::getIsClosed(){
+bool Position::getIsClosed() const {
     return this->isClosed;
 }
 
