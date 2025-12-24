@@ -42,7 +42,7 @@ Position ATRPositionSize::purchasePosition(double balance, PositionType position
         return newPosition;
     }
     else{
-        return Position("", "", "", "", -1, -1, 0, 0);
+        return Position();
     }
 }
 
@@ -69,7 +69,25 @@ void ATRPositionSize::processNewData(const StockDataInstance &currentData, const
 }
 
 void ATRPositionSize::updateStopLossPrice(Position &currentPosition, const StockDataInstance &data) const {
+    PositionType positionType = currentPosition.getPositionType();
+    double purchasePrice = currentPosition.getPurchasePrice();
+    double priceDifference = purchasePrice - currentPosition.getStopLossPrice();
+    double currentPrice = data.close;
 
+    if (positionType.getPositiontype() == "LONG"){
+
+        if (currentPrice > purchasePrice){
+            double newStopLossPrice = currentPrice - priceDifference;
+            currentPosition.setStopLossPrice(newStopLossPrice);
+        }
+    }
+    else if (positionType.getPositiontype() == "SHORT"){
+
+        if (currentPrice < purchasePrice){
+            double newStopLossPrice = currentPrice + priceDifference;
+            currentPosition.setStopLossPrice(newStopLossPrice);
+        }
+    }
 }
 
 bool ATRPositionSize::isValid() const {

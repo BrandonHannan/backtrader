@@ -1,6 +1,6 @@
 #include "BaseStrategy.h"
 
-BaseStrategy::BaseStrategy(double bal, unique_ptr<BasePositionSize> sizer, unique_ptr<BaseContext> context): balance(bal), positionSizer(move(sizer)), strategyContext(move(context)), closedPositions({}) {}
+BaseStrategy::BaseStrategy(double bal, unique_ptr<BasePositionSize> sizer, unique_ptr<BaseContext> context): balance(bal), positionSizer(move(sizer)), strategyContext(move(context)), closedPositions({}), position(Position()) {}
 
 double BaseStrategy::getBalance(){
     return this->balance;

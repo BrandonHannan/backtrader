@@ -46,6 +46,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
             }
         }
         else{
+            sizer->updateStopLossPrice(currentPosition, currentInstance);
             bool shouldSell = context->shouldSellTrade(currentPosition, currentInstance);
             if (shouldSell){
                 currentPosition.setSellDate(currentDate);
