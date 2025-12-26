@@ -1,11 +1,12 @@
 #include "BreakoutContext.h"
 
-BreakoutContext::BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold): 
+BreakoutContext::BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold, double priceMediumPercentageThreshold): 
                                                                                                           BaseContext(lookbackPeriod), priceStatistics(lookBackPeriod), volumeStatistics(lookBackPeriod) {
     this->priceHighZ = inverseNormalCDF(priceHighPercentageThreshold);
     this->priceLowZ = inverseNormalCDF(1 - priceLowPercentageThreshold);
     this->volumeHighZ = inverseNormalCDF(volumeHighPercentageThreshold);
     this->volumeLowZ = inverseNormalCDF(1 - volumeLowPercentageThreshold);
+    this->priceMedZ = inverseNormalCDF(priceMediumPercentageThreshold);
 }
 
 void BreakoutContext::updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData){
@@ -51,12 +52,17 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
             // Check if the current volume is greater than the maximum volume of the lookback period
             if (currentVolume > maxVol){
                 // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
-                // NOT IMPLEMENTED YET
-
-                // Trade Type: LONG BREAKTHROUGH
-                return Trade("LONG", "LONG BREAKTHROUGH");
+                if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
+                    // Trade Type: LONG BREAKTHROUGH
+                    return Trade("LONG", "LONG BREAKTHROUGH");
+                }
             }
             else{
+                // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
+                if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
+                    // Trade Type: LONG BREAKTHROUGH
+                    return Trade("LONG", "LONG BREAKTHROUGH");
+                }
 
                 // Trade Type: SHORT REVERSAL
                 return Trade("SHORT", "SHORT REVERSAL");
@@ -71,12 +77,16 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
             // Check if the current volume is greater than the maximum volume of the lookback period
             if (currentVolume > maxVol){
                 // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
-                // NOT IMPLEMENTED YET
-
-                // Trade Type: SHORT BREAKTHROUGH
-                return Trade("SHORT", "SHORT BREAKTHROUGH");
+                if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
+                    // Trade Type: SHORT BREAKTHROUGH
+                    return Trade("SHORT", "SHORT BREAKTHROUGH");
+                }
             }
             else{
+                if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
+                    // Trade Type: SHORT BREAKTHROUGH
+                    return Trade("SHORT", "SHORT BREAKTHROUGH");
+                }
 
                 // Trade Type: LONG REVERSAL
                 return Trade("LONG", "LONG REVERSAL");
@@ -88,11 +98,87 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
 
 bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const {
     bool shouldSell = this->checkStopLossPrice(currentPosition, data);
+
+    double currentClose = data.close;
+    double currentVolume = data.volume;
+    string tradeType = currentPosition.getTradeType();
+
+    double maxPrice = this->priceStatistics.getMax();
+    double meanPrice = this->priceStatistics.getMean();
+    double stdPrice = this->priceStatistics.getStd();
+    double minPrice = this->priceStatistics.getMin();
+    double maxVol = this->volumeStatistics.getMax();
+    double meanVol = this->volumeStatistics.getMean();
+    double stdVol = this->volumeStatistics.getStd();
+    double minVol = this->volumeStatistics.getMin();
+
+    if (tradeType == "LONG BREAKTHROUGH"){
+        // If there is no new high in price
+        if (currentClose < maxPrice){
+            // And if the volume is low, then sell
+            if ((currentVolume < minVol) || (currentVolume < (meanVol + (volumeLowZ * stdVol)))){
+                shouldSell = true;
+            }
+        }
+    }
+    else if (tradeType == "SHORT REVERSAL"){
+        // If the current price is within the medium average price of the lookback period, then sell
+        if ((currentClose < (meanPrice + (priceMedZ * stdPrice))) && (currentClose > (meanPrice - (priceMedZ * stdPrice)))){
+            shouldSell = true;
+        }
+
+        // If the position has not reached the stop loss price yet
+        if (!shouldSell){
+            // And if the volume has spiked, then sell
+            if ((currentVolume > maxVol) || (currentVolume > (meanVol + (volumeHighZ * stdVol)))){
+                shouldSell = true;
+            }
+        }
+    }
+    else if (tradeType == "SHORT BREAKTHROUGH"){
+        // If there is no new low in price
+        if (currentClose > minPrice){
+            // And if the volume is low, then sell
+            if ((currentVolume < minVol) || (currentVolume < (meanVol + (volumeLowZ * stdVol)))){
+                shouldSell = true;
+            }
+        }
+    }
+    else if (tradeType == "LONG REVERSAL"){
+        // If the current price is within the medium average price of the lookback period, the sell
+        if ((currentClose < (meanPrice + (priceMedZ * stdPrice))) && (currentClose > (meanPrice - (priceMedZ * stdPrice)))){
+            shouldSell = true;
+        }
+
+        // If the position has not reached the stop loss price yet
+        if (!shouldSell){
+            // And if the volume has spiked, then sell
+            if ((currentVolume > maxVol) || (currentVolume > (meanVol + (volumeHighZ * stdVol)))){
+                shouldSell = true;
+            }
+        }
+    }
     return shouldSell;
 }
 
+string BreakoutContext::getStats() const {
+    string stats = "";
+
+    string maxPrice = format("{:.2f}", this->priceStatistics.getMax());
+    string meanPrice = format("{:.2f}", this->priceStatistics.getMean());
+    string stdPrice = format("{:.2f}", this->priceStatistics.getStd());
+    string minPrice = format("{:.2f}", this->priceStatistics.getMin());
+    string maxVol = format("{:.2f}", this->volumeStatistics.getMax());
+    string meanVol = format("{:.2f}", this->volumeStatistics.getMean());
+    string stdVol = format("{:.2f}", this->volumeStatistics.getStd());
+    string minVol = format("{:.2f}", this->volumeStatistics.getMin());
+
+
+    stats.append("l");
+}
+
 bool BreakoutContext::isValid() const {
-    if (priceStatistics.isReady()){
+    if (priceStatistics.isReady() && volumeStatistics.isReady()){
         return true;
     }
     return false;

@@ -9,6 +9,7 @@ using namespace std;
 
 class Position{
     private:
+        string stockName;
         PositionType positionType; // Signals either a LONG or a SHORT trade
         string tradeType; // Signals the type of trade
         string purchaseDate;
@@ -17,6 +18,7 @@ class Position{
         double sellPrice;
         double numShares;
         double stopLossPrice;
+        string stats;
         
         bool isClosed;
 
@@ -26,7 +28,11 @@ class Position{
     
     public:
         Position();
-        Position(string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice);
+        Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice, string stats);
+
+        string getStockName() const;
+
+        void setStockName(string stockName);
 
         PositionType getPositionType() const;
 
@@ -61,6 +67,10 @@ class Position{
         double getNumShares() const;
 
         void setNumShares(double numShares);
+
+        string getStats() const;
+
+        void setStats(string stats);
 
         bool getIsClosed() const;
 

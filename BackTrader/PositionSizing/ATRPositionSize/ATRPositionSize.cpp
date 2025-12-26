@@ -35,10 +35,10 @@ PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, Positio
     }
 }
 
-Position ATRPositionSize::purchasePosition(double balance, PositionType position, const StockDataInstance &data) {
+Position ATRPositionSize::purchasePosition(double balance, const string stockName, const PositionType position, const StockDataInstance &data) {
     PositionPriceInfo positionPriceInfo = this->calculatePositionSize(balance, position, data);
     if (position.getPositiontype() == "LONG" || position.getPositiontype() == "SHORT"){
-        Position newPosition(position.getPositiontype(), "", data.date, "", data.close, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice);
+        Position newPosition(stockName, position.getPositiontype(), "", data.date, "", data.close, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice, "");
         return newPosition;
     }
     else{
@@ -91,8 +91,8 @@ void ATRPositionSize::updateStopLossPrice(Position &currentPosition, const Stock
 }
 
 bool ATRPositionSize::isValid() const {
-    if (this->trueRangeWindow.size() != this->ATRPeriod){
-        return false;
+    if (this->trueRangeWindow.size() == this->ATRPeriod){
+        return true;
     }
-    return true;
+    return false;
 }

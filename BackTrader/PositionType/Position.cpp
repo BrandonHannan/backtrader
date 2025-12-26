@@ -2,9 +2,9 @@
 
 Position::Position(): isClosed(true) {}
 
-Position::Position(string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
-                positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
-                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), isClosed(false) {}
+Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice, string stats):
+                stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), stats(stats), isClosed(false) {}
 
 
 // Helper function to convert dates to a Julian Date number 
@@ -34,6 +34,14 @@ int Position::LengthOfTradeBetweenDates(){
 
     length = toJulian(endYear, endMonth, endDay) - toJulian(beginningYear, beginningMonth, beginningDay);
     return length;
+}
+
+string Position::getStockName() const {
+    return this->stockName;
+}
+
+void Position::setStockName(string stockName){
+    this->stockName = stockName;
 }
 
 // Returns whether the trade is a SHORT or a LONG
@@ -106,6 +114,14 @@ void Position::setNumShares(double nShares){
     this->numShares = nShares;
 }
 
+string Position::getStats() const {
+    return this->stats;
+}
+
+void Position::setStats(string stats){
+    this->stats = stats;
+}
+
 bool Position::getIsClosed() const {
     return this->isClosed;
 }
@@ -121,6 +137,7 @@ int Position::LengthOfTrade(){
 
 Position& Position::operator=(const Position &obj){
     if (this != &obj){
+        this->setStockName(obj.stockName);
         this->setTradeType(obj.tradeType);
         this->setPositionType(obj.positionType);
         this->setNumShares(obj.numShares);
@@ -129,6 +146,7 @@ Position& Position::operator=(const Position &obj){
         this->setPurchasePrice(obj.purchasePrice);
         this->setSellPrice(obj.sellPrice);
         this->setStopLossPrice(obj.stopLossPrice);
+        this->setStats(obj.stats);
         this->setIsClosed(obj.isClosed);
     }
     return *this;

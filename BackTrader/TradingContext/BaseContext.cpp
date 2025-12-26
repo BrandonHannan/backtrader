@@ -13,7 +13,6 @@ void BaseContext::addTradeType(string tradeType){
 }
 
 bool BaseContext::checkStopLossPrice(const Position &currentPosition, const StockDataInstance &data) const {
-    bool result = false;
     double currentPrice = data.close;
     double stopLossPrice = currentPosition.getStopLossPrice();
     PositionType positionType = currentPosition.getPositionType();

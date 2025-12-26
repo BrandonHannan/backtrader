@@ -14,7 +14,7 @@ void PositionType::DeterminePositionType(){
     }
 }
 
-string PositionType::getPositiontype(){
+string PositionType::getPositiontype() const {
     if (this->isNull()){
         return "";
     }
@@ -26,7 +26,7 @@ void PositionType::setPositionType(string pType){
     this->setNull(false);
 }
 
-bool PositionType::isNull(){
+bool PositionType::isNull() const{
     return this->null;
 }
 

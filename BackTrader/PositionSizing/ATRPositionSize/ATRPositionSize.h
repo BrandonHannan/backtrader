@@ -16,7 +16,7 @@ class ATRPositionSize: public BasePositionSize{
         PositionPriceInfo calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const override;
     public:
         ATRPositionSize(double riskAmount, int ATRPeriod, double ATRMultiplier);
-        Position purchasePosition(double balance, PositionType position, const StockDataInstance &data);
+        Position purchasePosition(double balance, const string stockName, const PositionType position, const StockDataInstance &data);
         void processNewData(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
         void updateStopLossPrice(Position &currentPosition, const StockDataInstance &data) const override;
         bool isValid() const override;

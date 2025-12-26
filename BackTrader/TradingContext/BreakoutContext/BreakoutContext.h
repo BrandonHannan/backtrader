@@ -15,6 +15,7 @@ class BreakoutContext: public BaseContext {
         double priceLowZ;
         double volumeHighZ;
         double volumeLowZ;
+        double priceMedZ;
 
         WindowStatistics priceStatistics;
         WindowStatistics volumeStatistics;
@@ -25,7 +26,8 @@ class BreakoutContext: public BaseContext {
         // A volumeHighPercentageThreshold represents the percentage of volumes that the current volume has to be greater than
         // A priceLowPercentageThreshold represents the percentage of prices that the current price has to be lower than
         // A volumeLowPercentageThrehold represents the percentage of volumes that the current volume has to be lower than
-        BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold);
+        // A priceMediumPercentageThreshold represents the percentage of prices that the current price has to be within
+        BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold, double priceMediumPercentageThreshold);
 
         void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
 
@@ -33,6 +35,7 @@ class BreakoutContext: public BaseContext {
 
         bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const override;
 
+        string getStats() const override;
 
         bool isValid() const override;
 };

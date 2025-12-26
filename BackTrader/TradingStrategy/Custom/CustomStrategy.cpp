@@ -28,7 +28,6 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate);
 
         sizer->processNewData(currentInstance, previousInstance);
-        context->updateContext(currentInstance, previousInstance);
 
         Position currentPosition = this->getPosition();
 
@@ -39,9 +38,10 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
                 if (!trade.isValid){
                     // Execute trade
-                    Position newPosition = sizer->purchasePosition(this->getBalance(), trade.positionType, currentInstance);
+                    Position newPosition = sizer->purchasePosition(this->getBalance(), stockName, trade.positionType, currentInstance);
                     newPosition.setTradeType(trade.tradeType);
                     this->setPosition(newPosition);
+                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
                 }
             }
         }
@@ -54,8 +54,12 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 currentPosition.setIsClosed(true);
 
                 this->appendClosedPosition(currentPosition);
+                this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));
             }
         }
+
+        // Update CONTEXT with the current data points after the ShouldExecuteTrade and ShouldSellTrade functions are executed
+        context->updateContext(currentInstance, previousInstance);
 
     }
 }

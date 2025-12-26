@@ -37,7 +37,7 @@ class BasePositionSize{
         // - Trade Type
         // - Sold Date
         // - Sold Price
-        virtual Position purchasePosition(double balance, PositionType position, const StockDataInstance &data) const = 0;
+        virtual Position purchasePosition(double balance, const string stockName, const PositionType position, const StockDataInstance &data) const = 0;
 
         // Updates context on new data
         virtual void processNewData(const StockDataInstance &currentData, const StockDataInstance &previousData) = 0;

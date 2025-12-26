@@ -18,11 +18,11 @@ class PositionType{
         PositionType();
         PositionType(string pType);
 
-        string getPositiontype();
+        string getPositiontype() const;
 
         void setPositionType(string pType);
 
-        bool isNull();
+        bool isNull() const;
 
         void setNull(bool null);
 

@@ -5,6 +5,7 @@
 #include "../PositionType/Position.h"
 #include <unordered_set>
 #include <string>
+#include <format>
 
 using namespace std;
 
@@ -40,6 +41,9 @@ class BaseContext {
 
         // Should return TRUE to sell the current position or FALSE to not
         virtual bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const = 0;
+
+        // Returns a string of the current statistics
+        virtual string getStats() const = 0;
 
         virtual bool isValid() const = 0;
 
