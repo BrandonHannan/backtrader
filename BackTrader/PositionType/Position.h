@@ -4,6 +4,7 @@
 #include <iostream>
 #include "PositionType.h"
 #include <string>
+#include <format>
 
 using namespace std;
 
@@ -22,13 +23,13 @@ class Position{
         
         bool isClosed;
 
-        int toJulian(int y, int m, int d);
+        int toJulian(int y, int m, int d) const;
 
-        int LengthOfTradeBetweenDates();
+        int LengthOfTradeBetweenDates() const;
     
     public:
         Position();
-        Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice, string stats);
+        Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice);
 
         string getStockName() const;
 
@@ -76,7 +77,9 @@ class Position{
 
         void setIsClosed(bool isClosed);
 
-        int LengthOfTrade();
+        int LengthOfTrade() const;
+
+        string getBasePositionInfo() const;
 
         Position& operator=(const Position &obj);
 };

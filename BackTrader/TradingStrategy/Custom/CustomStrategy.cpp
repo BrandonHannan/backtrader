@@ -42,6 +42,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     newPosition.setTradeType(trade.tradeType);
                     this->setPosition(newPosition);
                     this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
+                    string positionStats = context->getStats();
+                    newPosition.setStats(positionStats);
                 }
             }
         }
@@ -52,6 +54,11 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 currentPosition.setSellDate(currentDate);
                 currentPosition.setSellPrice(currentClose);
                 currentPosition.setIsClosed(true);
+                
+                string positionStats = currentPosition.getBasePositionInfo();
+                string totalStats = combineSideBySide(currentPosition.getStats(), context->getStats());
+                positionStats.append(totalStats);
+                currentPosition.setStats(positionStats);
 
                 this->appendClosedPosition(currentPosition);
                 this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));

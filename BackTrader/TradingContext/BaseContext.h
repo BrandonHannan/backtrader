@@ -3,9 +3,8 @@
 
 #include "../StockData/StockData.h"
 #include "../PositionType/Position.h"
+#include "./Functions/StringHelper.h"
 #include <unordered_set>
-#include <string>
-#include <format>
 
 using namespace std;
 

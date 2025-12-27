@@ -163,18 +163,45 @@ bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const Sto
 
 string BreakoutContext::getStats() const {
     string stats = "";
+    int maxLength = 35;
 
-    string maxPrice = format("{:.2f}", this->priceStatistics.getMax());
-    string meanPrice = format("{:.2f}", this->priceStatistics.getMean());
-    string stdPrice = format("{:.2f}", this->priceStatistics.getStd());
-    string minPrice = format("{:.2f}", this->priceStatistics.getMin());
-    string maxVol = format("{:.2f}", this->volumeStatistics.getMax());
-    string meanVol = format("{:.2f}", this->volumeStatistics.getMean());
-    string stdVol = format("{:.2f}", this->volumeStatistics.getStd());
-    string minVol = format("{:.2f}", this->volumeStatistics.getMin());
+    double maxPrice = this->priceStatistics.getMax();
+    double meanPrice = this->priceStatistics.getMean();
+    double stdPrice = this->priceStatistics.getStd();
+    double minPrice = this->priceStatistics.getMin();
+    double slopePrice = this->priceStatistics.getSlope();
+    double slopeSEPrice = this->priceStatistics.getSlopeSE();
+    double slopeRSQPrice = this->priceStatistics.getSlopeRSQ();
+    bool slopeSigPrice = this->priceStatistics.getSlopeSignificance();
 
+    double maxVol = this->volumeStatistics.getMax();
+    double meanVol = this->volumeStatistics.getMean();
+    double stdVol = this->volumeStatistics.getStd();
+    double minVol = this->volumeStatistics.getMin();
+    double slopeVolume = this->volumeStatistics.getSlope();
+    double slopeSEVolume = this->volumeStatistics.getSlopeSE();
+    double slopeRSQVolume = this->volumeStatistics.getSlopeRSQ();
+    bool slopeSigVolume = this->volumeStatistics.getSlopeSignificance();
 
-    stats.append("l");
+    stats.append(formatDoubleStat("Mean Price", meanPrice, maxLength));
+    stats.append(formatDoubleStat("STD Price", stdPrice, maxLength));
+    stats.append(formatDoubleStat("Min Price", minPrice, maxLength));
+    stats.append(formatDoubleStat("Max Price", maxPrice, maxLength));
+    stats.append(formatDoubleStat("Slope Price", slopePrice, maxLength));
+    stats.append(formatDoubleStat("Slope Standard Error Price", slopeSEPrice, maxLength));
+    stats.append(formatDoubleStat("Slope R^2 Price", slopeRSQPrice, maxLength));
+    stats.append(formatBoolStat("Is Price Slope Significant", slopeSigPrice, maxLength));
+
+    stats.append(formatDoubleStat("Mean Volume", meanVol, maxLength));
+    stats.append(formatDoubleStat("STD Volume", stdVol, maxLength));
+    stats.append(formatDoubleStat("Min Volume", minVol, maxLength));
+    stats.append(formatDoubleStat("Max Volume", maxVol, maxLength));
+    stats.append(formatDoubleStat("Slope Volume", slopeVolume, maxLength));
+    stats.append(formatDoubleStat("Slope Standard Error Volume", slopeSEVolume, maxLength));
+    stats.append(formatDoubleStat("Slope R^2 Volume", slopeRSQVolume, maxLength));
+    stats.append(formatBoolStat("Is Volume Slope Significant", slopeSigVolume, maxLength));
+
+    return stats;
 }
 
 bool BreakoutContext::isValid() const {

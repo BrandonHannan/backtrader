@@ -116,7 +116,7 @@ double WindowStatistics::getSlopeRSQ() const {
 }
 
 bool WindowStatistics::getSlopeSignificance() const {
-    if (this->slopeTStatistic < this->PValue){
+    if (abs(this->slopeTStatistic) > this->CritialValue){
         return true;
     }
     return false;
@@ -126,14 +126,14 @@ double WindowStatistics::getMax() const {
     if (this->sortedWindow.empty()){
         return 0.0;
     }
-    return *this->sortedWindow.begin();
+    return *this->sortedWindow.rbegin();
 }
 
 double WindowStatistics::getMin() const {
     if (this->sortedWindow.empty()){
         return 0.0;
     }
-    return *this->sortedWindow.rbegin();
+    return *this->sortedWindow.begin();
 }
 
 bool WindowStatistics::isReady() const {

@@ -38,7 +38,7 @@ PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, Positio
 Position ATRPositionSize::purchasePosition(double balance, const string stockName, const PositionType position, const StockDataInstance &data) {
     PositionPriceInfo positionPriceInfo = this->calculatePositionSize(balance, position, data);
     if (position.getPositiontype() == "LONG" || position.getPositiontype() == "SHORT"){
-        Position newPosition(stockName, position.getPositiontype(), "", data.date, "", data.close, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice, "");
+        Position newPosition(stockName, position.getPositiontype(), "", data.date, "", data.close, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice);
         return newPosition;
     }
     else{

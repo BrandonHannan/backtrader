@@ -27,7 +27,11 @@ class WindowStatistics {
 		double slopeTStatistic;
 
 		static constexpr double EPS = 1e-14;
-		static constexpr double PValue = 0.01;
+		// A P value is generally used, but in this case the slopeTStatistic holds strength of the trend, whereas the p value is a probability derived 
+		// from the T statistic. In this case, to compare the p value to the slopeTStatistic is to compare it to a critical value and a p value 
+		// of 0.01 is roughly equal to 2.58
+		// static constexpr double PValue = 0.01;
+		static constexpr double CritialValue = 2.58;
 
 		void updateVariables();
 	public:

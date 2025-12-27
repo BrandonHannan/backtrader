@@ -2,13 +2,13 @@
 
 Position::Position(): isClosed(true) {}
 
-Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice, string stats):
+Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
                 stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
-                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), stats(stats), isClosed(false) {}
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), isClosed(false) {}
 
 
 // Helper function to convert dates to a Julian Date number 
-int Position::toJulian(int y, int m, int d) {
+int Position::toJulian(int y, int m, int d) const {
     if (m <= 2) {
         y -= 1;
         m += 12;
@@ -19,7 +19,7 @@ int Position::toJulian(int y, int m, int d) {
 }
 
 // Helper function to determine the number of days between the purhcase date and the sell date
-int Position::LengthOfTradeBetweenDates(){
+int Position::LengthOfTradeBetweenDates() const {
     if (purchaseDate == "" || sellDate == "" || purchaseDate.length() != 10 || sellDate.length() != 10){
         return -1;
     }
@@ -130,9 +130,18 @@ void Position::setIsClosed(bool isC){
     this->isClosed = isC;
 }
 
-int Position::LengthOfTrade(){
+int Position::LengthOfTrade() const {
     // Returns -1 if an invalid position
     return LengthOfTradeBetweenDates();
+}
+
+string Position::getBasePositionInfo() const {
+    string result;
+    result.append(format("     Trade Type: {}     Position Type: {}           Stock Name: {}\n", this->tradeType, this->positionType.getPositiontype(), this->stockName));
+    result.append(format(" Purchase Price: {}     Purchase Date: {}     Number of Shares: {}\n", format("{:.2f}", this->purchasePrice), this->purchaseDate, format("{:.2f}", this->numShares)));
+    result.append(format("Stop Loss Price: {}\n", format("{:.2f}", this->stopLossPrice)));
+    result.append(format("     Sell Price: {}         Sell Date: {}      Length of Trade: {}\n", format("{:.2f}", this->sellPrice), this->sellDate, format("{:.2f}", LengthOfTrade())));
+    return result;
 }
 
 Position& Position::operator=(const Position &obj){
