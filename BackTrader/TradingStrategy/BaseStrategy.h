@@ -44,7 +44,7 @@ class BaseStrategy {
 
         void setContext(unique_ptr<BaseContext> context);
 
-        Position getPosition();
+        Position &getPosition();
 
         void setPosition(Position &p);
 

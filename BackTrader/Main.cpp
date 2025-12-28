@@ -1,35 +1,18 @@
 #include "DataReader/DataReader.h"
-#include "TradingStrategy/TradingStrategy.h"
-#include "TradingStrategy/CustomChannelBreakout/CustomChannelBreakout.h"
-#include "Position/Position.h"
+#include "./TradingStrategy/Custom/CustomStrategy.h"
+#include "./PositionSizing/ATRPositionSize/ATRPositionSize.h"
+#include "./TradingContext/BreakoutContext/BreakoutContext.h"
 #include <iostream>
 #include <algorithm>
 #include <time.h>
 #include <fstream>
 
-string PositionTypeReader(PositionType pT){
-    if (pT == SHORT){ return "Short"; }
-    else if (pT == LONG){ return "Long"; }
-    else { return "No Position Type"; }
-}
-
-string TradeTypeReader(TradeType tT){
-    if (tT == HVS){ return "HVS"; }
-    else if (tT == HNVHL){ return "HNVHL"; }
-    else if (tT == HNVSL){ return "HNVSL"; }
-    else if (tT == HNVHHVL){ return "HNVHHVL"; }
-    else if (tT == LVL){ return "LVL"; }
-    else if (tT == LNVLS){ return "LNVLS"; }
-    else if (tT == LNVSS){ return "LNVSS"; }
-    else if (tT == LNVLHVS){ return "LNVLHVS"; }
-    else { return "No Trade Type"; }
-}
 
 int main(){
     // Use this For MacOS
-    unordered_map<string, StockData> data = ReadData("../data.txt");
+    // unordered_map<string, StockData> data = ReadData("../data.txt");
     // Use this For Windows
-    //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
+    unordered_map<string, StockData> data = ReadData("C:\\Users\\brand\\Documents\\Repos\\backtrader\\data.txt");
     cout << "Number of Stocks: " << data.size() << endl;
 
     // for (auto stockData : data){
@@ -47,1081 +30,177 @@ int main(){
     vector<int> ATRPeriodArray = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30, 35, 40, 45, 50, 55, 60};
     vector<double> ATRMultiplierArray = {0.25, 0.5, 0.75, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0};
     vector<double> RiskAmountArray = {0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05};
-    vector<double> volatilityThreshold1Array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-    vector<double> volumeComparisonArray = {0.1, 0.15, 0.2, 0.225, 0.25, 0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.45, 0.5};
-    vector<double> volumeDropComparisonArray = {0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5};
-    vector<double> priceSurgeArray = {1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75};
-    vector<double> dropPriceSurgeArray = {0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99};
-    vector<double> volumeComparisonPriceSurgeArray = {0.01, 0.05, 0.075, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55, 0.6};
-    vector<double> priceDiffCompareArray = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99};
-    vector<int> waitingPeriodArray = {1, 2, 3, 4, 5, 6, 7, 8 ,9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-    vector<double> priceComparisonArray = {0.01, 0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.45, 0.5};
-    vector<double> HVSVolumeDropComparisonArray = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9};
-    vector<double> ExitComparisonArray = {1.01, 1.025, 1.05, 1.075, 1.1, 1.125, 1.15, 1.175, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5};
+    vector<double> percentageArray = {0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99};
 
     int lookbackPeriod = lookbackPeriodArray[6];
 
     double ATRMultiplier = ATRMultiplierArray[5];
-    int ATRPeriod = 60;
+    int ATRPeriod = ATRPeriodArray[10];
     double RiskAmount = RiskAmountArray[3];
 
-    double volumeComparison = volumeComparisonArray[4];
-    double volumeDropComparison = volumeComparisonArray[2];
-    double priceSurge = priceSurgeArray[1];
-    double dropPriceSurge = dropPriceSurgeArray[7];
-    double volumeComparisonPriceSurge = volumeComparisonPriceSurgeArray[4];
-    double volumeComparisonDropSurge = volumeComparisonPriceSurgeArray[4];
-    double priceDiffLongCompare = priceDiffCompareArray[4];
-    double priceDiffShortCompare = priceDiffCompareArray[4];
-    int HVSWaitingPeriod = waitingPeriodArray[6];
-    double HVSVolumeDropComparison = volumeComparisonArray[2];
-    int LVLWaitingPeriod = waitingPeriodArray[6];
-    double LVLVolumeDropComparison = volumeComparisonArray[2];
-    double HVSExitComparison = priceComparisonArray[4];
-    double HNVSLExitThreshold = priceDiffCompareArray[9];
-    double HNVSLExitComparison = priceSurgeArray[0];
-    double HNVHHVLExitComparison = priceComparisonArray[4];
-    double LVLExitComparison = priceComparisonArray[4];
-    double LNVSSExitThreshold = priceDiffCompareArray[9];
-    double LNVSSExitComparison = priceSurgeArray[0];
-    double LNVLHVSExitComparison = priceComparisonArray[4];
-
-    double pricePercentageLongComparison = priceSurgeArray[0];
-    double pricePercentageLongThreshold = priceDiffCompareArray[9];
-    double pricePercentageShortComparison = priceSurgeArray[0];
-    double pricePercentageShortThreshold = priceDiffCompareArray[9];
-    double volumePercentageLongComparison = priceSurgeArray[0];
-    double volumePercentageShortComparison = priceSurgeArray[0];
-    double volumePercentageLongThreshold = 0.99;
-    double volumePercentageShortThreshold = priceDiffCompareArray[9];
-    double pricePercentageLongNVComparison = priceSurgeArray[0];
-    double pricePercentageLongNVThreshold = priceDiffCompareArray[9];
-    double pricePercentageShortNVComparison = priceSurgeArray[0];
-    double pricePercentageShortNVThreshold = priceDiffCompareArray[9];
+    double priceHighPercentageThreshold = percentageArray[8];
+    double priceLowPercentageThreshold = percentageArray[8];
+    double volumeHighPercentageThreshold = percentageArray[8];
+    double volumeLowPercentageThreshold = percentageArray[8];
+    double priceMediumPercentageTreshold = percentageArray[6];
 
     double balance = 10000;
-    Position emptyPosition;
 
-    ofstream file("Returns.txt");
+    unique_ptr<BasePositionSize> sizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+
+    unique_ptr<BaseContext> context = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+
+    CustomStrategy strategy = CustomStrategy(balance, move(sizer), move(context));
+
+    //ofstream file("Returns.txt");
 
     clock_t start = clock();
-    CustomChannelBreakout strategy(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-    volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-    priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-    LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-    HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-    pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-    volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold, 
-    pricePercentageLongNVComparison, pricePercentageLongNVThreshold, pricePercentageShortNVComparison, pricePercentageShortNVThreshold);
 
+    // vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
+    //                          "GC=F", "SI=F", "PL=F", "PA=F", "HG=F",
+    //                          "ZC=F", "ZW=F", "ZS=F", "ZM=F", "ZL=F",
+    //                          "KC=F", "CC=F", "SB=F", "CT=F", "OJ=F",
+    //                          "LBS=F", "ZO=F", "ZR=F", "LE=F", "HE=F",
+    //                          "GF=F", "ALI=F", "TIO=F", "ETH=F", "DC=F", "CSC=F", "GNF=F"};
+    // for (int i = 0; i<stocks.size(); i++){
+    //     strategy.ExecuteStrategy(stocks[i], data[stocks[i]]);
+    // }
 
-    vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
-                             "GC=F", "SI=F", "PL=F", "PA=F", "HG=F",
-                             "ZC=F", "ZW=F", "ZS=F", "ZM=F", "ZL=F",
-                             "KC=F", "CC=F", "SB=F", "CT=F", "OJ=F",
-                             "LBS=F", "ZO=F", "ZR=F", "LE=F", "HE=F",
-                             "GF=F", "ALI=F", "TIO=F", "ETH=F", "DC=F", "CSC=F", "GNF=F"};
-    for (int i = 0; i<stocks.size(); i++){
-        strategy.ExecuteStrategy(data[stocks[i]]);
+    for (const auto& [ticker, stockData] : data) {
+        // Optional: Safety check to ensure data is valid before running
+        if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+            cout << "Skipping invalid data for: " << ticker << endl;
+            continue;
+        }
+
+        cout << "Executing strategy for: " << ticker << "..." << endl; // Debug print
+        strategy.ExecuteStrategy(ticker, stockData);
     }
 
     // Look Back
-    /*file << "Lookback\n";
-    for (int i = 0; i < lookbackPeriodArray.size(); i++){
-        file << lookbackPeriodArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriodArray[i], ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // ATR Period
-    file << "ATR Period\n";
-    for (int i = 0; i < ATRPeriodArray.size(); i++){
-        file << ATRPeriodArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriodArray[i], ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // ATR Multiplier
-    file << "ATR Multiplier\n";
-    for (int i = 0; i < ATRMultiplierArray.size(); i++){
-        file << ATRMultiplierArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplierArray[i], RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Risk Amount
-    file << "Risk Amount\n";
-    for (int i = 0; i < RiskAmountArray.size(); i++){
-        file << RiskAmountArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmountArray[i],
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Comparison
-    file << "Volume Comparison\n";
-    for (int i = 0; i < volumeComparisonArray.size(); i++){
-        file << volumeComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparisonArray[i], volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Drop Comparison
-    file << "Volume Drop Comparison\n";
-    for (int i = 0; i < volumeDropComparisonArray.size(); i++){
-        file << volumeDropComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparisonArray[i], priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Surge
-    file << "Price Surge\n";
-    for (int i = 0; i < priceSurgeArray.size(); i++){
-        file << priceSurgeArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurgeArray[i], volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Drop Price Surge
-    file << "Drop Price Surge\n";
-    for (int i = 0; i < dropPriceSurgeArray.size(); i++){
-        file << dropPriceSurgeArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurgeArray[i], HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Comparison Price Surge
-    file << "Volume Comparison Price Surge\n";
-    for (int i = 0; i < volumeComparisonPriceSurgeArray.size(); i++){
-        file << volumeComparisonPriceSurgeArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurgeArray[i], volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Comparison Drop Price Surge
-    file << "Volume Comparison Drop Price Surge\n";
-    for (int i = 0; i < volumeComparisonPriceSurgeArray.size(); i++){
-        file << volumeComparisonPriceSurgeArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonPriceSurgeArray[i], 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Difference Long Compare
-    file << "Price Difference Long Compare\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffCompareArray[i], priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Difference Short Compare
-    file << "Price Difference Short Compare\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffCompareArray[i], dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HVS Waiting Period
-    file << "HVS Waiting Period\n";
-    for (int i = 0; i < waitingPeriodArray.size(); i++){
-        file << waitingPeriodArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, waitingPeriodArray[i], HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HVS Waiting Period
-    file << "HVS Waiting Period\n";
-    for (int i = 0; i < waitingPeriodArray.size(); i++){
-        file << waitingPeriodArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, waitingPeriodArray[i], HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HVS Volume Drop Comparison
-    file << "HVS Volume Drop Comparison\n";
-    for (int i = 0; i < HVSVolumeDropComparisonArray.size(); i++){
-        file << HVSVolumeDropComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparisonArray[i], 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // LVL Waiting Period
-    file << "LVL Waiting Period\n";
-    for (int i = 0; i < waitingPeriodArray.size(); i++){
-        file << waitingPeriodArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        waitingPeriodArray[i], LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // LVL Volume Drop Comparison
-    file << "LVL Volume Drop Comparison\n";
-    for (int i = 0; i < volumeDropComparisonArray.size(); i++){
-        file << volumeDropComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, volumeDropComparisonArray[i], HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HVS Exit Comparison
-    file << "HVS Exit Comparison\n";
-    for (int i = 0; i < volumeComparisonPriceSurgeArray.size(); i++){
-        file << volumeComparisonPriceSurgeArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, volumeComparisonPriceSurgeArray[i], HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HNVSL Exit Threshold
-    file << "HNVSL Exit Threshold\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, priceDiffCompareArray[i], HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HNVSL Exit Comparison
-    file << "HNVSL Exit Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, ExitComparisonArray[i], 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // HNVHHVL Exit Comparison
-    file << "HNVHHVL Exit Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        ExitComparisonArray[i], LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // LVL Exit Comparison
-    file << "LVL Exit Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, ExitComparisonArray[i], LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // LNVSS Exit Threshold
-    file << "LNVSS Exit Threshold\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, priceDiffCompareArray[i], LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // LNVSS Exit Comparison
-    file << "LNVSS Exit Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, ExitComparisonArray[i], LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // LNVLHVS Exit Comparison
-    file << "LNVLHVS Exit Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, ExitComparisonArray[i], 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Percentage Long Comparison
-    file << "Price Percentage Long Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        ExitComparisonArray[i], pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Percentage Long Threshold
-    file << "Price Percentage Long Threshold\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, priceDiffCompareArray[i], pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Percentage Short Comparison
-    file << "Price Percentage Short Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, ExitComparisonArray[i], pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Price Percentage Short Threshold
-    file << "Price Percentage Short Threshold\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, priceDiffCompareArray[i],
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Percentage Long Comparison
-    file << "Volume Percentage Long Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        ExitComparisonArray[i], volumePercentageShortComparison, volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Percentage Short Comparison
-    file << "Volume Percentage Short Comparison\n";
-    for (int i = 0; i < ExitComparisonArray.size(); i++){
-        file << ExitComparisonArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, ExitComparisonArray[i], volumePercentageLongThreshold, volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Percentage Long Threshold
-    file << "Volume Percentage Long Threshold\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, priceDiffCompareArray[i], volumePercentageShortThreshold);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }
-
-    // Volume Percentage Short Threshold
-    file << "Volume Percentage Short Threshold\n";
-    for (int i = 0; i < priceDiffCompareArray.size(); i++){
-        file << priceDiffCompareArray[i] << "\n^\n";
-        CustomChannelBreakout specific(balance, false, emptyPosition, {}, lookbackPeriod, ATRPeriod, ATRMultiplier, RiskAmount,
-        volumeComparison, volumeDropComparison, priceSurge, volumeComparisonPriceSurge, volumeComparisonDropSurge, 
-        priceDiffLongCompare, priceDiffShortCompare, dropPriceSurge, HVSWaitingPeriod, HVSVolumeDropComparison, 
-        LVLWaitingPeriod, LVLVolumeDropComparison, HVSExitComparison, HNVSLExitThreshold, HNVSLExitComparison, 
-        HNVHHVLExitComparison, LVLExitComparison, LNVSSExitComparison, LNVSSExitThreshold, LNVLHVSExitComparison, 
-        pricePercentageLongComparison, pricePercentageLongThreshold, pricePercentageShortComparison, pricePercentageShortThreshold,
-        volumePercentageLongComparison, volumePercentageShortComparison, volumePercentageLongThreshold, priceDiffCompareArray[i]);
-
-        for (int j = 0; j<stocks.size(); j++){
-            specific.ExecuteStrategy(data[stocks[j]]);
-        }
-        map<int, vector<double>> returns = specific.getYearlyReturns();
-        for (auto const& x : returns){
-            file << x.first << "\n$\n";
-            for (int i = 0; i < x.second.size(); i++){
-                file << x.second[i] << "\n";
-                if (i == x.second.size() - 1){
-                    file << "&\n";
-                }
-            }
-        }
-        file << "%\n";
-    }*/
-
-
-    file.close();
+    // file << "Lookback\n";
+    // for (int i = 0; i<lookbackPeriodArray.size(); i++){
+    //     file << lookbackPeriodArray[i] << "\n^\n";
+    //     CustomStrategy specificStrategy = CustomStrategy(balance, move(sizer), make_unique<BreakoutContext>(lookbackPeriodArray[i], priceHighPercentageThreshold, 
+    //         volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold));
+    //     for (int j = 0; j<stocks.size(); j++){
+    //         specificStrategy.ExecuteStrategy(stocks[j], data[stocks[j]]);
+    //     }
+    //     map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+    //     for (auto const& x : returns){
+    //         file << x.first << "\n$\n";
+    //         for (int i = 0; i < x.second.size(); i++){
+    //             file << x.second[i] << "\n";
+    //             if (i == x.second.size() - 1){
+    //                 file << "&\n";
+    //             }
+    //         }
+    //     }
+    //     file << "%\n";
+    // }
+
+    //file.close();
 
     clock_t end = clock();
     double timeSpent = (double)(end - start)/CLOCKS_PER_SEC;
 
-    ofstream file1("Analysis.csv");
-    ostringstream oss;
-    file1 << "Trade Number,Trade Type,Position Type,Purchase Date,Sell Date,LookBack Period,Slope P Value,Previous Slope P Value,Price Slope,Previous Price Slope,Old Maximum Price in LookBack Period (Before trade was made),New Maximum PRice in LookBack Period (When trade was made),Old Minimum Price in LookBack Period (Before trade was made),New Minimum Price in LookBack Period (When trade was made),Profit/Loss\n";
-
     vector<Position> r = strategy.getClosedPositions();
     double sum = 0;
+
     for (int i = 0; i<r.size(); i++){
-        string stringResult = "";
         cout << "Position " << i << ":" << endl;
-        stringResult += (to_string(i + 1) + ",");
-        cout << "Trade Type: " << TradeTypeReader(r[i].getTradeType()) << " | ";
-        stringResult += (TradeTypeReader(r[i].getTradeType()) + ",");
-        cout << "Position Type: " << PositionTypeReader(r[i].getPositionType()) << endl;
-        stringResult += (PositionTypeReader(r[i].getPositionType()) + ",");
+        cout << "Position Type: " << r[i].getPositionType().getPositiontype() << endl;
+        cout << "Trade Type: " << r[i].getTradeType() << " | ";
         cout << "Purchase Date: " << r[i].getPurchaseDate() << " | " << "Sell Date: " << r[i].getSellDate() << endl;
-        stringResult += (r[i].getPurchaseDate() + ",");
-        stringResult += (r[i].getSellDate() + ",");
-        stringResult += (to_string(lookbackPeriod) + ",");
-        if (r[i].getTradeType() == 0 || r[i].getTradeType() == 4){
-            PositionStats x = r[i].getStats();
-            cout << "P Value: " << x.pValue << " P Value Prev: " << x.pValuePrev << endl;
-            oss.str(""); oss.clear();
-            oss << std::scientific << std::setprecision(6) << x.pValue;
-            stringResult += (oss.str() + ",");
-            oss.str(""); oss.clear();
-            oss << std::scientific << std::setprecision(6) << x.pValuePrev;
-            stringResult += (oss.str() + ",");
-            cout << "Price Slope: " << x.priceSlope << " Price Slope Prev: " << x.priceSlopePrev << endl;
-            oss.str(""); oss.clear();
-            oss << std::scientific << std::setprecision(6) << x.priceSlope;
-            stringResult += (oss.str() + ",");
-            oss.str(""); oss.clear();
-            oss << std::scientific << std::setprecision(6) << x.priceSlopePrev;
-            stringResult += (oss.str() + ",");
-            if (r[i].getTradeType() == 0){
-                cout << "Old Maximum Price in LookBack Period (Before trade was made): " << x.prev << endl;
-                cout << "New Maximum Price in LookBack Period (When trade was made): " << x.current << endl;
-                stringResult += (to_string(x.prev) + "," + to_string(x.current) + ",,,");
-            }
-            else{
-                cout << "Old Minimum Price in LookBack Period (Before trade was made): " << x.prev << endl;
-                cout << "New Minimum Price in LookBack Period (When trade was made): " << x.current << endl;
-                stringResult += (",," + to_string(x.prev) + "," + to_string(x.current) + ",");
-            }
-        }
-        else{
-            stringResult += ",,,,,,,,";
-        }
         cout << "Profit/Loss: ";
         double profit = 0;
-        if (r[i].getPositionType() == LONG){
+        if (r[i].getPositionType().getPositiontype() == "LONG"){
             profit = (r[i].getSellPrice() - r[i].getPurchasePrice()) *
                         r[i].getNumShares();
         }
-        else if (r[i].getPositionType() == SHORT){
+        else if (r[i].getPositionType().getPositiontype() == "SHORT"){
             profit = (r[i].getPurchasePrice() - r[i].getSellPrice()) *
                         r[i].getNumShares();
         }
-        cout << "$" << profit << endl << endl;
-        stringResult += (to_string(profit) + "\n");
-        file1 << stringResult;
+        cout << "$" << profit << endl;
+        cout << "Stats: " << endl;
+        cout << r[i].getStats() << endl << endl;
         sum = sum + profit;
     }
+
     cout << "Total Profit/Loss: $" << sum << endl;
-    cout << "Balance: $" << strategy.balance << endl << endl;
+    cout << "Balance: $" << strategy.getBalance() << endl << endl;
     cout << "Execution Time: " << timeSpent << "s" << endl;
-    file1.close();
+
+    // ofstream file1("Analysis.csv");
+    // ostringstream oss;
+    // file1 << "Trade Number,Trade Type,Position Type,Purchase Date,Sell Date,LookBack Period,Slope P Value,Previous Slope P Value,Price Slope,Previous Price Slope,Old Maximum Price in LookBack Period (Before trade was made),New Maximum PRice in LookBack Period (When trade was made),Old Minimum Price in LookBack Period (Before trade was made),New Minimum Price in LookBack Period (When trade was made),Profit/Loss\n";
+
+    // vector<Position> r = strategy.getClosedPositions();
+    // double sum = 0;
+    // for (int i = 0; i<r.size(); i++){
+    //     string stringResult = "";
+    //     cout << "Position " << i << ":" << endl;
+    //     stringResult += (to_string(i + 1) + ",");
+    //     cout << "Trade Type: " << TradeTypeReader(r[i].getTradeType()) << " | ";
+    //     stringResult += (TradeTypeReader(r[i].getTradeType()) + ",");
+    //     cout << "Position Type: " << PositionTypeReader(r[i].getPositionType()) << endl;
+    //     stringResult += (PositionTypeReader(r[i].getPositionType()) + ",");
+    //     cout << "Purchase Date: " << r[i].getPurchaseDate() << " | " << "Sell Date: " << r[i].getSellDate() << endl;
+    //     stringResult += (r[i].getPurchaseDate() + ",");
+    //     stringResult += (r[i].getSellDate() + ",");
+    //     stringResult += (to_string(lookbackPeriod) + ",");
+    //     if (r[i].getTradeType() == 0 || r[i].getTradeType() == 4){
+    //         PositionStats x = r[i].getStats();
+    //         cout << "P Value: " << x.pValue << " P Value Prev: " << x.pValuePrev << endl;
+    //         oss.str(""); oss.clear();
+    //         oss << std::scientific << std::setprecision(6) << x.pValue;
+    //         stringResult += (oss.str() + ",");
+    //         oss.str(""); oss.clear();
+    //         oss << std::scientific << std::setprecision(6) << x.pValuePrev;
+    //         stringResult += (oss.str() + ",");
+    //         cout << "Price Slope: " << x.priceSlope << " Price Slope Prev: " << x.priceSlopePrev << endl;
+    //         oss.str(""); oss.clear();
+    //         oss << std::scientific << std::setprecision(6) << x.priceSlope;
+    //         stringResult += (oss.str() + ",");
+    //         oss.str(""); oss.clear();
+    //         oss << std::scientific << std::setprecision(6) << x.priceSlopePrev;
+    //         stringResult += (oss.str() + ",");
+    //         if (r[i].getTradeType() == 0){
+    //             cout << "Old Maximum Price in LookBack Period (Before trade was made): " << x.prev << endl;
+    //             cout << "New Maximum Price in LookBack Period (When trade was made): " << x.current << endl;
+    //             stringResult += (to_string(x.prev) + "," + to_string(x.current) + ",,,");
+    //         }
+    //         else{
+    //             cout << "Old Minimum Price in LookBack Period (Before trade was made): " << x.prev << endl;
+    //             cout << "New Minimum Price in LookBack Period (When trade was made): " << x.current << endl;
+    //             stringResult += (",," + to_string(x.prev) + "," + to_string(x.current) + ",");
+    //         }
+    //     }
+    //     else{
+    //         stringResult += ",,,,,,,,";
+    //     }
+    //     cout << "Profit/Loss: ";
+    //     double profit = 0;
+    //     if (r[i].getPositionType() == LONG){
+    //         profit = (r[i].getSellPrice() - r[i].getPurchasePrice()) *
+    //                     r[i].getNumShares();
+    //     }
+    //     else if (r[i].getPositionType() == SHORT){
+    //         profit = (r[i].getPurchasePrice() - r[i].getSellPrice()) *
+    //                     r[i].getNumShares();
+    //     }
+    //     cout << "$" << profit << endl << endl;
+    //     stringResult += (to_string(profit) + "\n");
+    //     file1 << stringResult;
+    //     sum = sum + profit;
+    // }
+    // cout << "Total Profit/Loss: $" << sum << endl;
+    // cout << "Balance: $" << strategy.balance << endl << endl;
+    // cout << "Execution Time: " << timeSpent << "s" << endl;
+    // file1.close();
+
+
     // map<int, vector<double>> results = strategy.getYearlyReturns();
 
     // for (auto const& x : results){

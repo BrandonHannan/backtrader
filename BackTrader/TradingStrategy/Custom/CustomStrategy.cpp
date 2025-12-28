@@ -29,27 +29,34 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
         sizer->processNewData(currentInstance, previousInstance);
 
-        Position currentPosition = this->getPosition();
+        Position &currentPosition = this->getPosition();
 
         if (currentPosition.getIsClosed()){
+            context->updateContext(currentInstance, previousInstance);
+
             // Check if the position size and context instances are ready and full of data
             if (sizer->isValid() && context->isValid()){
                 Trade trade = context->shouldExecuteTrade(currentInstance);
-
-                if (!trade.isValid){
+                if (trade.isValid){
                     // Execute trade
                     Position newPosition = sizer->purchasePosition(this->getBalance(), stockName, trade.positionType, currentInstance);
                     newPosition.setTradeType(trade.tradeType);
-                    this->setPosition(newPosition);
-                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
                     string positionStats = context->getStats();
                     newPosition.setStats(positionStats);
+
+                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
+                    
+                    this->setPosition(newPosition);
                 }
             }
         }
         else{
             sizer->updateStopLossPrice(currentPosition, currentInstance);
             bool shouldSell = context->shouldSellTrade(currentPosition, currentInstance);
+            
+            // Update CONTEXT with the current data points after the ShouldSellTrade functions are executed
+            context->updateContext(currentInstance, previousInstance);
+
             if (shouldSell){
                 currentPosition.setSellDate(currentDate);
                 currentPosition.setSellPrice(currentClose);
@@ -62,11 +69,10 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
                 this->appendClosedPosition(currentPosition);
                 this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));
+                
+                Position emptyPosition = Position();
+                this->setPosition(emptyPosition);
             }
         }
-
-        // Update CONTEXT with the current data points after the ShouldExecuteTrade and ShouldSellTrade functions are executed
-        context->updateContext(currentInstance, previousInstance);
-
     }
 }

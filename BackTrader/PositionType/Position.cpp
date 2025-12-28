@@ -138,9 +138,9 @@ int Position::LengthOfTrade() const {
 string Position::getBasePositionInfo() const {
     string result;
     result.append(format("     Trade Type: {}     Position Type: {}           Stock Name: {}\n", this->tradeType, this->positionType.getPositiontype(), this->stockName));
-    result.append(format(" Purchase Price: {}     Purchase Date: {}     Number of Shares: {}\n", format("{:.2f}", this->purchasePrice), this->purchaseDate, format("{:.2f}", this->numShares)));
+    result.append(format(" Purchase Price: {:.2f}     Purchase Date: {}     Number of Shares: {:.2f}\n", this->purchasePrice, this->purchaseDate, this->numShares));
     result.append(format("Stop Loss Price: {}\n", format("{:.2f}", this->stopLossPrice)));
-    result.append(format("     Sell Price: {}         Sell Date: {}      Length of Trade: {}\n", format("{:.2f}", this->sellPrice), this->sellDate, format("{:.2f}", LengthOfTrade())));
+    result.append(format("     Sell Price: {:.2f}          Sell Date: {}       Length of Trade: {:.2f}\n", this->sellPrice, this->sellDate, (double)LengthOfTrade()));
     return result;
 }
 

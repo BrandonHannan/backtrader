@@ -26,7 +26,7 @@ void BaseStrategy::setContext(unique_ptr<BaseContext> context){
     this->strategyContext = move(context);
 }
 
-Position BaseStrategy::getPosition(){
+Position& BaseStrategy::getPosition(){
     return this->position;
 }
 

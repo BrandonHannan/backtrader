@@ -23,8 +23,6 @@ class BasePositionSize{
     public:
         BasePositionSize(double riskAmount);
 
-        virtual ~BasePositionSize() = default;
-
         // Determines the position to purchase or an invalid position
         // Returns a Position object with the following filled attributes:
         // - Position Type (LONG or SHORT)
