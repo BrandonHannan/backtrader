@@ -107,7 +107,7 @@ int main(){
     vector<Position> r = strategy.getClosedPositions();
     double sum = 0;
 
-    for (int i = 0; i<r.size(); i++){
+    for (int i = 0; i<10; i++){
         cout << "Position " << i << ":" << endl;
         cout << "Position Type: " << r[i].getPositionType().getPositiontype() << endl;
         cout << "Trade Type: " << r[i].getTradeType() << " | ";

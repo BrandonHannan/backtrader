@@ -8,7 +8,7 @@ PositionType::PositionType(string pType): positionType(pType), null(false) {
 
 // Helper function for constructor 
 void PositionType::DeterminePositionType(){
-    if (this->positionType != "SHORT" || this->positionType != "LONG"){
+    if (this->positionType != "SHORT" && this->positionType != "LONG"){
         this->setNull(true);
         this->setPositionType("");
     }

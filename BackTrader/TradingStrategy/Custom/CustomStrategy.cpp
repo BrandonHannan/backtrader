@@ -32,8 +32,6 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         Position &currentPosition = this->getPosition();
 
         if (currentPosition.getIsClosed()){
-            context->updateContext(currentInstance, previousInstance);
-
             // Check if the position size and context instances are ready and full of data
             if (sizer->isValid() && context->isValid()){
                 Trade trade = context->shouldExecuteTrade(currentInstance);
@@ -53,9 +51,6 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         else{
             sizer->updateStopLossPrice(currentPosition, currentInstance);
             bool shouldSell = context->shouldSellTrade(currentPosition, currentInstance);
-            
-            // Update CONTEXT with the current data points after the ShouldSellTrade functions are executed
-            context->updateContext(currentInstance, previousInstance);
 
             if (shouldSell){
                 currentPosition.setSellDate(currentDate);
@@ -68,11 +63,19 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 currentPosition.setStats(positionStats);
 
                 this->appendClosedPosition(currentPosition);
-                this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));
+                if (currentPosition.getPositionType().getPositiontype() == "LONG"){
+                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));
+                }
+                else if (currentPosition.getPositionType().getPositiontype() == "SHORT"){
+                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice()))));
+                }
                 
                 Position emptyPosition = Position();
                 this->setPosition(emptyPosition);
             }
         }
+
+        // Update CONTEXT with the current data points after the shouldExecuteTrade and shouldSellTrade functions are executed
+        context->updateContext(currentInstance, previousInstance);
     }
 }

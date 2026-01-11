@@ -9,7 +9,7 @@
 using namespace std;
 
 struct Trade {
-    string positionType;
+    PositionType positionType;
     string tradeType;
     bool isValid;
 
