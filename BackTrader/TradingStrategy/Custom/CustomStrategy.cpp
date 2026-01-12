@@ -24,6 +24,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         string currentDate = data.date[i];
         double currentVolume = data.volume[i];
 
+        double currentBalance = this->getBalance();
+
         StockDataInstance previousInstance(i - 1, previousOpen, previousClose, previousHigh, previousLow, previousVolume, previousDate);
         StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate);
 
@@ -31,13 +33,13 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
         Position &currentPosition = this->getPosition();
 
-        if (currentPosition.getIsClosed()){
+        if (currentPosition.getIsClosed() && currentBalance > 0){
             // Check if the position size and context instances are ready and full of data
             if (sizer->isValid() && context->isValid()){
                 Trade trade = context->shouldExecuteTrade(currentInstance);
                 if (trade.isValid){
                     // Execute trade
-                    Position newPosition = sizer->purchasePosition(this->getBalance(), stockName, trade.positionType, currentInstance);
+                    Position newPosition = sizer->purchasePosition(currentBalance, stockName, trade.positionType, currentInstance);
                     newPosition.setTradeType(trade.tradeType);
                     string positionStats = context->getStats();
                     newPosition.setStats(positionStats);

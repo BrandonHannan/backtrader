@@ -39,10 +39,10 @@ int main(){
     double RiskAmount = RiskAmountArray[3];
 
     double priceHighPercentageThreshold = percentageArray[8];
-    double priceLowPercentageThreshold = percentageArray[8];
-    double volumeHighPercentageThreshold = percentageArray[8];
-    double volumeLowPercentageThreshold = percentageArray[8];
-    double priceMediumPercentageTreshold = percentageArray[6];
+    double priceLowPercentageThreshold = percentageArray[12];
+    double volumeHighPercentageThreshold = percentageArray[12];
+    double volumeLowPercentageThreshold = percentageArray[12];
+    double priceMediumPercentageTreshold = percentageArray[8];
 
     double balance = 10000;
 
@@ -105,9 +105,14 @@ int main(){
     double timeSpent = (double)(end - start)/CLOCKS_PER_SEC;
 
     vector<Position> r = strategy.getClosedPositions();
+    double longReversal = 0;
+    double longBreakthrough = 0;
+    double shortReversal = 0;
+    double shortBreakthrough = 0;
     double sum = 0;
+    int counter = 0;
 
-    for (int i = 0; i<10; i++){
+    for (int i = 0; i<r.size(); i++){
         cout << "Position " << i << ":" << endl;
         cout << "Position Type: " << r[i].getPositionType().getPositiontype() << endl;
         cout << "Trade Type: " << r[i].getTradeType() << " | ";
@@ -117,11 +122,16 @@ int main(){
         if (r[i].getPositionType().getPositiontype() == "LONG"){
             profit = (r[i].getSellPrice() - r[i].getPurchasePrice()) *
                         r[i].getNumShares();
+            if (r[i].getTradeType() == "LONG REVERSAL") { longReversal += profit; }
+            if (r[i].getTradeType() == "LONG BREAKTHROUGH") { longBreakthrough += profit; }
         }
         else if (r[i].getPositionType().getPositiontype() == "SHORT"){
             profit = (r[i].getPurchasePrice() - r[i].getSellPrice()) *
                         r[i].getNumShares();
+            if (r[i].getTradeType() == "SHORT REVERSAL") { shortReversal += profit; }
+            if (r[i].getTradeType() == "SHORT BREAKTHROUGH") { shortBreakthrough += profit; }
         }
+        if (profit > 0){ counter++; }
         cout << "$" << profit << endl;
         cout << "Stats: " << endl;
         cout << r[i].getStats() << endl << endl;
@@ -129,6 +139,11 @@ int main(){
     }
 
     cout << "Total Profit/Loss: $" << sum << endl;
+    cout << "Number of positive trades: " << counter << endl;
+    cout << "LONG REVERSAL Profit/Loss: $" << longReversal << endl;
+    cout << "LONG BREAKTHROUGH Profit/Loss: $" << longBreakthrough << endl;
+    cout << "SHORT REVERSAL Profit/Loss: $" << shortReversal << endl;
+    cout << "SHORT BREAKTHROUGH Profit/Loss: $" << shortBreakthrough << endl;
     cout << "Balance: $" << strategy.getBalance() << endl << endl;
     cout << "Execution Time: " << timeSpent << "s" << endl;
 
