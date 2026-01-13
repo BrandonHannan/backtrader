@@ -54,18 +54,18 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
                 // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
                 if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
                     // Trade Type: LONG BREAKTHROUGH
-                    //return Trade("LONG", "LONG BREAKTHROUGH");
+                    return Trade("LONG", "LONG BREAKTHROUGH");
                 }
             }
             else{
                 // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
                 if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
                     // Trade Type: LONG BREAKTHROUGH
-                    //return Trade("LONG", "LONG BREAKTHROUGH");
+                    return Trade("LONG", "LONG BREAKTHROUGH");
                 }
 
                 // Trade Type: SHORT REVERSAL
-                //return Trade("SHORT", "SHORT REVERSAL");
+                return Trade("SHORT", "SHORT REVERSAL");
             }
         }
     }
@@ -79,13 +79,13 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
                 // Check if the current volume is greater than the specified percentage of volume possible based on a normal distribution
                 if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
                     // Trade Type: SHORT BREAKTHROUGH
-                    //return Trade("SHORT", "SHORT BREAKTHROUGH");
+                    return Trade("SHORT", "SHORT BREAKTHROUGH");
                 }
             }
             else{
                 if (currentVolume > (meanVol + (volumeHighZ * stdVol))){
                     // Trade Type: SHORT BREAKTHROUGH
-                    //return Trade("SHORT", "SHORT BREAKTHROUGH");
+                    return Trade("SHORT", "SHORT BREAKTHROUGH");
                 }
 
                 // Trade Type: LONG REVERSAL

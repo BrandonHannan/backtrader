@@ -12,7 +12,8 @@ int main(){
     // Use this For MacOS
     // unordered_map<string, StockData> data = ReadData("../data.txt");
     // Use this For Windows
-    unordered_map<string, StockData> data = ReadData("C:\\Users\\brand\\Documents\\Repos\\backtrader\\data.txt");
+    unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
+    //unordered_map<string, StockData> data = ReadData("C:\\Users\\brand\\Documents\\Repos\\backtrader\\data.txt");
     cout << "Number of Stocks: " << data.size() << endl;
 
     // for (auto stockData : data){
@@ -101,6 +102,8 @@ int main(){
 
     //file.close();
 
+    ofstream file("Analysis.txt");
+
     clock_t end = clock();
     double timeSpent = (double)(end - start)/CLOCKS_PER_SEC;
 
@@ -115,6 +118,11 @@ int main(){
     for (int i = 0; i<r.size(); i++){
         cout << "Position " << i << ":" << endl;
         cout << "Position Type: " << r[i].getPositionType().getPositiontype() << endl;
+        file << "Position Type: " << r[i].getPositionType().getPositiontype() << "\n";
+        file << "Trade Type: " << r[i].getTradeType() << "\n";
+        file << "Purchase Date: " << r[i].getPurchaseDate() << "\n";
+        file << "Sell Date: " << r[i].getSellDate() << "\n";
+        file << "Profit/Loss: ";
         cout << "Trade Type: " << r[i].getTradeType() << " | ";
         cout << "Purchase Date: " << r[i].getPurchaseDate() << " | " << "Sell Date: " << r[i].getSellDate() << endl;
         cout << "Profit/Loss: ";
@@ -133,10 +141,14 @@ int main(){
         }
         if (profit > 0){ counter++; }
         cout << "$" << profit << endl;
+        file << "$" << profit << "\n";
+        file << "Stats:\n" << r[i].getStats() << "\n\n";
         cout << "Stats: " << endl;
         cout << r[i].getStats() << endl << endl;
         sum = sum + profit;
     }
+
+    file.close();
 
     cout << "Total Profit/Loss: $" << sum << endl;
     cout << "Number of positive trades: " << counter << endl;

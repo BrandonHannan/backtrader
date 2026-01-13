@@ -50,11 +50,11 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 }
             }
         }
-        else{
+        else if (currentPosition.getIsClosed() == false){
             sizer->updateStopLossPrice(currentPosition, currentInstance);
             bool shouldSell = context->shouldSellTrade(currentPosition, currentInstance);
 
-            if (shouldSell){
+            if (shouldSell || i == size - 1){
                 currentPosition.setSellDate(currentDate);
                 currentPosition.setSellPrice(currentClose);
                 currentPosition.setIsClosed(true);
