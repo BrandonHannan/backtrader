@@ -1,7 +1,9 @@
 #include "BreakoutContext.h"
 
 BreakoutContext::BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold, double priceMediumPercentageThreshold): 
-                                                                                                          BaseContext(lookbackPeriod), priceStatistics(lookBackPeriod), volumeStatistics(lookBackPeriod) {
+                                                                                                          BaseContext(lookbackPeriod), priceStatistics(lookBackPeriod), volumeStatistics(lookBackPeriod), priceHighPct(priceHighPercentageThreshold),
+                                                                                                          volumeHighPct(volumeHighPercentageThreshold), priceLowPct(priceLowPercentageThreshold), volumeLowPct(volumeLowPercentageThreshold), 
+                                                                                                          priceMedPct(priceMediumPercentageThreshold) {
     this->priceHighZ = inverseNormalCDF(priceHighPercentageThreshold);
     this->priceLowZ = inverseNormalCDF(1 - priceLowPercentageThreshold);
     this->volumeHighZ = inverseNormalCDF(volumeHighPercentageThreshold);
@@ -28,12 +30,12 @@ void BreakoutContext::updateContext(const StockDataInstance &currentData, const 
     return;
 }
 
-Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
+Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &currentData) const {
     if (!priceStatistics.isReady() || !volumeStatistics.isReady()){
         return Trade();
     }
-    double currentClose = data.close;
-    double currentVolume = data.volume;
+    double currentClose = currentData.close;
+    double currentVolume = currentData.volume;
     double maxPrice = this->priceStatistics.getMax();
     double meanPrice = this->priceStatistics.getMean();
     double stdPrice = this->priceStatistics.getStd();
@@ -96,11 +98,11 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &data) const {
     return Trade();
 }
 
-bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const {
-    bool shouldSell = this->checkStopLossPrice(currentPosition, data);
+bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const {
+    bool shouldSell = this->checkStopLossPrice(currentPosition, currentData);
 
-    double currentClose = data.close;
-    double currentVolume = data.volume;
+    double currentClose = currentData.close;
+    double currentVolume = currentData.volume;
     string tradeType = currentPosition.getTradeType();
 
     double maxPrice = this->priceStatistics.getMax();
@@ -209,4 +211,16 @@ bool BreakoutContext::isValid() const {
         return true;
     }
     return false;
+}
+
+void BreakoutContext::clear() {
+    this->clearBase();
+    priceStatistics = WindowStatistics(this->lookBackPeriod);
+    volumeStatistics = WindowStatistics(this->lookBackPeriod);
+
+    priceHighZ  = inverseNormalCDF(priceHighPct);
+    priceLowZ   = inverseNormalCDF(1 - priceLowPct);
+    volumeHighZ = inverseNormalCDF(volumeHighPct);
+    volumeLowZ  = inverseNormalCDF(1 - volumeLowPct);
+    priceMedZ   = inverseNormalCDF(priceMedPct);
 }

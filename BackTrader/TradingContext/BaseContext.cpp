@@ -14,19 +14,31 @@ void BaseContext::addTradeType(string tradeType){
 
 bool BaseContext::checkStopLossPrice(const Position &currentPosition, const StockDataInstance &data) const {
     double currentPrice = data.close;
+    double currentLow = data.low;
+    double currentHigh = data.high;
     double stopLossPrice = currentPosition.getStopLossPrice();
     PositionType positionType = currentPosition.getPositionType();
 
     if (positionType.getPositiontype() == "LONG"){
+        if (currentLow < currentPrice){
+            currentPrice = currentLow;
+        }
         if (currentPrice <= stopLossPrice){
             return true;
         }
     }
     else if (positionType.getPositiontype() == "SHORT"){
+        if (currentHigh > currentPrice){
+            currentPrice = currentHigh;
+        }
         if (currentPrice >= stopLossPrice){
             return true;
         }
     }
 
     return false;
+}
+
+void BaseContext::clearBase() {
+    allowedTradeTypes.clear();
 }

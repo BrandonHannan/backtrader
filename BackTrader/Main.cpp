@@ -12,8 +12,8 @@ int main(){
     // Use this For MacOS
     // unordered_map<string, StockData> data = ReadData("../data.txt");
     // Use this For Windows
-    unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
-    //unordered_map<string, StockData> data = ReadData("C:\\Users\\brand\\Documents\\Repos\\backtrader\\data.txt");
+    //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
+    unordered_map<string, StockData> data = ReadData("C:\\Users\\brand\\Documents\\Repos\\backtrader\\data.txt");
     cout << "Number of Stocks: " << data.size() << endl;
 
     // for (auto stockData : data){
@@ -45,7 +45,7 @@ int main(){
     double volumeLowPercentageThreshold = percentageArray[12];
     double priceMediumPercentageTreshold = percentageArray[8];
 
-    double balance = 10000;
+    double balance = 1000;
 
     unique_ptr<BasePositionSize> sizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
 
@@ -76,6 +76,7 @@ int main(){
 
         cout << "Executing strategy for: " << ticker << "..." << endl; // Debug print
         strategy.ExecuteStrategy(ticker, stockData);
+        strategy.setBalance(balance);
     }
 
     // Look Back

@@ -17,6 +17,12 @@ class BreakoutContext: public BaseContext {
         double volumeLowZ;
         double priceMedZ;
 
+        double priceHighPct;
+        double volumeHighPct;
+        double priceLowPct;
+        double volumeLowPct;
+        double priceMedPct;
+
         WindowStatistics priceStatistics;
         WindowStatistics volumeStatistics;
 
@@ -31,13 +37,15 @@ class BreakoutContext: public BaseContext {
 
         void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
 
-        Trade shouldExecuteTrade(const StockDataInstance &data) const override;
+        Trade shouldExecuteTrade(const StockDataInstance &currentData) const override;
 
-        bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const override;
+        bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const override;
 
         string getStats() const override;
 
         bool isValid() const override;
+
+        void clear() override;
 };
 
 #endif

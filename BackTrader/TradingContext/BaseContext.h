@@ -22,6 +22,8 @@ class BaseContext {
         int lookBackPeriod;
         unordered_set<string> allowedTradeTypes;
 
+        void clearBase();
+
         // Returns TRUE if the current stock price is >= to the stop loss price for LONG trades and <= to the stop loss price for SHORT trades
         bool checkStopLossPrice(const Position &currentPosition, const StockDataInstance &data) const;
     public:
@@ -36,15 +38,17 @@ class BaseContext {
         // Returns these attributes of a new Position:
         // - Position Type (LONG or SHORT)
         // - Trade Type
-        virtual Trade shouldExecuteTrade(const StockDataInstance &data) const = 0;
+        virtual Trade shouldExecuteTrade(const StockDataInstance &currentData) const = 0;
 
         // Should return TRUE to sell the current position or FALSE to not
-        virtual bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &data) const = 0;
+        virtual bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const = 0;
 
         // Returns a string of the current statistics
         virtual string getStats() const = 0;
 
         virtual bool isValid() const = 0;
+
+        virtual void clear() = 0;
 
         virtual ~BaseContext() = default;
 };

@@ -20,6 +20,7 @@ class ATRPositionSize: public BasePositionSize{
         void processNewData(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
         void updateStopLossPrice(Position &currentPosition, const StockDataInstance &data) const override;
         bool isValid() const override;
+        void clear() override;
 };
 
 #endif

@@ -36,6 +36,8 @@ class BaseStrategy {
 
         void addToBalance(double val);
 
+        void setBalance(double val);
+
         BasePositionSize* getPositionSizer();
 
         void setPositionSizer(unique_ptr<BasePositionSize> sizer);

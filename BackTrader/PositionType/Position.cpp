@@ -4,7 +4,7 @@ Position::Position(): isClosed(true) {}
 
 Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
                 stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
-                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), isClosed(false) {}
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), originalStopLossPrice(sLPrice), isClosed(false) {}
 
 
 // Helper function to convert dates to a Julian Date number 
@@ -90,6 +90,10 @@ void Position::setPurchasePrice(double pPrice){
     this->purchasePrice = pPrice;
 }
 
+double Position::getOriginalStopLossPrice() const {
+    return this->originalStopLossPrice;
+}
+
 double Position::getStopLossPrice() const {
     return this->stopLossPrice;
 }
@@ -142,6 +146,45 @@ string Position::getBasePositionInfo() const {
     result.append(format("Stop Loss Price: {}\n", format("{:.2f}", this->stopLossPrice)));
     result.append(format("     Sell Price: {:.2f}          Sell Date: {}       Length of Trade: {:.2f}\n", this->sellPrice, this->sellDate, (double)LengthOfTrade()));
     return result;
+}
+
+double Position::getExitPrice(const StockDataInstance &currentData, const StockDataInstance &futureData) const {
+    double currentClose = currentData.close;
+    double currentOpen = currentData.open;
+    double currentHigh = currentData.high;
+    double currentLow = currentData.low;
+
+    double stopLossPrice = this->getStopLossPrice();
+    double exitPrice = currentClose;
+
+    if (this->positionType.getPositiontype() == "LONG"){
+        if (currentLow <= stopLossPrice){
+            if (currentOpen <= stopLossPrice){
+                exitPrice = currentOpen;
+            }
+            else{
+                exitPrice = stopLossPrice;
+            }
+        }
+        else{
+            exitPrice = futureData.open;
+        }
+    }
+    else if (this->positionType.getPositiontype() == "SHORT"){
+        if (currentHigh >= stopLossPrice){
+            if (currentOpen >= stopLossPrice){
+                exitPrice = currentOpen;
+            }
+            else{
+                exitPrice = stopLossPrice;
+            }
+        }
+        else{
+            exitPrice = futureData.open;
+        }
+    }
+
+    return exitPrice;
 }
 
 Position& Position::operator=(const Position &obj){

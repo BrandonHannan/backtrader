@@ -10,6 +10,10 @@ void BaseStrategy::addToBalance(double val){
     this->balance = this->balance + val;
 }
 
+void BaseStrategy::setBalance(double val){
+    this->balance = val;
+}
+
 BasePositionSize* BaseStrategy::getPositionSizer() {
     return this->positionSizer.get();
 }

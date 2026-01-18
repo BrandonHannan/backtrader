@@ -45,6 +45,8 @@ class BasePositionSize{
 
         virtual bool isValid() const = 0;
 
+        virtual void clear() = 0;
+
         virtual ~BasePositionSize() = default;
 };
 

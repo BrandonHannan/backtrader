@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "PositionType.h"
+#include "../StockData/StockData.h"
 #include <string>
 #include <format>
 
@@ -20,6 +21,8 @@ class Position{
         double numShares;
         double stopLossPrice;
         string stats;
+
+        double originalStopLossPrice;
         
         bool isClosed;
 
@@ -57,6 +60,8 @@ class Position{
 
         void setPurchasePrice(double purchasePrice);
 
+        double getOriginalStopLossPrice() const;
+
         double getStopLossPrice() const;
 
         void setStopLossPrice(double stopLossPrice);
@@ -80,6 +85,8 @@ class Position{
         int LengthOfTrade() const;
 
         string getBasePositionInfo() const;
+
+        double getExitPrice(const StockDataInstance &currentData, const StockDataInstance &futureData) const;
 
         Position& operator=(const Position &obj);
 };
