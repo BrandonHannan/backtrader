@@ -16,6 +16,8 @@ def parse_returns_file(file_path):
     # Initialize subKey as a float to handle all number types
     key, subKey, subsubKey, prevSymbol = "", 0.0, 0, ""
 
+    num_regex = re.compile(r"[-+]?\d*\.?\d+([eE][-+]?\d+)?")
+
     with open(file_path, 'r') as file:
         for line in file:
             line = line.strip()
@@ -24,32 +26,22 @@ def parse_returns_file(file_path):
             # FIX 1: Clean any leading/trailing single quotes from the line
             line = line.strip("'")
             
-            # Check if the line is a number (integer or float)
-            if re.fullmatch(r"[-+]?\d*\.?\d+", line):
+            if num_regex.fullmatch(line):
                 val = float(line)
-                if prevSymbol == "%":
-                    # FIX 2: Do not convert subKey to int, keep its original value
+                if prevSymbol in ["%", ""]: # New Parameter Value
                     subKey = val
                     results[key][subKey] = dict()
-                elif prevSymbol in ["^", "&"]:
-                    # Years can remain integers
+                elif prevSymbol in ["^", "&"]: # New Year
                     subsubKey = int(val)
                     results[key][subKey][subsubKey] = []
-                elif prevSymbol == "$":
-                    # PnL values are floats
+                elif prevSymbol == "$": # PnL Value
                     results[key][subKey][subsubKey].append(val)
-                else:
-                    # FIX 2: Handle the first subkey, keeping its original value
-                    subKey = val
-                    results[key][subKey] = dict()
-
             elif line in ["^", "&", "%", "$"]:
                 prevSymbol = line
             else:
-                # This handles the main parameter key (e.g., "Lookback")
-                key = line
+                key = line # e.g., "Lookback"
                 results[key] = dict()
-                prevSymbol = "" # Reset symbol after a new key
+                prevSymbol = ""
                 
     return results
 
@@ -60,8 +52,10 @@ if __name__ == '__main__':
     # --- Configuration ---
     # MACOS
     # INPUT_FILE = "/Users/brandonhannan/Documents/Repos/backtrader/BackTrader/Returns.txt"
-    # WINDOWS
-    INPUT_FILE = "C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\BackTrader\\Returns.txt"
+    # WINDOWS Work
+    # INPUT_FILE = "C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\BackTrader\\Returns.txt"
+    # WINDOWS Home
+    INPUT_FILE = "C:\\Users\\brand\\Documents\\Repos\\backtrader\\BackTrader\\Returns.txt"
     OUTPUT_CSV = 'strategy_lookback_optimization_results.csv'
     INITIAL_CAPITAL = 10000.0
     

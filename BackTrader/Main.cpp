@@ -33,17 +33,17 @@ int main(){
     vector<double> RiskAmountArray = {0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05};
     vector<double> percentageArray = {0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99};
 
-    int lookbackPeriod = lookbackPeriodArray[6];
+    int lookbackPeriod = lookbackPeriodArray[3];
 
-    double ATRMultiplier = ATRMultiplierArray[5];
-    int ATRPeriod = ATRPeriodArray[10];
-    double RiskAmount = RiskAmountArray[3];
+    double ATRMultiplier = ATRMultiplierArray[3];
+    int ATRPeriod = ATRPeriodArray[17];
+    double RiskAmount = RiskAmountArray[5];
 
-    double priceHighPercentageThreshold = percentageArray[8];
-    double priceLowPercentageThreshold = percentageArray[12];
-    double volumeHighPercentageThreshold = percentageArray[12];
-    double volumeLowPercentageThreshold = percentageArray[12];
-    double priceMediumPercentageTreshold = percentageArray[8];
+    double priceHighPercentageThreshold = percentageArray[16];
+    double priceLowPercentageThreshold = percentageArray[1];
+    double volumeHighPercentageThreshold = percentageArray[3];
+    double volumeLowPercentageThreshold = percentageArray[17];
+    double priceMediumPercentageTreshold = percentageArray[6];
 
     double balance = 1000;
 
@@ -53,7 +53,7 @@ int main(){
 
     CustomStrategy strategy = CustomStrategy(balance, move(sizer), move(context));
 
-    //ofstream file("Returns.txt");
+    ofstream file("Returns.txt");
 
     clock_t start = clock();
 
@@ -80,6 +80,233 @@ int main(){
     }
 
     // Look Back
+    file << "Lookback\n";
+    for (int i = 0; i<lookbackPeriodArray.size(); i++){
+        file << lookbackPeriodArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriodArray[i], priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // Risk Amount
+    file << "Risk Amount\n";
+    for (int i = 0; i<RiskAmountArray.size(); i++){
+        file << RiskAmountArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmountArray[i], ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // ATR Period
+    file << "ATR Period\n";
+    for (int i = 0; i<ATRPeriodArray.size(); i++){
+        file << ATRPeriodArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriodArray[i], ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // ATR Multiplier
+    file << "ATR Multiplier\n";
+    for (int i = 0; i<ATRMultiplierArray.size(); i++){
+        file << ATRMultiplierArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplierArray[i]);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // Price High Percentage Threshold
+    file << "Price High Percentage Threshold\n";
+    for (int i = 0; i<percentageArray.size(); i++){
+        file << percentageArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, percentageArray[i], volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+    
+    // Price Low Percentage Threshold
+    file << "Price Low Percentage Threshold\n";
+    for (int i = 0; i<percentageArray.size(); i++){
+        file << percentageArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, percentageArray[i], volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // Volume High Percentage Threshold
+    file << "Volume High Percentage Threshold\n";
+    for (int i = 0; i<percentageArray.size(); i++){
+        file << percentageArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, percentageArray[i], priceLowPercentageThreshold, volumeLowPercentageThreshold, priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // Volume Low Percentage Threshold
+    file << "Volume Low Percentage Threshold\n";
+    for (int i = 0; i<percentageArray.size(); i++){
+        file << percentageArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, percentageArray[i], priceMediumPercentageTreshold);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    // Price Medium Percentage Treshold
+    file << "Price Medium Percentage Treshold\n";
+    for (int i = 0; i<percentageArray.size(); i++){
+        file << percentageArray[i] << "\n^\n";
+        unique_ptr<BasePositionSize> specificSizer = make_unique<ATRPositionSize>(RiskAmount, ATRPeriod, ATRMultiplier);
+        unique_ptr<BaseContext> specificContext = make_unique<BreakoutContext>(lookbackPeriod, priceHighPercentageThreshold, volumeHighPercentageThreshold, priceLowPercentageThreshold, volumeLowPercentageThreshold, percentageArray[i]);
+        CustomStrategy specificStrategy = CustomStrategy(balance, move(specificSizer), move(specificContext));
+        for (const auto& [ticker, stockData] : data){
+            if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) {
+                continue;
+            }
+            specificStrategy.ExecuteStrategy(ticker, stockData);
+            specificStrategy.setBalance(balance);
+        }
+        map<int, vector<double>> returns = specificStrategy.getYearlyReturns();
+        for (auto const& x : returns){
+            file << x.first << "\n$\n";
+            for (double pnl : x.second) {
+                file << pnl << "\n";
+            }
+            file << "&\n";
+        }
+        file << "%\n";
+    }
+
+    file.close();
+
+    // Look Back
     // file << "Lookback\n";
     // for (int i = 0; i<lookbackPeriodArray.size(); i++){
     //     file << lookbackPeriodArray[i] << "\n^\n";
@@ -103,7 +330,7 @@ int main(){
 
     //file.close();
 
-    ofstream file("Analysis.txt");
+    ofstream file1("Analysis.txt");
 
     clock_t end = clock();
     double timeSpent = (double)(end - start)/CLOCKS_PER_SEC;
@@ -119,11 +346,11 @@ int main(){
     for (int i = 0; i<r.size(); i++){
         cout << "Position " << i << ":" << endl;
         cout << "Position Type: " << r[i].getPositionType().getPositiontype() << endl;
-        file << "Position Type: " << r[i].getPositionType().getPositiontype() << "\n";
-        file << "Trade Type: " << r[i].getTradeType() << "\n";
-        file << "Purchase Date: " << r[i].getPurchaseDate() << "\n";
-        file << "Sell Date: " << r[i].getSellDate() << "\n";
-        file << "Profit/Loss: ";
+        file1 << "Position Type: " << r[i].getPositionType().getPositiontype() << "\n";
+        file1 << "Trade Type: " << r[i].getTradeType() << "\n";
+        file1 << "Purchase Date: " << r[i].getPurchaseDate() << "\n";
+        file1 << "Sell Date: " << r[i].getSellDate() << "\n";
+        file1 << "Profit/Loss: ";
         cout << "Trade Type: " << r[i].getTradeType() << " | ";
         cout << "Purchase Date: " << r[i].getPurchaseDate() << " | " << "Sell Date: " << r[i].getSellDate() << endl;
         cout << "Profit/Loss: ";
@@ -142,14 +369,14 @@ int main(){
         }
         if (profit > 0){ counter++; }
         cout << "$" << profit << endl;
-        file << "$" << profit << "\n";
-        file << "Stats:\n" << r[i].getStats() << "\n\n";
+        file1 << "$" << profit << "\n";
+        file1 << "Stats:\n" << r[i].getStats() << "\n\n";
         cout << "Stats: " << endl;
         cout << r[i].getStats() << endl << endl;
         sum = sum + profit;
     }
 
-    file.close();
+    file1.close();
 
     cout << "Total Profit/Loss: $" << sum << endl;
     cout << "Number of positive trades: " << counter << endl;
