@@ -34,12 +34,19 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &currentData) 
     if (!priceStatistics.isReady() || !volumeStatistics.isReady()){
         return Trade();
     }
+
+    if (currentData.date == "2008-03-06"){
+        double stuff = this->priceStatistics.getMax();
+    }
     double currentClose = currentData.close;
     double currentVolume = currentData.volume;
     double maxPrice = this->priceStatistics.getMax();
     double meanPrice = this->priceStatistics.getMean();
     double stdPrice = this->priceStatistics.getStd();
     double minPrice = this->priceStatistics.getMin();
+    double slopePrice = this->priceStatistics.getSlope();
+    double rSqPrice = this->priceStatistics.getSlopeRSQ();
+    bool isPriceSlopeSig = this->priceStatistics.getSlopeSignificance();
     double maxVol = this->volumeStatistics.getMax();
     double meanVol = this->volumeStatistics.getMean();
     double stdVol = this->volumeStatistics.getStd();
@@ -103,7 +110,9 @@ bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const Sto
 
     double currentClose = currentData.close;
     double currentVolume = currentData.volume;
+    string currentDate = currentData.date;
     string tradeType = currentPosition.getTradeType();
+    int currentTradeLength = currentPosition.currentLengthOfTrade(currentDate);
 
     double maxPrice = this->priceStatistics.getMax();
     double meanPrice = this->priceStatistics.getMean();
@@ -114,52 +123,75 @@ bool BreakoutContext::shouldSellTrade(const Position &currentPosition, const Sto
     double stdVol = this->volumeStatistics.getStd();
     double minVol = this->volumeStatistics.getMin();
 
-    if (tradeType == "LONG BREAKTHROUGH"){
-        // If there is no new high in price
-        if (currentClose < maxPrice){
-            // And if the volume is low, then sell
-            if ((currentVolume < minVol) || (currentVolume < (meanVol + (volumeLowZ * stdVol)))){
-                shouldSell = true;
-            }
-        }
-    }
-    else if (tradeType == "SHORT REVERSAL"){
-        // If the current price is within the medium average price of the lookback period, then sell
-        if ((currentClose < (meanPrice + (priceMedZ * stdPrice))) && (currentClose > (meanPrice - (priceMedZ * stdPrice)))){
-            shouldSell = true;
-        }
+    // if (currentTradeLength > this->lookBackPeriod){
+    //     if (tradeType == "LONG BREAKTHROUGH"){
+    //         if (currentPosition.getStopLossPrice() < currentPosition.getPurchasePrice()){
+    //             shouldSell = true;
+    //         }
+    //     }
+    //     else if (tradeType == "LONG REVERSAL"){
+    //         if (currentPosition.getStopLossPrice() < currentPosition.getPurchasePrice()){
+    //             shouldSell = true;
+    //         }
+    //     }
+    //     else if (tradeType == "SHORT REVERSAL"){
+    //         if (currentPosition.getStopLossPrice() > currentPosition.getPurchasePrice()){
+    //             shouldSell = true;
+    //         }
+    //     }
+    //     else if (tradeType == "SHORT BREAKTHROUGH"){
+    //         if (currentPosition.getStopLossPrice() > currentPosition.getPurchasePrice()){
+    //             shouldSell = true;
+    //         }
+    //     }
+    // }
 
-        // If the position has not reached the stop loss price yet
-        if (!shouldSell){
-            // And if the volume has spiked, then sell
-            if ((currentVolume > maxVol) || (currentVolume > (meanVol + (volumeHighZ * stdVol)))){
-                shouldSell = true;
-            }
-        }
-    }
-    else if (tradeType == "SHORT BREAKTHROUGH"){
-        // If there is no new low in price
-        if (currentClose > minPrice){
-            // And if the volume is low, then sell
-            if ((currentVolume < minVol) || (currentVolume < (meanVol + (volumeLowZ * stdVol)))){
-                shouldSell = true;
-            }
-        }
-    }
-    else if (tradeType == "LONG REVERSAL"){
-        // If the current price is within the medium average price of the lookback period, the sell
-        if ((currentClose < (meanPrice + (priceMedZ * stdPrice))) && (currentClose > (meanPrice - (priceMedZ * stdPrice)))){
-            shouldSell = true;
-        }
+    // if (tradeType == "LONG BREAKTHROUGH"){
+    //     // If there is no new high in price
+    //     if (currentClose < maxPrice){
+    //         // And if the volume is low, then sell
+    //         if ((currentVolume < minVol) || (currentVolume < (meanVol + (volumeLowZ * stdVol)))){
+    //             shouldSell = true;
+    //         }
+    //     }
+    // }
+    // else if (tradeType == "SHORT REVERSAL"){
+    //     // If the current price is within the medium average price of the lookback period, then sell
+    //     if ((currentClose < (meanPrice + (priceMedZ * stdPrice))) && (currentClose > (meanPrice - (priceMedZ * stdPrice)))){
+    //         shouldSell = true;
+    //     }
 
-        // If the position has not reached the stop loss price yet
-        if (!shouldSell){
-            // And if the volume has spiked, then sell
-            if ((currentVolume > maxVol) || (currentVolume > (meanVol + (volumeHighZ * stdVol)))){
-                shouldSell = true;
-            }
-        }
-    }
+    //     // If the position has not reached the stop loss price yet
+    //     if (!shouldSell){
+    //         // And if the volume has spiked, then sell
+    //         if ((currentVolume > maxVol) || (currentVolume > (meanVol + (volumeHighZ * stdVol)))){
+    //             shouldSell = true;
+    //         }
+    //     }
+    // }
+    // else if (tradeType == "SHORT BREAKTHROUGH"){
+    //     // If there is no new low in price
+    //     if (currentClose > minPrice){
+    //         // And if the volume is low, then sell
+    //         if ((currentVolume < minVol) || (currentVolume < (meanVol + (volumeLowZ * stdVol)))){
+    //             shouldSell = true;
+    //         }
+    //     }
+    // }
+    // else if (tradeType == "LONG REVERSAL"){
+    //     // If the current price is within the medium average price of the lookback period, the sell
+    //     if ((currentClose < (meanPrice + (priceMedZ * stdPrice))) && (currentClose > (meanPrice - (priceMedZ * stdPrice)))){
+    //         shouldSell = true;
+    //     }
+
+    //     // If the position has not reached the stop loss price yet
+    //     if (!shouldSell){
+    //         // And if the volume has spiked, then sell
+    //         if ((currentVolume > maxVol) || (currentVolume > (meanVol + (volumeHighZ * stdVol)))){
+    //             shouldSell = true;
+    //         }
+    //     }
+    // }
     return shouldSell;
 }
 
