@@ -34,10 +34,7 @@ Trade BreakoutContext::shouldExecuteTrade(const StockDataInstance &currentData) 
     if (!priceStatistics.isReady() || !volumeStatistics.isReady()){
         return Trade();
     }
-
-    if (currentData.date == "2008-03-06"){
-        double stuff = this->priceStatistics.getMax();
-    }
+    
     double currentClose = currentData.close;
     double currentVolume = currentData.volume;
     double maxPrice = this->priceStatistics.getMax();
