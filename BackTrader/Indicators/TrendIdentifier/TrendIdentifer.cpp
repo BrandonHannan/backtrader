@@ -80,8 +80,8 @@ Trend TrendIdentifier::processNextDay(StockDataInstance data){
             double p1 = e2.data.close; // P1 is captured but we don't have P2 to compare it to yet
             double t2 = e3.data.close;
 
-            if (t2 > t1) { 
-                // C++ will automatically default-initialize e4 and e5 in the struct
+            // CONFIRMATION: T2 must be > T1, AND current price must break above P1
+            if (t2 > t1 && data.close > p1) { 
                 return {TrendType::UPTREND, e1, e2, e3}; 
             }
         }
@@ -92,7 +92,8 @@ Trend TrendIdentifier::processNextDay(StockDataInstance data){
             double t1 = e2.data.close; 
             double p2 = e3.data.close;
 
-            if (p2 < p1) { 
+            // CONFIRMATION: P2 must be < P1, AND current price must break below T1
+            if (p2 < p1 && data.close < t1) { 
                 return {TrendType::DOWNTREND, e1, e2, e3}; 
             }
         }
