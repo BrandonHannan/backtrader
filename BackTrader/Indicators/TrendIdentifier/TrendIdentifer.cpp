@@ -1,9 +1,9 @@
 #include "./TrendIdentifier.h"
 
 TrendIdentifier::TrendIdentifier(int lookBackPeriod, TrendMode mode)
-    : lookBackPeriod(lookBackPeriod), mode(mode) {}
+    : lookBackPeriod(lookBackPeriod), currentTrend(Trend()), mode(mode) {}
 
-Trend TrendIdentifier::processNextDay(StockDataInstance data){
+void TrendIdentifier::processNextDay(StockDataInstance data){
     Trend result;
 
     // 1. STATE MACHINE: Identify extrema on the fly
@@ -52,7 +52,7 @@ Trend TrendIdentifier::processNextDay(StockDataInstance data){
             double t3 = e5.data.close;
 
             if (t3 > t2 && t2 > t1 && p2 > p1) {
-                return {TrendType::UPTREND, e1, e2, e3, e4, e5};
+                this->currentTrend = {TrendType::UPTREND, e1, e2, e3, e4, e5};
             }
         }
 
@@ -63,7 +63,7 @@ Trend TrendIdentifier::processNextDay(StockDataInstance data){
             double p3 = e5.data.close;
 
             if (p3 < p2 && p2 < p1 && t2 < t1) {
-                return {TrendType::DOWNTREND, e1, e2, e3, e4, e5};
+                this->currentTrend = {TrendType::DOWNTREND, e1, e2, e3, e4, e5};
             }
         }
     }
@@ -82,7 +82,7 @@ Trend TrendIdentifier::processNextDay(StockDataInstance data){
 
             // CONFIRMATION: T2 must be > T1, AND current price must break above P1
             if (t2 > t1 && data.close > p1) { 
-                return {TrendType::UPTREND, e1, e2, e3}; 
+                this->currentTrend = {TrendType::UPTREND, e1, e2, e3};
             }
         }
 
@@ -94,10 +94,12 @@ Trend TrendIdentifier::processNextDay(StockDataInstance data){
 
             // CONFIRMATION: P2 must be < P1, AND current price must break below T1
             if (p2 < p1 && data.close < t1) { 
-                return {TrendType::DOWNTREND, e1, e2, e3}; 
+                this->currentTrend = {TrendType::DOWNTREND, e1, e2, e3};
             }
         }
     }
+}
 
-    return result;
+Trend TrendIdentifier::getCurrentTrend() {
+    return this->currentTrend;
 }

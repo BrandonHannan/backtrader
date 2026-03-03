@@ -29,6 +29,7 @@ class TrendIdentifier {
         int lookBackPeriod;
         TrendMode mode;
         deque<Extremum> extrema;
+        Trend currentTrend;
         
         int currentDay = 0;
         StockDataInstance lastData = StockDataInstance(-1, 0, 0, 0, 0, 0, "");
@@ -37,7 +38,9 @@ class TrendIdentifier {
         TrendIdentifier(int lookBackPeriod, TrendMode mode = TrendMode::FIVE_POINT);
 
         // Feeds one day of data at a time. 
-        Trend processNextDay(StockDataInstance data);
+        void processNextDay(StockDataInstance data);
+
+        Trend getCurrentTrend();
 };
 
 
