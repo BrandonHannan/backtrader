@@ -1,6 +1,7 @@
 #ifndef POSITION_H
 #define POSITION_H
 
+#include "../TradingContext/Functions/DateHelper.h"
 #include <iostream>
 #include <string>
 
@@ -48,8 +49,6 @@ class Position{
         double numShares;
         bool isClosed;
         PositionStats stats;
-
-        int toJulian(int y, int m, int d);
 
         int LengthOfTradeBetweenDates();
 

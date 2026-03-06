@@ -53,6 +53,7 @@ void TrendIdentifier::processNextDay(StockDataInstance data){
 
             if (t3 > t2 && t2 > t1 && p2 > p1) {
                 this->currentTrend = {TrendType::UPTREND, e1, e2, e3, e4, e5};
+                return;
             }
         }
 
@@ -64,6 +65,7 @@ void TrendIdentifier::processNextDay(StockDataInstance data){
 
             if (p3 < p2 && p2 < p1 && t2 < t1) {
                 this->currentTrend = {TrendType::DOWNTREND, e1, e2, e3, e4, e5};
+                return;
             }
         }
     }
@@ -83,6 +85,7 @@ void TrendIdentifier::processNextDay(StockDataInstance data){
             // CONFIRMATION: T2 must be > T1, AND current price must break above P1
             if (t2 > t1 && data.close > p1) { 
                 this->currentTrend = {TrendType::UPTREND, e1, e2, e3};
+                return;
             }
         }
 
@@ -95,9 +98,12 @@ void TrendIdentifier::processNextDay(StockDataInstance data){
             // CONFIRMATION: P2 must be < P1, AND current price must break below T1
             if (p2 < p1 && data.close < t1) { 
                 this->currentTrend = {TrendType::DOWNTREND, e1, e2, e3};
+                return;
             }
         }
     }
+
+    this->currentTrend.type = TrendType::NONE;
 }
 
 Trend TrendIdentifier::getCurrentTrend() {

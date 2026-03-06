@@ -1,20 +1,9 @@
-#include <iostream>
 #include "Position.h"
 
 PositionStats::PositionStats(): pValue(0), pValuePrev(0), priceSlope(0), priceSlopePrev(0), prev(0), current(0) {}
 
 PositionStats::PositionStats(double pV, double pVP, double pS, double pSP, double p, double c): 
     pValue(pV), pValuePrev(pVP), priceSlope(pS), priceSlopePrev(pSP), prev(p), current(c) {}
-
-int Position::toJulian(int y, int m, int d) {
-    if (m <= 2) {
-        y -= 1;
-        m += 12;
-    }
-    int A = y / 100;
-    int B = 2 - A + A / 4;
-    return int(365.25 * (y + 4716)) + int(30.6001 * (m + 1)) + d + B - 1524;
-}
 
 int Position::LengthOfTradeBetweenDates(){
     if (purchaseDate == "" || sellDate == "" || purchaseDate.length() != 10 || sellDate.length() != 10){
@@ -29,7 +18,7 @@ int Position::LengthOfTradeBetweenDates(){
     int endMonth = stoi(sellDate.substr(5, 7));
     int endDay = stoi(sellDate.substr(8, 10));
 
-    length = toJulian(endYear, endMonth, endDay) - toJulian(beginningYear, beginningMonth, beginningDay);
+    length = ToJulian(endYear, endMonth, endDay) - ToJulian(beginningYear, beginningMonth, beginningDay);
     return length;
 }
 
