@@ -1,33 +1,53 @@
 #include "TrendLine.h"
 
-TrendLine::TrendLine(TrendLineMode mode): mode(mode), activeTrendline() {}
+Trendline::Trendline(): isActive(false), m(0), c(0), dateDifference(-1) {}
 
-int TrendLine::LengthOfTradeBetweenDates(string date1, string date2){
-    if (date1 == "" || date2 == "" || date1.length() != 10 || date2.length() != 10){
-        return -1;
+bool Trendline::isPointValidWithinTrendLine(const StockDataInstance &data){
+    if (!this->isActive){
+        return false;
     }
-    int length = 0;
-    int beginningYear = stoi(date1.substr(0, 4));
-    int beginningMonth = stoi(date1.substr(5, 7));
-    int beginningDay = stoi(date1.substr(8, 10));
 
-    int endYear = stoi(date2.substr(0, 4));
-    int endMonth = stoi(date2.substr(5, 7));
-    int endDay = stoi(date2.substr(8, 10));
+    int dateDifference = LengthOfTradeBetweenDates(this->anchor.data.date, data.date);
+    double y = m * dateDifference + this->c;
+    // UPTREND
+    if (this->m > 0){
+        return data.close >= y;
+    }
+    else if (this->m < 0){ // DOWNTREND
+        return data.close <= y;
+    }
 
-    length = ToJulian(endYear, endMonth, endDay) - ToJulian(beginningYear, beginningMonth, beginningDay);
-    return length;
+    return false;
 }
 
-double TrendLine::calculateGradient(const Extremum& p1, const Extremum& p2){
+TrendLineTracker::TrendLineTracker(TrendLineMode mode): mode(mode), activeTrendline() {}
+
+double TrendLineTracker::calculateGradient(const Extremum& p1, const Extremum& p2) const {
     if (p1.data.date == p2.data.date) return 0.0;
-    return (p2.data.close - p1.data.close) / static_cast<double>(this->LengthOfTradeBetweenDates(p1.data.date, p2.data.date));
+    return (p2.data.close - p1.data.close) / static_cast<double>(LengthOfTradeBetweenDates(p1.data.date, p2.data.date));
 }
 
-void TrendLine::update(const Trend& currentTrend){
-    this->activeTrendline.type = currentTrend.type;
+void TrendLineTracker::updateActiveTrendline(const double &newGradient, const Extremum &newPoint){
+    if (this->mode == TrendLineMode::MINIMUM){
+        if (abs(newGradient) < this->activeTrendline.m){
+            this->activeTrendline.m = newGradient;
+            this->activeTrendline.c = newPoint.data.close;
+            this->activeTrendline.currentPoint = newPoint;
+            this->activeTrendline.dateDifference = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, newPoint.data.date);
+        }
+    }
+    else{
+        if (abs(newGradient) > this->activeTrendline.m){
+            this->activeTrendline.m = newGradient;
+            this->activeTrendline.c = newPoint.data.close;
+            this->activeTrendline.currentPoint = newPoint;
+            this->activeTrendline.dateDifference = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, newPoint.data.date);
+        }
+    }
+}
 
-    if (!this->activeTrendline.isActive || this->activeTrendline.type != currentTrend.type){
+void TrendLineTracker::update(const Trend& currentTrend){
+    if (!this->activeTrendline.isActive){
         if (currentTrend.type == TrendType::UPTREND) {
             this->activeTrendline.anchor = currentTrend.e1; // T1
             this->activeTrendline.currentPoint = currentTrend.e3; // T2
@@ -36,35 +56,70 @@ void TrendLine::update(const Trend& currentTrend){
             this->activeTrendline.anchor = currentTrend.e1; // P1
             this->activeTrendline.currentPoint = currentTrend.e3; // P2
         }
+        else{
+            return;
+        }
 
-        this->activeTrendline.currentGradient = calculateGradient(this->activeTrendline.anchor, this->activeTrendline.currentPoint);
+        this->activeTrendline.c = currentTrend.e1.data.close;
+        this->activeTrendline.m = calculateGradient(this->activeTrendline.anchor, this->activeTrendline.currentPoint);
+        this->activeTrendline.dateDifference = LengthOfTradeBetweenDates(currentTrend.e1.data.date, currentTrend.e3.data.date);
+
+        if (currentTrend.e5.index != -1){
+            double newGradient = 0;
+            newGradient = calculateGradient(this->activeTrendline.anchor, currentTrend.e5);
+
+            this->updateActiveTrendline(newGradient, currentTrend.e5);
+        }
     }
     else{
         // Identify the newest extremum in the pattern
-        // (e3 for 3-point mode, e5 for 5-point mode)
-        Extremum latestExtremum = (currentTrend.e5.index != -1) ? currentTrend.e5 : currentTrend.e3;
+        Extremum latestExtremum = currentTrend.e1;
+        double newGradient = 0;
 
-        // Ensure we are looking at a new point we haven't processed yet
-        int dateLength = this->LengthOfTradeBetweenDates(this->activeTrendline.currentPoint.data.date, latestExtremum.data.date);
-        if (dateLength > 0) {
+        // Only evaluate troughs for uptrends, and peaks for downtrends
+        bool isValidExtremum = (this->activeTrendline.m > 0 && latestExtremum.isTrough) || (this->activeTrendline.m < 0 && !latestExtremum.isTrough);
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.anchor.data.date;
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.currentPoint.data.date;
+        isValidExtremum = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, latestExtremum.data.date) > this->activeTrendline.dateDifference;
 
-            // Only evaluate troughs for uptrends, and peaks for downtrends
-            bool isValidExtremum = (this->activeTrendline.type == TrendType::UPTREND && latestExtremum.isTrough) ||
-                                    (this->activeTrendline.type == TrendType::DOWNTREND && !latestExtremum.isTrough);
+        if (isValidExtremum){
+            newGradient = calculateGradient(this->activeTrendline.anchor, latestExtremum);
 
-            if (isValidExtremum) {
-                double newGradient = calculateGradient(this->activeTrendline.anchor, latestExtremum);
+            this->updateActiveTrendline(newGradient, latestExtremum);
+        }
 
-                // Update if the absolute gradient is strictly smaller (flatter slope)
-                if (abs(newGradient) < abs(this->activeTrendline.currentGradient)) {
-                    this->activeTrendline.currentPoint = latestExtremum;
-                    this->activeTrendline.currentGradient = newGradient;
-                }
-            }
+        latestExtremum = currentTrend.e3;
+
+        isValidExtremum = (this->activeTrendline.m > 0 && latestExtremum.isTrough) || (this->activeTrendline.m < 0 && !latestExtremum.isTrough);
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.anchor.data.date;
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.currentPoint.data.date;
+        isValidExtremum = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, latestExtremum.data.date) > this->activeTrendline.dateDifference;
+
+        if (isValidExtremum){
+            newGradient = calculateGradient(this->activeTrendline.anchor, latestExtremum);
+
+            this->updateActiveTrendline(newGradient, latestExtremum);
+        }
+
+        latestExtremum = currentTrend.e5;
+
+        isValidExtremum = (this->activeTrendline.m > 0 && latestExtremum.isTrough) || (this->activeTrendline.m < 0 && !latestExtremum.isTrough);
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.anchor.data.date;
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.currentPoint.data.date;
+        isValidExtremum = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, latestExtremum.data.date) > this->activeTrendline.dateDifference;
+
+        if (isValidExtremum){
+            newGradient = calculateGradient(this->activeTrendline.anchor, latestExtremum);
+
+            this->updateActiveTrendline(newGradient, latestExtremum);
         }
     }
 }
 
-Trendline TrendLine::getActiveTrend() const {
+Trendline TrendLineTracker::getActiveTrend() const {
     return this->activeTrendline;
+}
+
+void TrendLineTracker::clear(){
+    this->activeTrendline = Trendline();
 }

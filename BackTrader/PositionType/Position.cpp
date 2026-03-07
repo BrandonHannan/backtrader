@@ -6,20 +6,8 @@ Position::Position(string stockName, string pType, string tType, string pDate, s
                 stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
                 sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), originalStopLossPrice(sLPrice), isClosed(false) {}
 
-
-// Helper function to convert dates to a Julian Date number 
-int Position::toJulian(int y, int m, int d) const {
-    if (m <= 2) {
-        y -= 1;
-        m += 12;
-    }
-    int A = y / 100;
-    int B = 2 - A + A / 4;
-    return int(365.25 * (y + 4716)) + int(30.6001 * (m + 1)) + d + B - 1524;
-}
-
 // Helper function to determine the number of days between the purhcase date and the sell date
-int Position::LengthOfTradeBetweenDates() const {
+int Position::LengthOfTradeBetweenDates(const string &purchaseDate, const string &sellDate) const {
     if (purchaseDate == "" || sellDate == "" || purchaseDate.length() != 10 || sellDate.length() != 10){
         return -1;
     }
@@ -32,7 +20,7 @@ int Position::LengthOfTradeBetweenDates() const {
     int endMonth = stoi(sellDate.substr(5, 7));
     int endDay = stoi(sellDate.substr(8, 10));
 
-    length = toJulian(endYear, endMonth, endDay) - toJulian(beginningYear, beginningMonth, beginningDay);
+    length = ToJulian(endYear, endMonth, endDay) - ToJulian(beginningYear, beginningMonth, beginningDay);
     return length;
 }
 
@@ -136,7 +124,11 @@ void Position::setIsClosed(bool isC){
 
 int Position::LengthOfTrade() const {
     // Returns -1 if an invalid position
-    return LengthOfTradeBetweenDates();
+    return LengthOfTradeBetweenDates(this->purchaseDate, this->sellDate);
+}
+
+int Position::currentLengthOfTrade(string currentDate) const {
+    return LengthOfTradeBetweenDates(this->purchaseDate, currentDate);
 }
 
 string Position::getBasePositionInfo() const {

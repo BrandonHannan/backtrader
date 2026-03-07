@@ -4,6 +4,7 @@
 #include <iostream>
 #include "PositionType.h"
 #include "../StockData/StockData.h"
+#include "../TradingContext/Functions/DateHelper.h"
 #include <string>
 #include <format>
 
@@ -26,9 +27,7 @@ class Position{
         
         bool isClosed;
 
-        int toJulian(int y, int m, int d) const;
-
-        int LengthOfTradeBetweenDates() const;
+        int LengthOfTradeBetweenDates(const string &purchaseDate, const string &sellDate) const;
     
     public:
         Position();
@@ -83,6 +82,8 @@ class Position{
         void setIsClosed(bool isClosed);
 
         int LengthOfTrade() const;
+
+        int currentLengthOfTrade(string currentDate) const;
 
         string getBasePositionInfo() const;
 

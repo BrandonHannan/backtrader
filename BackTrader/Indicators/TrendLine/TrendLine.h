@@ -10,29 +10,37 @@ using namespace std;
 
 enum class TrendLineMode { MINIMUM, MAXIMUM };
 
-struct Trendline {
-    bool isActive = false;
-    TrendType type = TrendType::NONE;
-    Extremum anchor;       // The starting point (e.g., the first trough)
-    Extremum currentPoint; // The point making the smallest absolute gradient
-    double currentGradient = std::numeric_limits<double>::max();
+class Trendline {
+    public:
+        bool isActive;
+        Extremum anchor;       // The starting point (e.g., the first trough)
+        Extremum currentPoint; // The point making the smallest absolute gradient
+        int dateDifference;
+        double m;
+        double c;
+
+        Trendline() {}
+
+        bool isPointValidWithinTrendLine(const StockDataInstance &data);
 };
 
-class TrendLine {
+class TrendLineTracker {
     private:
         TrendLineMode mode;
         Trendline activeTrendline;
 
-        int LengthOfTradeBetweenDates(string date1, string date2);
+        void updateActiveTrendline(const double &newGradient, const Extremum &newPoint);
 
-        double calculateGradient(const Extremum& p1, const Extremum& p2);
+        double calculateGradient(const Extremum& p1, const Extremum& p2) const;
     
     public:
-        TrendLine(TrendLineMode mode) {}
+        TrendLineTracker(TrendLineMode mode) {}
 
         void update(const Trend &currentTrend);
 
         Trendline getActiveTrend() const;
+
+        void clear();
 };
 
 #endif
