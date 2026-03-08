@@ -1,10 +1,9 @@
 #ifndef BASESTRATEGY_H
 #define BASESTRATEGY_H
-#include "../PositionType/Position.h"
-#include "../StockData/StockData.h"
+#include "../Objects/PositionType/Position.h"
+#include "../Objects/StockData/StockData.h"
 #include "../PositionSizing/BasePositionSize.h"
 #include "../TradingContext/BaseContext.h"
-#include "../TradingContext/Functions/StringHelper.h"
 #include <unordered_map>
 #include <map>
 #include <cmath>

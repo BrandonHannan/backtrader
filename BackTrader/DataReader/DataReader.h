@@ -2,8 +2,10 @@
 #define DATAREADER_H
 
 #include <unordered_map>
-#include <string>
-#include "../StockData/StockData.h"
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include "../Objects/StockData/StockData.h"
 
 unordered_map<std::string, StockData> ReadData(const string &fileName);
 

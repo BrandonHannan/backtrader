@@ -1,8 +1,4 @@
-#include "../StockData/StockData.h"
-#include <unordered_map>
-#include <fstream>
-#include <sstream>
-#include <iostream>
+#include "DataReader.h"
 
 unordered_map<string, StockData> ReadData(const string &fileName){
     unordered_map<string, StockData> result;
