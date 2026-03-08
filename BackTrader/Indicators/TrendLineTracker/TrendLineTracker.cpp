@@ -1,24 +1,4 @@
-#include "TrendLine.h"
-
-Trendline::Trendline(): isActive(false), m(0), c(0), dateDifference(-1) {}
-
-bool Trendline::isPointValidWithinTrendLine(const StockDataInstance &data){
-    if (!this->isActive){
-        return false;
-    }
-
-    int dateDifference = LengthOfTradeBetweenDates(this->anchor.data.date, data.date);
-    double y = m * dateDifference + this->c;
-    // UPTREND
-    if (this->m > 0){
-        return data.close >= y;
-    }
-    else if (this->m < 0){ // DOWNTREND
-        return data.close <= y;
-    }
-
-    return false;
-}
+#include "TrendLineTracker.h"
 
 TrendLineTracker::TrendLineTracker(TrendLineMode mode): mode(mode), activeTrendline() {}
 
@@ -65,8 +45,7 @@ void TrendLineTracker::update(const Trend& currentTrend){
         this->activeTrendline.dateDifference = LengthOfTradeBetweenDates(currentTrend.e1.data.date, currentTrend.e3.data.date);
 
         if (currentTrend.e5.index != -1){
-            double newGradient = 0;
-            newGradient = calculateGradient(this->activeTrendline.anchor, currentTrend.e5);
+            double newGradient = calculateGradient(this->activeTrendline.anchor, currentTrend.e5);
 
             this->updateActiveTrendline(newGradient, currentTrend.e5);
         }
@@ -88,7 +67,33 @@ void TrendLineTracker::update(const Trend& currentTrend){
             this->updateActiveTrendline(newGradient, latestExtremum);
         }
 
+        latestExtremum = currentTrend.e2;
+
+        isValidExtremum = (this->activeTrendline.m > 0 && latestExtremum.isTrough) || (this->activeTrendline.m < 0 && !latestExtremum.isTrough);
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.anchor.data.date;
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.currentPoint.data.date;
+        isValidExtremum = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, latestExtremum.data.date) > this->activeTrendline.dateDifference;
+
+        if (isValidExtremum){
+            newGradient = calculateGradient(this->activeTrendline.anchor, latestExtremum);
+
+            this->updateActiveTrendline(newGradient, latestExtremum);
+        }
+
         latestExtremum = currentTrend.e3;
+
+        isValidExtremum = (this->activeTrendline.m > 0 && latestExtremum.isTrough) || (this->activeTrendline.m < 0 && !latestExtremum.isTrough);
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.anchor.data.date;
+        isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.currentPoint.data.date;
+        isValidExtremum = LengthOfTradeBetweenDates(this->activeTrendline.anchor.data.date, latestExtremum.data.date) > this->activeTrendline.dateDifference;
+
+        if (isValidExtremum){
+            newGradient = calculateGradient(this->activeTrendline.anchor, latestExtremum);
+
+            this->updateActiveTrendline(newGradient, latestExtremum);
+        }
+
+        latestExtremum = currentTrend.e4;
 
         isValidExtremum = (this->activeTrendline.m > 0 && latestExtremum.isTrough) || (this->activeTrendline.m < 0 && !latestExtremum.isTrough);
         isValidExtremum = isValidExtremum && latestExtremum.data.date != this->activeTrendline.anchor.data.date;

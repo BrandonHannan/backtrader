@@ -1,6 +1,7 @@
 #include "WindowStatistics.h"
 
-WindowStatistics::WindowStatistics(int windowSize): windowSize(windowSize), sum(0), sumSQ(0), indexSum(0), sumXY(0), indexSumSQ(0), mean(NAN), std(NAN), slope(NAN), slopeSE(NAN), slopeRSQ(NAN), slopeTStatistic(NAN) {
+WindowStatistics::WindowStatistics(int windowSize): windowSize(windowSize), sum(0), sumSQ(0), indexSum(0), sumXY(0), indexSumSQ(0), mean(NAN), EMAMean(NAN), std(NAN), slope(NAN), slopeSE(NAN), slopeRSQ(NAN), slopeTStatistic(NAN) {
+    this->alphaEMA = 2/static_cast<double>(windowSize + 1);
     // LookbackPeriod must be >= 2
     for (int i = 0; i<windowSize; i++){
         double x = double(i);
@@ -10,9 +11,11 @@ WindowStatistics::WindowStatistics(int windowSize): windowSize(windowSize), sum(
 }
 
 void WindowStatistics::updateVariables(){
+    double EMAMeanValue = (this->dataPoints.back() * this->alphaEMA) + (this->EMAMean * (1 - this->alphaEMA));
     double meanValue = this->sum / this->windowSize;
     double varValue = (this->sumSQ / this->windowSize) - (meanValue * meanValue);
     double sqrtValue = sqrt(varValue);
+    this->EMAMean = EMAMeanValue;
     this->mean = meanValue;
     this->std = sqrtValue;
     double denominator = this->windowSize * this->indexSumSQ - this->indexSum * this->indexSum;
@@ -69,6 +72,12 @@ void WindowStatistics::addDataPoint(double value){
         this->sum += value;
         this->sumSQ += value * value;
         this->sumXY += value * (this->dataPoints.size() - 1);
+
+        // Specific Case for Updating EMA Mean
+        if (this->dataPoints.size() == this->windowSize){
+            this->updateVariables();
+            this->EMAMean = this->sum / this->alphaEMA;
+        }
     }
     else{
         double frontValue = this->dataPoints.front();
@@ -84,15 +93,19 @@ void WindowStatistics::addDataPoint(double value){
 
         this->dataPoints.pop();
         this->dataPoints.push(value);
-    }
 
-    if (this->dataPoints.size() == this->windowSize){
-        this->updateVariables();
+        if (this->dataPoints.size() == this->windowSize){
+            this->updateVariables();
+        }
     }
 }
 
 int WindowStatistics::getSize() const {
     return this->dataPoints.size();
+}
+
+double WindowStatistics::getEMAMean() const {
+    return this->EMAMean;
 }
 
 double WindowStatistics::getMean() const {

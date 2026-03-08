@@ -1,21 +1,13 @@
 #ifndef BASECONTEXT_H
 #define BASECONTEXT_H
 
-#include "../StockData/StockData.h"
-#include "../PositionType/Position.h"
-#include "./Functions/StringHelper.h"
+#include "../Objects/StockData/StockData.h"
+#include "../Objects/PositionType/Position.h"
+#include "../Objects/Trade/Trade.h"
+#include "../Functions/StringHelper.h"
 #include <unordered_set>
 
 using namespace std;
-
-struct Trade {
-    PositionType positionType;
-    string tradeType;
-    bool isValid;
-
-    Trade() : isValid(false) {}
-    Trade(string positionType, string tradeType): positionType(positionType), tradeType(tradeType), isValid(true) {}
-};
 
 class BaseContext {
     protected:

@@ -1,17 +1,13 @@
 #ifndef BASEPOSITIONSIZE_H
 #define BASEPOSITIONSIZE_H
-#include "../StockData/StockData.h"
-#include "../PositionType/Position.h"
-#include "../PositionType/PositionType.h"
+
+#include "../Objects/StockData/StockData.h"
+#include "../Objects/PositionType/Position.h"
+#include "../Objects/PositionType/PositionType.h"
+#include "../Objects/PositionPriceInfo/PositionPriceInfo.h"
 #include <iostream>
 #include <cmath>
 #include <algorithm>
-
-struct PositionPriceInfo{
-    double numShares;
-    double stopLossPrice;
-    PositionPriceInfo(double numShares, double stopLossPrice): numShares(numShares), stopLossPrice(stopLossPrice) {}
-};
 
 class BasePositionSize{
     protected:

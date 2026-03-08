@@ -18,8 +18,10 @@ class WindowStatistics {
 		double sumXY;
 		double indexSum;
 		double indexSumSQ;
+		double alphaEMA;
 
 		double mean;
+		double EMAMean;
 		double std;
 		double slope;
 		double slopeSE;
@@ -39,6 +41,7 @@ class WindowStatistics {
 
 		void addDataPoint(double value);
 		int getSize() const;
+		double getEMAMean() const;
 		double getMean() const;
 		double getStd() const;
 		double getSlope() const;

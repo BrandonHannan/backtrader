@@ -1,28 +1,14 @@
-#ifndef TRENDLINE_H
-#define TRENDLINE_H
+#ifndef TRENDLINETRACKER_H
+#define TRENDLINETRACKER_H
 
-#include "../TrendIdentifier/TrendIdentifier.h"
-#include "../../TradingContext/Functions/DateHelper.h"
+#include "../../Objects/Trendline/Trendline.h"
+#include "../../Functions/DateHelper.h"
 #include "cmath"
 #include "limits"
 
 using namespace std;
 
 enum class TrendLineMode { MINIMUM, MAXIMUM };
-
-class Trendline {
-    public:
-        bool isActive;
-        Extremum anchor;       // The starting point (e.g., the first trough)
-        Extremum currentPoint; // The point making the smallest absolute gradient
-        int dateDifference;
-        double m;
-        double c;
-
-        Trendline() {}
-
-        bool isPointValidWithinTrendLine(const StockDataInstance &data);
-};
 
 class TrendLineTracker {
     private:
