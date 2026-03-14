@@ -106,6 +106,25 @@ void TrendIdentifier::processNextDay(StockDataInstance data){
     this->currentTrend.type = TrendType::NONE;
 }
 
-Trend TrendIdentifier::getCurrentTrend() {
+bool TrendIdentifier::isReady() const {
+    if (this->mode == TrendMode::FIVE_POINT && extrema.size() >= 5){
+        return true;
+    }
+    else if (this->mode == TrendMode::THREE_POINT && extrema.size() >= 3){
+        return true;
+    }
+
+    return false;
+}
+
+Trend TrendIdentifier::getCurrentTrend() const {
     return this->currentTrend;
+}
+
+void TrendIdentifier::clear(){
+    this->extrema.clear();
+    this->currentTrend = Trend();
+    this->currentDay = 0;
+    this->lastData = StockDataInstance(-1, 0, 0, 0, 0, 0, "");
+    this->dir = Direction::UNKNOWN;
 }

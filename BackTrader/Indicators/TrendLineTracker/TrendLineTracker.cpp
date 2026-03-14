@@ -31,10 +31,12 @@ void TrendLineTracker::update(const Trend& currentTrend){
         if (currentTrend.type == TrendType::UPTREND) {
             this->activeTrendline.anchor = currentTrend.e1; // T1
             this->activeTrendline.currentPoint = currentTrend.e3; // T2
+            this->activeTrendline.initialTrendType = TrendType::UPTREND;
         }
         else if (currentTrend.type == TrendType::DOWNTREND){
             this->activeTrendline.anchor = currentTrend.e1; // P1
             this->activeTrendline.currentPoint = currentTrend.e3; // P2
+            this->activeTrendline.initialTrendType = TrendType::DOWNTREND;
         }
         else{
             return;
@@ -43,6 +45,7 @@ void TrendLineTracker::update(const Trend& currentTrend){
         this->activeTrendline.c = currentTrend.e1.data.close;
         this->activeTrendline.m = calculateGradient(this->activeTrendline.anchor, this->activeTrendline.currentPoint);
         this->activeTrendline.dateDifference = LengthOfTradeBetweenDates(currentTrend.e1.data.date, currentTrend.e3.data.date);
+        this->activeTrendline.isActive = true;
 
         if (currentTrend.e5.index != -1){
             double newGradient = calculateGradient(this->activeTrendline.anchor, currentTrend.e5);

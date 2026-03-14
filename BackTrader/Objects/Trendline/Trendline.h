@@ -5,6 +5,8 @@
 #include "../../Objects/Trend/Trend.h"
 #include "../../Functions/DateHelper.h"
 
+enum class TrendLineMode { MINIMUM, MAXIMUM };
+
 class Trendline {
     public:
         bool isActive;
@@ -13,10 +15,11 @@ class Trendline {
         int dateDifference;
         double m;
         double c;
+        TrendType initialTrendType;
 
         Trendline() {}
 
-        bool isPointValidWithinTrendLine(const StockDataInstance &data, const TrendType &trendType);
+        bool isPointValidWithinTrendLine(const StockDataInstance &data);
 };
 
 #endif

@@ -1,9 +1,10 @@
 #ifndef SMAMACD_H
 #define SMAMACD_H
 
+#include "../Indicator.h"
 #include "../../Functions/WindowStatistics.h"
 
-class SMAMACD {
+class SMAMACD: public Indicator {
     private:
         int lookBackPeriod;
         int doubleLookBackPeriod;
@@ -19,6 +20,8 @@ class SMAMACD {
         double getMACD() const;
 
         double getSignal() const;
+
+        void clear() override;
 };
 
 #endif

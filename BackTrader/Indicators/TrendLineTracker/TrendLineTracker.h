@@ -1,6 +1,7 @@
 #ifndef TRENDLINETRACKER_H
 #define TRENDLINETRACKER_H
 
+#include "../Indicator.h"
 #include "../../Objects/Trendline/Trendline.h"
 #include "../../Functions/DateHelper.h"
 #include "cmath"
@@ -8,9 +9,7 @@
 
 using namespace std;
 
-enum class TrendLineMode { MINIMUM, MAXIMUM };
-
-class TrendLineTracker {
+class TrendLineTracker: public Indicator {
     private:
         TrendLineMode mode;
         Trendline activeTrendline;
@@ -26,7 +25,7 @@ class TrendLineTracker {
 
         Trendline getActiveTrend() const;
 
-        void clear();
+        void clear() override;
 };
 
 #endif

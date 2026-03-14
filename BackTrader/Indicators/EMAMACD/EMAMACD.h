@@ -1,9 +1,10 @@
 #ifndef EMAMACD_H
 #define EMAMACD_H
 
+#include "../Indicator.h"
 #include "../../Functions/WindowStatistics.h"
 
-class EMAMACD {
+class EMAMACD: public Indicator {
     private:
         int lookBackPeriod;
         int doubleLookBackPeriod;
@@ -19,6 +20,8 @@ class EMAMACD {
         double getMACD() const;
 
         double getSignal() const;
+
+        void clear() override;
 };
 
 #endif

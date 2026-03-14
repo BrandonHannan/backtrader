@@ -18,3 +18,9 @@ double SMAMACD::getSignal() const {
     }
     return this->signal.getMean();
 }
+
+void SMAMACD::clear(){
+    this->shortTerm = WindowStatistics(this->lookBackPeriod);
+    this->longTerm = WindowStatistics(this->doubleLookBackPeriod);
+    this->signal = WindowStatistics(this->signalLookBackPeriod);
+}

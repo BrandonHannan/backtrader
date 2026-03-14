@@ -2,6 +2,8 @@
 #define DOWCONTEXT_H
 
 #include "../BaseContext.h"
+#include "../../Indicators/TrendIdentifier/TrendIdentifier.h"
+#include "../../Indicators/TrendLineTracker/TrendLineTracker.h"
 #include <cmath>
 #include <queue>
 
@@ -9,9 +11,15 @@ using namespace std;
 
 class DowContext: public BaseContext {
     private:
-        double s;
+        bool firstUpdate = true; // Signal that determines whether the first update for the context has occured
+
+        TrendIdentifier trend; // Captures the trend for the given look back period
+        TrendIdentifier doubleTrend; // Captures the trend for the given double look back period
+        TrendLineTracker trendLine; // Is the trend line for the current trend
+        TrendLineTracker doubleTrendLine; // Is the trend line for the current double look back period trend
+
     public:
-        DowContext(int lookBackPeriod);
+        DowContext(int lookBackPeriod, int doubleLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);
 
         void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
 

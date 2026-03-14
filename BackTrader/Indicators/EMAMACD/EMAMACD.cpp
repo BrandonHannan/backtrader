@@ -17,3 +17,9 @@ double EMAMACD::getSignal() const {
     }
     return this->signal.getEMAMean();
 }
+
+void EMAMACD::clear(){
+    this->shortTerm = WindowStatistics(this->lookBackPeriod);
+    this->longTerm = WindowStatistics(this->doubleLookBackPeriod);
+    this->signal = WindowStatistics(this->signalLookBackPeriod);
+}

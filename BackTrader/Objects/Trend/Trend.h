@@ -3,6 +3,8 @@
 
 #include "../Extremum/Extremum.h"
 
+enum class TrendMode { FIVE_POINT, THREE_POINT };
+
 enum class TrendType { NONE, UPTREND, DOWNTREND };
 
 // Structure to hold our confirmed trend pattern

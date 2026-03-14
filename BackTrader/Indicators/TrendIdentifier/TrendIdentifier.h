@@ -1,6 +1,7 @@
 #ifndef TRENDIDENTIFIER_H
 #define TRENDIDENTIFIER_H
 
+#include "../Indicator.h"
 #include "../../Objects/StockData/StockData.h"
 #include "../../Objects/Trend/Trend.h"
 #include <iostream>
@@ -9,9 +10,7 @@
 
 using namespace std;
 
-enum class TrendMode { FIVE_POINT, THREE_POINT };
-
-class TrendIdentifier {
+class TrendIdentifier: public Indicator {
     private:
         int lookBackPeriod;
         TrendMode mode;
@@ -27,7 +26,11 @@ class TrendIdentifier {
         // Feeds one day of data at a time. 
         void processNextDay(StockDataInstance data);
 
-        Trend getCurrentTrend();
+        bool isReady() const;
+
+        Trend getCurrentTrend() const;
+
+        void clear() override;
 };
 
 
