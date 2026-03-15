@@ -192,6 +192,8 @@ Position& Position::operator=(const Position &obj){
         this->setStopLossPrice(obj.stopLossPrice);
         this->setStats(obj.stats);
         this->setIsClosed(obj.isClosed);
+
+        this->originalStopLossPrice = obj.originalStopLossPrice;
     }
     return *this;
 }

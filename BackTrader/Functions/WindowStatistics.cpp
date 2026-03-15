@@ -75,8 +75,8 @@ void WindowStatistics::addDataPoint(double value){
 
         // Specific Case for Updating EMA Mean
         if (this->dataPoints.size() == this->windowSize){
+            this->EMAMean = this->sum / this->windowSize;
             this->updateVariables();
-            this->EMAMean = this->sum / this->alphaEMA;
         }
     }
     else{

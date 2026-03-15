@@ -9,7 +9,7 @@ double TrendLineTracker::calculateGradient(const Extremum& p1, const Extremum& p
 
 void TrendLineTracker::updateActiveTrendline(const double &newGradient, const Extremum &newPoint){
     if (this->mode == TrendLineMode::MINIMUM){
-        if (abs(newGradient) < this->activeTrendline.m){
+        if (abs(newGradient) < abs(this->activeTrendline.m)){
             this->activeTrendline.m = newGradient;
             this->activeTrendline.c = newPoint.data.close;
             this->activeTrendline.currentPoint = newPoint;
@@ -17,7 +17,7 @@ void TrendLineTracker::updateActiveTrendline(const double &newGradient, const Ex
         }
     }
     else{
-        if (abs(newGradient) > this->activeTrendline.m){
+        if (abs(newGradient) > abs(this->activeTrendline.m)){
             this->activeTrendline.m = newGradient;
             this->activeTrendline.c = newPoint.data.close;
             this->activeTrendline.currentPoint = newPoint;
@@ -122,6 +122,10 @@ void TrendLineTracker::update(const Trend& currentTrend){
             this->updateActiveTrendline(newGradient, latestExtremum);
         }
     }
+}
+
+bool TrendLineTracker::isReady() const {
+    return this->activeTrendline.isActive;
 }
 
 Trendline TrendLineTracker::getActiveTrend() const {

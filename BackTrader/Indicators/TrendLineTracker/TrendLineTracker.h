@@ -23,6 +23,8 @@ class TrendLineTracker: public Indicator {
 
         void update(const Trend &currentTrend);
 
+        bool isReady() const;
+
         Trendline getActiveTrend() const;
 
         void clear() override;
