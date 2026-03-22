@@ -16,8 +16,11 @@ VCPKG_ROOT = C:/path/to/your/vcpkg
 # The name of your final executable file
 TARGET = a
 
+# Define a custom function to recursively find files
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
 # The source files for your program
-SRCS = Main.cpp DataReader/datareader.cpp PositionType/Position.cpp PositionType/PositionType.cpp TradingStrategy/BaseStrategy.cpp TradingStrategy/Custom/CustomStrategy.cpp TradingContext/BaseContext.cpp TradingContext/BreakoutContext/BreakoutContext.cpp TradingContext/Functions/InverseNormalCDF.cpp TradingContext/Functions/StringHelper.cpp TradingContext/Functions/WindowStatistics.cpp PositionSizing/BasePositionSize.cpp PositionSizing/ATRPositionSize/ATRPositionSize.cpp
+SRCS = $(call rwildcard, ., *.cpp)
 
 # --- Makefile Rules ---
 

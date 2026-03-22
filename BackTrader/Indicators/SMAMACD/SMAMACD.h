@@ -21,6 +21,8 @@ class SMAMACD: public Indicator {
 
         double getSignal() const;
 
+        bool isReady() const;
+
         void clear() override;
 };
 

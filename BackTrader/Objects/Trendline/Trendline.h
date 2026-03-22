@@ -17,7 +17,7 @@ class Trendline {
         double c;
         TrendType initialTrendType;
 
-        Trendline() {}
+        Trendline();
 
         bool isPointValidWithinTrendLine(const StockDataInstance &data);
 };

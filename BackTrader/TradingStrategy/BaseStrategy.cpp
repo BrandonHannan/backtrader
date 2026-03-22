@@ -64,7 +64,12 @@ vector<double> BaseStrategy::getAllReturns(){
     for (int i = 0; i<this->closedPositions.size(); i++){
         double pPrice = this->closedPositions[i].getPurchasePrice();
         double sPrice = this->closedPositions[i].getSellPrice();
-        results.push_back(sPrice - pPrice);
+        if (this->closedPositions[i].getPositionType().getPositiontype() == "LONG") {
+            results.push_back(sPrice - pPrice);
+        } else {
+            // For SHORT trades, selling lower than the purchase price is a profit
+            results.push_back(pPrice - sPrice); 
+        }
     }
     return results;
 }

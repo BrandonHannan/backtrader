@@ -1,14 +1,16 @@
 #include "./DowContext.h"
 
-DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode): 
+DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode): 
     BaseContext(lookBackPeriod), 
     doubleLookBackPeriod(doubleLookBackPeriod), 
+    signalLookBackPeriod(signalLookBackPeriod),
     trendMode(trendMode), 
     trendLineMode(trendLineMode),
     trend(TrendIdentifier(lookBackPeriod, trendMode)), 
     doubleTrend(TrendIdentifier(doubleLookBackPeriod, trendMode)),
     trendLine(TrendLineTracker(trendLineMode)), 
     doubleTrendLine(TrendLineTracker(trendLineMode)), 
+    sMACD(SMAMACD(lookBackPeriod, doubleLookBackPeriod, signalLookBackPeriod)),
     priceStatistics(lookBackPeriod), 
     volumeStatistics(lookBackPeriod) {}
 
@@ -72,18 +74,22 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
 Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData) const {
     Trend currentTrend = this->trend.getCurrentTrend();
     Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
+    double macd = this->sMACD.getMACD();
+    double signal = this->sMACD.getSignal();
 
     Trendline currentTrendLine = this->trendLine.getActiveTrend();
     Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
     if (currentTrend.type == TrendType::NONE){
         return Trade();
     }
-    else if (currentTrend.type == TrendType::UPTREND){
-        return Trade("LONG", "LONG BREAKTHROUGH");
+    
+    if (currentTrend.type == TrendType::UPTREND){
+        if ((macd - signal) > 0){
+            return Trade("LONG", "LONG BREAKTHROUGH");
+        }
     }
-    else{
-        return Trade("SHORT", "SHORT BREAKTHROUGH");
-    }
+
+    return Trade();
 }
 
 bool DowContext::shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const {
@@ -107,8 +113,11 @@ bool DowContext::isValid() const {
     //     return true;
     // }
 
-    if (this->trend.isReady() && this->trendLine.isReady()){
-        return true;
+    if (this->trend.isReady() && this->trendLine.isReady() /*&& this->doubleTrend.isReady() && this->doubleTrendLine.isReady()*/){
+        if (this->sMACD.isReady()){
+            return true;
+        }
+        // return true;
     }
     return false;
 }
@@ -165,5 +174,6 @@ void DowContext::clear(){
     this->doubleTrend = TrendIdentifier(this->doubleLookBackPeriod, this->trendMode);
     this->trendLine = TrendLineTracker(this->trendLineMode);
     this->doubleTrendLine = TrendLineTracker(this->trendLineMode);
+    this->sMACD = SMAMACD(this->lookBackPeriod, this->doubleLookBackPeriod, this->signalLookBackPeriod);
 }
 

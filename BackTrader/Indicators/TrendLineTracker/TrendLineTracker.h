@@ -19,7 +19,7 @@ class TrendLineTracker: public Indicator {
         double calculateGradient(const Extremum& p1, const Extremum& p2) const;
     
     public:
-        TrendLineTracker(TrendLineMode mode) {}
+        TrendLineTracker(TrendLineMode mode);
 
         void update(const Trend &currentTrend);
 

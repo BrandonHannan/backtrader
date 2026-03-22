@@ -5,6 +5,7 @@
 #include "../../Functions/WindowStatistics.h"
 #include "../../Indicators/TrendIdentifier/TrendIdentifier.h"
 #include "../../Indicators/TrendLineTracker/TrendLineTracker.h"
+#include "../../Indicators/SMAMACD/SMAMACD.h"
 #include <cmath>
 #include <queue>
 
@@ -14,6 +15,7 @@ class DowContext: public BaseContext {
     private:
         bool firstUpdate = true; // Signal that determines whether the first update for the context has occured
         int doubleLookBackPeriod;
+        int signalLookBackPeriod;
         TrendMode trendMode;
         TrendLineMode trendLineMode;
 
@@ -22,11 +24,13 @@ class DowContext: public BaseContext {
         TrendLineTracker trendLine; // Is the trend line for the current trend
         TrendLineTracker doubleTrendLine; // Is the trend line for the current double look back period trend
 
+        SMAMACD sMACD;
+
         WindowStatistics priceStatistics;
         WindowStatistics volumeStatistics;
 
     public:
-        DowContext(int lookBackPeriod, int doubleLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);
+        DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);
 
         void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
 
