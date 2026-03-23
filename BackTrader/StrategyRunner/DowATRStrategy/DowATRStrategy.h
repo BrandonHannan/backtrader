@@ -85,4 +85,22 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
     return;
 }
 
+void ExecuteAllSweeps2D(unordered_map<string, StockData> &data){
+    ofstream file("Returns.txt");
+    DowContextInputParameters dowParams;
+    DowBaseCase dowBase;
+    vector<unique_ptr<ISweepJob>> mySweeps;
+
+    mySweeps.push_back(make_unique<StrategyRunner2D<int, double>>(
+        "ATR Period", "ATR Multiplier", 
+        dowParams.ATRPeriodArray, dowParams.ATRMultiplierArray, 
+        dowBase.balance, 
+        [&](int atrPer, double atrMult) { // Lambda captures both parameters
+            auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, atrPer, atrMult);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+        }
+    ));
+}
+
 #endif

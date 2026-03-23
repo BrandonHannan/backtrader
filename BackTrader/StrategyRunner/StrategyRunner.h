@@ -63,6 +63,65 @@ public:
     }
 };
 
+// 2.5 The 2D Implementation: Handles combinations of any two data types
+template <typename T1, typename T2>
+class StrategyRunner2D : public ISweepJob {
+private:
+    string paramName1;
+    string paramName2;
+    vector<T1> testValues1;
+    vector<T2> testValues2;
+    double initialBalance;
+    function<unique_ptr<CustomStrategy>(T1, T2)> strategyBuilder; // Lambda now takes two parameters
+
+public:
+    StrategyRunner2D(string name1, string name2, vector<T1> values1, vector<T2> values2, double initBal, function<unique_ptr<CustomStrategy>(T1, T2)> builder)
+        : paramName1(name1), paramName2(name2), testValues1(values1), testValues2(values2), initialBalance(initBal), strategyBuilder(builder) {}
+
+    void run(ofstream& file, const unordered_map<string, StockData>& data) override {
+        cout << "Running 2D sweep for: " << paramName1 << " & " << paramName2 << "...\n";
+        
+        // Header now includes both names
+        file << paramName1 << "_" << paramName2 << "\n"; 
+        
+        for (const T1& val1 : testValues1) {
+            for (const T2& val2 : testValues2) {
+                // Write the combination pair separated by a comma (e.g., "14,2.5")
+                if constexpr (std::is_enum_v<T1>) {
+                    file << static_cast<int>(val1) << ",";
+                } else {
+                    file << val1 << ",";
+                }
+                
+                if constexpr (std::is_enum_v<T2>) {
+                    file << static_cast<int>(val2) << "\n^\n";
+                } else {
+                    file << val2 << "\n^\n";
+                }
+                
+                // Build the strategy for this specific combination
+                unique_ptr<CustomStrategy> specificStrategy = strategyBuilder(val1, val2);
+
+                // Execute across all valid stocks
+                for (const auto& [ticker, stockData] : data) {
+                    if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) continue;
+                    specificStrategy->ExecuteStrategy(ticker, stockData);
+                    specificStrategy->setBalance(initialBalance);
+                }
+
+                // Write results
+                map<int, vector<double>> returns = specificStrategy->getYearlyReturns();
+                for (auto const& x : returns){
+                    file << x.first << "\n$\n";
+                    for (double pnl : x.second) file << pnl << "\n";
+                    file << "&\n";
+                }
+                file << "%\n";
+            }
+        }
+    }
+};
+
 // 3. The Universal Function: It just takes a list of jobs and runs them.
 void RunAllSweeps(const vector<unique_ptr<ISweepJob>>& jobs, ofstream& file, const unordered_map<string, StockData>& data) {
     cout << "Starting Sweep Engine...\n";
