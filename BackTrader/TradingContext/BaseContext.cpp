@@ -1,15 +1,13 @@
 #include "BaseContext.h"
 
-BaseContext::BaseContext(): lookBackPeriod(-1), allowedTradeTypes({}) {}
+BaseContext::BaseContext(): lookBackPeriod(-1), allowedTradeTypes({}), priceStatistics(0), volumeStatistics(0) {}
 
-BaseContext::BaseContext(int lookBackPeriod): lookBackPeriod(lookBackPeriod), allowedTradeTypes({}) {}
+BaseContext::BaseContext(int lookBackPeriod): lookBackPeriod(lookBackPeriod), allowedTradeTypes({}), priceStatistics(lookBackPeriod), volumeStatistics(lookBackPeriod) {}
 
-BaseContext::BaseContext(int lookBackPeriod, unordered_set<string> allowedTradeTypes): lookBackPeriod(lookBackPeriod), allowedTradeTypes(allowedTradeTypes) {}
+BaseContext::BaseContext(int lookBackPeriod, unordered_set<string> allowedTradeTypes): lookBackPeriod(lookBackPeriod), allowedTradeTypes(allowedTradeTypes), priceStatistics(lookBackPeriod), volumeStatistics(lookBackPeriod) {}
 
 void BaseContext::addTradeType(string tradeType){
-    if (this->allowedTradeTypes.find(tradeType) != this->allowedTradeTypes.end()){
-        this->allowedTradeTypes.insert(tradeType);
-    }
+    this->allowedTradeTypes.insert(tradeType);
 }
 
 bool BaseContext::checkStopLossPrice(const Position &currentPosition, const StockDataInstance &data) const {
@@ -41,4 +39,6 @@ bool BaseContext::checkStopLossPrice(const Position &currentPosition, const Stoc
 
 void BaseContext::clearBase() {
     allowedTradeTypes.clear();
+    priceStatistics = WindowStatistics(this->lookBackPeriod);
+    volumeStatistics = WindowStatistics(this->lookBackPeriod);
 }

@@ -1,7 +1,7 @@
 #include "BreakoutContext.h"
 
-BreakoutContext::BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold, double priceMediumPercentageThreshold): 
-                                                                                                          BaseContext(lookbackPeriod), priceStatistics(lookBackPeriod), volumeStatistics(lookBackPeriod), priceHighPct(priceHighPercentageThreshold),
+BreakoutContext::BreakoutContext(int lookbackPeriod, double priceHighPercentageThreshold, double volumeHighPercentageThreshold, double priceLowPercentageThreshold, double volumeLowPercentageThreshold, double priceMediumPercentageThreshold):
+                                                                                                          BaseContext(lookbackPeriod), priceHighPct(priceHighPercentageThreshold),
                                                                                                           volumeHighPct(volumeHighPercentageThreshold), priceLowPct(priceLowPercentageThreshold), volumeLowPct(volumeLowPercentageThreshold), 
                                                                                                           priceMedPct(priceMediumPercentageThreshold) {
     this->priceHighZ = inverseNormalCDF(priceHighPercentageThreshold);
@@ -235,6 +235,39 @@ string BreakoutContext::getStats() const {
     return stats;
 }
 
+json BreakoutContext::getContextData() const {
+    json data;
+    data["contextType"] = "BreakoutContext";
+    data["priceStatistics"] = {
+        {"mean",             priceStatistics.getMean()},
+        {"std",              priceStatistics.getStd()},
+        {"min",              priceStatistics.getMin()},
+        {"max",              priceStatistics.getMax()},
+        {"slope",            priceStatistics.getSlope()},
+        {"slopeSE",          priceStatistics.getSlopeSE()},
+        {"slopeRSQ",         priceStatistics.getSlopeRSQ()},
+        {"slopeSignificant", priceStatistics.getSlopeSignificance()}
+    };
+    data["volumeStatistics"] = {
+        {"mean",             volumeStatistics.getMean()},
+        {"std",              volumeStatistics.getStd()},
+        {"min",              volumeStatistics.getMin()},
+        {"max",              volumeStatistics.getMax()},
+        {"slope",            volumeStatistics.getSlope()},
+        {"slopeSE",          volumeStatistics.getSlopeSE()},
+        {"slopeRSQ",         volumeStatistics.getSlopeRSQ()},
+        {"slopeSignificant", volumeStatistics.getSlopeSignificance()}
+    };
+    data["thresholds"] = {
+        {"priceHighZ",  priceHighZ},
+        {"priceLowZ",   priceLowZ},
+        {"volumeHighZ", volumeHighZ},
+        {"volumeLowZ",  volumeLowZ},
+        {"priceMedZ",   priceMedZ}
+    };
+    return data;
+}
+
 bool BreakoutContext::isValid() const {
     if (priceStatistics.isReady() && volumeStatistics.isReady()){
         return true;
@@ -244,9 +277,6 @@ bool BreakoutContext::isValid() const {
 
 void BreakoutContext::clear() {
     this->clearBase();
-    priceStatistics = WindowStatistics(this->lookBackPeriod);
-    volumeStatistics = WindowStatistics(this->lookBackPeriod);
-
     priceHighZ  = inverseNormalCDF(priceHighPct);
     priceLowZ   = inverseNormalCDF(1 - priceLowPct);
     volumeHighZ = inverseNormalCDF(volumeHighPct);

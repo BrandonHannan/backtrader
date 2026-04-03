@@ -26,9 +26,6 @@ class DowContext: public BaseContext {
 
         SMAMACD sMACD;
 
-        WindowStatistics priceStatistics;
-        WindowStatistics volumeStatistics;
-
     public:
         DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);
 
@@ -39,6 +36,8 @@ class DowContext: public BaseContext {
         bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const override;
 
         string getStats() const override;
+
+        json getContextData() const override;
 
         bool isValid() const override;
 

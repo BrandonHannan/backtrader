@@ -1,10 +1,11 @@
 #include "Position.h"
 
-Position::Position(): isClosed(true) {}
+Position::Position(): isClosed(true), entryContextData(json::object()), exitContextData(json::object()) {}
 
 Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
-                stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice), 
-                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), originalStopLossPrice(sLPrice), isClosed(false) {}
+                stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice),
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), originalStopLossPrice(sLPrice), isClosed(false),
+                entryContextData(json::object()), exitContextData(json::object()) {}
 
 // Helper function to determine the number of days between the purhcase date and the sell date
 int Position::LengthOfTradeBetweenDates(const string &purchaseDate, const string &sellDate) const {
@@ -114,6 +115,22 @@ void Position::setStats(string stats){
     this->stats = stats;
 }
 
+json Position::getEntryContextData() const {
+    return this->entryContextData;
+}
+
+void Position::setEntryContextData(const json &data) {
+    this->entryContextData = data;
+}
+
+json Position::getExitContextData() const {
+    return this->exitContextData;
+}
+
+void Position::setExitContextData(const json &data) {
+    this->exitContextData = data;
+}
+
 bool Position::getIsClosed() const {
     return this->isClosed;
 }
@@ -179,6 +196,30 @@ double Position::getExitPrice(const StockDataInstance &currentData, const StockD
     return exitPrice;
 }
 
+json Position::toJson() const {
+    double pnl = 0.0;
+    if (positionType.getPositiontype() == "LONG") {
+        pnl = (sellPrice - purchasePrice) * numShares;
+    } else if (positionType.getPositiontype() == "SHORT") {
+        pnl = (purchasePrice - sellPrice) * numShares;
+    }
+
+    return {
+        {"stockName",        stockName},
+        {"positionType",     positionType.getPositiontype()},
+        {"tradeType",        tradeType},
+        {"purchaseDate",     purchaseDate},
+        {"sellDate",         sellDate},
+        {"purchasePrice",    purchasePrice},
+        {"sellPrice",        sellPrice},
+        {"numShares",        numShares},
+        {"originalStopLoss", originalStopLossPrice},
+        {"pnl",              pnl},
+        {"entryContext",     entryContextData},
+        {"exitContext",      exitContextData}
+    };
+}
+
 Position& Position::operator=(const Position &obj){
     if (this != &obj){
         this->setStockName(obj.stockName);
@@ -192,6 +233,8 @@ Position& Position::operator=(const Position &obj){
         this->setStopLossPrice(obj.stopLossPrice);
         this->setStats(obj.stats);
         this->setIsClosed(obj.isClosed);
+        this->setEntryContextData(obj.entryContextData);
+        this->setExitContextData(obj.exitContextData);
 
         this->originalStopLossPrice = obj.originalStopLossPrice;
     }

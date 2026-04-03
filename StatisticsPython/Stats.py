@@ -50,13 +50,9 @@ def parse_returns_file(file_path):
 # --- 3. Main Processing and CSV Writing ---
 if __name__ == '__main__':
     # --- Configuration ---
-    # MACOS
-    # INPUT_FILE = "/Users/brandonhannan/Documents/Repos/backtrader/BackTrader/Returns.txt"
-    # WINDOWS Work
-    # INPUT_FILE = "C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\BackTrader\\Returns.txt"
-    # WINDOWS Home
-    INPUT_FILE = "C:\\Users\\brand\\Documents\\Repos\\backtrader\\BackTrader\\Returns.txt"
-    OUTPUT_CSV = 'strategy_lookback_optimization_results.csv'
+    OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output')
+    INPUT_FILE = os.path.join(OUTPUT_DIR, 'Returns.txt')
+    OUTPUT_CSV = os.path.join(OUTPUT_DIR, 'strategy_lookback_optimization_results.csv')
     INITIAL_CAPITAL = 10000.0
     
     # 1. "Download" all data by parsing the local file

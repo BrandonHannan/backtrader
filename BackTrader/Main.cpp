@@ -14,7 +14,7 @@ int main(){
     // unordered_map<string, StockData> data = ReadData("../data.txt");
     // Use this For Windows
     //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
-    unordered_map<string, StockData> data = ReadData("C:\\Users\\brand\\Documents\\Repos\\backtrader\\data.txt");
+    unordered_map<string, StockData> data = ReadData("../data.txt");
     cout << "Number of Stocks: " << data.size() << endl;
 
     // for (auto stockData : data){

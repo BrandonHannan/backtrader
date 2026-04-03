@@ -5,10 +5,12 @@
 #include "PositionType.h"
 #include "../../Functions/DateHelper.h"
 #include "../StockData/StockData.h"
+#include "../../include/nlohmann/json.hpp"
 #include <string>
 #include <format>
 
 using namespace std;
+using json = nlohmann::json;
 
 class Position{
     private:
@@ -22,6 +24,8 @@ class Position{
         double numShares;
         double stopLossPrice;
         string stats;
+        json entryContextData;
+        json exitContextData;
 
         double originalStopLossPrice;
         
@@ -77,6 +81,14 @@ class Position{
 
         void setStats(string stats);
 
+        json getEntryContextData() const;
+
+        void setEntryContextData(const json &data);
+
+        json getExitContextData() const;
+
+        void setExitContextData(const json &data);
+
         bool getIsClosed() const;
 
         void setIsClosed(bool isClosed);
@@ -88,6 +100,8 @@ class Position{
         string getBasePositionInfo() const;
 
         double getExitPrice(const StockDataInstance &currentData, const StockDataInstance &futureData) const;
+
+        json toJson() const;
 
         Position& operator=(const Position &obj);
 };

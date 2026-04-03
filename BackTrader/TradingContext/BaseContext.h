@@ -5,14 +5,19 @@
 #include "../Objects/PositionType/Position.h"
 #include "../Objects/Trade/Trade.h"
 #include "../Functions/StringHelper.h"
+#include "../Functions/WindowStatistics.h"
+#include "../include/nlohmann/json.hpp"
 #include <unordered_set>
 
 using namespace std;
+using json = nlohmann::json;
 
 class BaseContext {
     protected:
         int lookBackPeriod;
         unordered_set<string> allowedTradeTypes;
+        WindowStatistics priceStatistics;
+        WindowStatistics volumeStatistics;
 
         void clearBase();
 
@@ -37,6 +42,9 @@ class BaseContext {
 
         // Returns a string of the current statistics
         virtual string getStats() const = 0;
+
+        // Returns a JSON object of the current context data
+        virtual json getContextData() const = 0;
 
         virtual bool isValid() const = 0;
 

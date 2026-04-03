@@ -23,9 +23,6 @@ class BreakoutContext: public BaseContext {
         double volumeLowPct;
         double priceMedPct;
 
-        WindowStatistics priceStatistics;
-        WindowStatistics volumeStatistics;
-
     public:
         // A lookbackPeriod represents the number of days that the strategy takes into consideration
         // A priceHighPercentageThreshold represents the percentage of prices that the current price has to be greater than. E.g. A current price of $5 must be greater than 85% of prices in a normal distribution
@@ -42,6 +39,8 @@ class BreakoutContext: public BaseContext {
         bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const override;
 
         string getStats() const override;
+
+        json getContextData() const override;
 
         bool isValid() const override;
 

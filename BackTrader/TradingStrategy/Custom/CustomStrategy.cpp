@@ -62,7 +62,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
                 currentPosition.setSellPrice(exitPrice);
                 currentPosition.setIsClosed(true);
-                
+                currentPosition.setExitContextData(context->getContextData());
+
                 string positionStats = currentPosition.getBasePositionInfo();
                 string totalStats = combineSideBySide(currentPosition.getStats(), context->getStats());
                 positionStats.append(totalStats);
@@ -96,6 +97,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     newPosition.setTradeType(trade.tradeType);
                     string positionStats = context->getStats();
                     newPosition.setStats(positionStats);
+                    newPosition.setEntryContextData(context->getContextData());
 
                     this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
                     
@@ -114,6 +116,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         lastPosition.setSellPrice(data.close.back());
         lastPosition.setSellDate(data.date.back());
         lastPosition.setIsClosed(true);
+        lastPosition.setExitContextData(context->getContextData());
 
         string positionStats = lastPosition.getBasePositionInfo();
         string totalStats = combineSideBySide(lastPosition.getStats(), context->getStats());

@@ -35,7 +35,8 @@ class RSIContext: public BaseContext {
         RSIContext(int RSIPeriod);
 
         void updateContext(StockDataInstance &currentData, StockDataInstance &previousData) override;
-        unique_ptr<string> shouldExecuteTrade(StockDataInstance &data) const override;
+        Trade shouldExecuteTrade(const StockDataInstance &currentData) const override;
+        json getContextData() const override { return json::object(); }
 };
 
 #endif
