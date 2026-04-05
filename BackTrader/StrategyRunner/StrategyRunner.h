@@ -46,7 +46,9 @@ public:
 
             // Execute across all valid stocks
             for (const auto& [ticker, stockData] : data) {
-                if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) continue;
+                size_t n = stockData.close.size();
+                if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
+                    stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
                 specificStrategy->ExecuteStrategy(ticker, stockData);
                 specificStrategy->setBalance(initialBalance);
             }
@@ -104,7 +106,9 @@ public:
 
                 // Execute across all valid stocks
                 for (const auto& [ticker, stockData] : data) {
-                    if (stockData.close.empty() || stockData.close.size() != stockData.volume.size()) continue;
+                    size_t n = stockData.close.size();
+                    if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
+                        stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
                     specificStrategy->ExecuteStrategy(ticker, stockData);
                     specificStrategy->setBalance(initialBalance);
                 }

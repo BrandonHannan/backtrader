@@ -53,7 +53,13 @@ if __name__ == '__main__':
     OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output')
     INPUT_FILE = os.path.join(OUTPUT_DIR, 'Returns.txt')
     OUTPUT_CSV = os.path.join(OUTPUT_DIR, 'strategy_lookback_optimization_results.csv')
-    INITIAL_CAPITAL = 10000.0
+    _config_path = os.path.join(OUTPUT_DIR, "configuration.json")
+    if os.path.exists(_config_path):
+        import json
+        with open(_config_path) as _f:
+            INITIAL_CAPITAL = json.load(_f)["initial_balance"]
+    else:
+        INITIAL_CAPITAL = 68000.0  # fallback if C++ hasn't been run yet
     
     # 1. "Download" all data by parsing the local file
     if not os.path.exists(INPUT_FILE):

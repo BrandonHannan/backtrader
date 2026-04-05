@@ -79,6 +79,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 
                 Position emptyPosition = Position();
                 this->setPosition(emptyPosition);
+                context->onPositionSold();
             }
             else{
                 sizer->updateStopLossPrice(currentPosition, currentInstance);
@@ -133,6 +134,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         
         Position emptyPosition = Position();
         this->setPosition(emptyPosition);
+        context->onPositionSold();
     }
 
     context->clear();

@@ -255,6 +255,11 @@ json DowContext::getContextData() const {
     return data;
 }
 
+void DowContext::onPositionSold() {
+    this->trendLine = TrendLineTracker(this->trendLineMode);
+    this->doubleTrendLine = TrendLineTracker(this->trendLineMode);
+}
+
 void DowContext::clear(){
     this->clearBase();
     this->trend = TrendIdentifier(this->lookBackPeriod, this->trendMode);

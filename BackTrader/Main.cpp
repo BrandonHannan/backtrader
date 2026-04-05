@@ -1,5 +1,6 @@
 #include "DataReader/DataReader.h"
 #include "StrategyRunner/DowATRStrategy/DowATRStrategy.h"
+#include "StrategyRunner/DowATRStrategy/DowATRBaseCase.h"
 #include "./TradingStrategy/Custom/CustomStrategy.h"
 #include "./PositionSizing/ATRPositionSize/ATRPositionSize.h"
 #include "./TradingContext/BreakoutContext/BreakoutContext.h"
@@ -15,7 +16,21 @@ int main(){
     // Use this For Windows
     //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
     unordered_map<string, StockData> data = ReadData("../data.txt");
-    cout << "Number of Stocks: " << data.size() << endl;
+    int dataSize = 0;
+    for (const auto& [ticker, stockData] : data) {
+        size_t n = stockData.close.size();
+        if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
+            stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
+        dataSize = dataSize + 1;
+    }
+    cout << "Number of Stocks: " << dataSize << endl;
+
+    DowBaseCase dowBase;
+    double initial_balance = static_cast<double>(dataSize) * dowBase.balance;
+    {
+        ofstream configFile("../output/configuration.json");
+        configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
+    }
 
     // for (auto stockData : data){
     //     cout << "Stock: " << stockData.first << endl;
@@ -54,9 +69,23 @@ int main(){
 
     // CustomStrategy strategy = CustomStrategy(balance, move(sizer), move(context));
 
+    cout << "Select execution mode:\n";
+    cout << "  1 - ExecuteBaseCase (single run with default parameters)\n";
+    cout << "  2 - ExecuteAllSweeps (full parameter sweep)\n";
+    cout << "Enter choice: ";
+    int choice;
+    cin >> choice;
+
     clock_t start = clock();
 
-    ExecuteAllSweeps(data);
+    if (choice == 1) {
+        ExecuteBaseCase(data);
+    } else if (choice == 2) {
+        ExecuteAllSweeps(data);
+    } else {
+        cout << "Invalid choice. Exiting.\n";
+        return 1;
+    }
 
     // vector<string> stocks = {"CL=F", "BZ=F", "NG=F", "HO=F", "RB=F",
     //                          "GC=F", "SI=F", "PL=F", "PA=F", "HG=F",

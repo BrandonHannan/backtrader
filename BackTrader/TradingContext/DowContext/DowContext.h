@@ -42,6 +42,8 @@ class DowContext: public BaseContext {
         bool isValid() const override;
 
         void clear() override;
+
+        void onPositionSold() override;
 };
 
 
