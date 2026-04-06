@@ -1,6 +1,5 @@
 # NeuralNetwork — Improvement Strategies
 
-**Current baseline:** Best model `diamond_32_256_128_32`, AUC-ROC = 0.5250 (barely above random).
 **Dataset:** 10,442 closed trades. Data quantity is not the bottleneck — feature quality and evaluation methodology are.
 
 Strategies are ordered from highest to lowest expected impact. Each entry includes what to do, why it helps, a plain-English explanation, and a workflow showing how it integrates with the C++/Python pipeline.
@@ -29,8 +28,17 @@ output/data.json  →  load_positions() returns (X, y, dates)
                   →  train all 51 configs as before
 ```
 
-**Files to change:**
-- `NeuralNetwork/neural_network.py` — modify `load_positions()` to return `dates` list alongside `X, y`; replace `train_test_split` with index-based chronological slicing
+**Files changed:**
+- `NeuralNetwork/neural_network.py` — modified `load_positions()` to return `dates` list alongside `X, y`; replaced `train_test_split` with index-based chronological slicing
+
+**Results (implemented):**
+
+| Split method | Best model | AUC-ROC |
+|---|---|---|
+| Random stratified (before) | `diamond_32_256_128_32` | 0.5250 — inflated by regime leakage |
+| Temporal (after) | `cylinder_2L_512` | 0.4745 — honest forward-only evaluation |
+
+The AUC drop confirms the original score was not real — the model had seen future market regimes during training. Split ranges: train 1997–2022, val 2022–2024, test 2024–2025.
 
 ---
 
@@ -55,10 +63,20 @@ A neural network adjusts thousands of interconnected knobs simultaneously, searc
     →  results added to the leaderboard table under family="xgboost"/"lightgbm"
 ```
 
-**Files to change:**
-- New `NeuralNetwork/tree_models.py`
-- `NeuralNetwork/requirements.txt` — add `xgboost`, `lightgbm`
-- `NeuralNetwork/neural_network.py` — import and call `tree_models` after the neural network sweep, merge results into leaderboard
+**Files changed:**
+- New `NeuralNetwork/tree_models.py` — XGBoost and LightGBM trainers returning `TrainResult`
+- `NeuralNetwork/requirements.txt` — added `xgboost`, `lightgbm`
+- `NeuralNetwork/neural_network.py` — imports and calls `tree_models` after the NN sweep, merges results into leaderboard; leaderboard updated to show a dedicated gradient boosting section
+
+**Results (implemented):**
+
+| Model | AUC-ROC | F1 | Recall | Acc |
+|---|---|---|---|---|
+| LightGBM `lightgbm_l63_n500` | **0.4922** | 0.3520 | 0.3427 | 0.5418 |
+| XGBoost `xgboost_d6_n500` | 0.4687 | 0.4472 | 0.6327 | 0.4320 |
+| Best NN `cylinder_2L_512` (prior best) | 0.4745 | 0.4380 | 0.5870 | 0.4531 |
+
+LightGBM takes the top spot overall at 0.4922, confirming gradient boosting is better suited to this tabular dataset than MLPs. All three models are still below 0.50, indicating the signal is weak — next priority is adding new features (RSI, ATR) via the C++ engine (Tier 2).
 
 ---
 

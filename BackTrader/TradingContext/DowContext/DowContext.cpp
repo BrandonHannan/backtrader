@@ -10,7 +10,9 @@ DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalL
     doubleTrend(TrendIdentifier(doubleLookBackPeriod, trendMode)),
     trendLine(TrendLineTracker(trendLineMode)), 
     doubleTrendLine(TrendLineTracker(trendLineMode)), 
-    sMACD(SMAMACD(lookBackPeriod, doubleLookBackPeriod, signalLookBackPeriod)) {}
+    sMACD(SMAMACD(lookBackPeriod, doubleLookBackPeriod, signalLookBackPeriod)),
+    rsi(RSI(lookBackPeriod)),
+    doubleRsi(RSI(doubleLookBackPeriod)) {}
 
 void DowContext::updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData){
     double currentClose = currentData.close;
@@ -29,6 +31,11 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         this->trend.processNextDay(currentData);
         this->doubleTrend.processNextDay(previousData);
         this->doubleTrend.processNextDay(currentData);
+
+        this->rsi.processNextDay(previousClose);
+        this->rsi.processNextDay(currentClose);
+        this->doubleRsi.processNextDay(previousClose);
+        this->doubleRsi.processNextDay(currentClose);
 
         Trend currentTrend = this->trend.getCurrentTrend();
         Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
@@ -51,6 +58,9 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
 
         this->trend.processNextDay(currentData);
         this->doubleTrend.processNextDay(currentData);
+
+        this->rsi.processNextDay(currentClose);
+        this->doubleRsi.processNextDay(currentClose);
 
         Trend currentTrend = this->trend.getCurrentTrend();
         Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
@@ -252,6 +262,11 @@ json DowContext::getContextData() const {
     data["doubleTrendLineReady"] = doubleTrendLine.isReady();
     data["doubleTrendLine"]      = doubleTrendLine.isReady() ? trendlineToJson(doubleTrendLine.getActiveTrend()) : json::object();
 
+    data["rsiReady"]       = rsi.isReady();
+    data["rsiValue"]       = rsi.isReady() ? rsi.getRSI() : 50.0;
+    data["doubleRsiReady"] = doubleRsi.isReady();
+    data["doubleRsiValue"] = doubleRsi.isReady() ? doubleRsi.getRSI() : 50.0;
+
     return data;
 }
 
@@ -267,5 +282,7 @@ void DowContext::clear(){
     this->trendLine = TrendLineTracker(this->trendLineMode);
     this->doubleTrendLine = TrendLineTracker(this->trendLineMode);
     this->sMACD = SMAMACD(this->lookBackPeriod, this->doubleLookBackPeriod, this->signalLookBackPeriod);
+    this->rsi = RSI(this->lookBackPeriod);
+    this->doubleRsi = RSI(this->doubleLookBackPeriod);
 }
 

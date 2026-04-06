@@ -6,6 +6,7 @@
 #include "../../Indicators/TrendIdentifier/TrendIdentifier.h"
 #include "../../Indicators/TrendLineTracker/TrendLineTracker.h"
 #include "../../Indicators/SMAMACD/SMAMACD.h"
+#include "../../Indicators/RSI/RSI.h"
 #include <cmath>
 #include <queue>
 
@@ -25,6 +26,9 @@ class DowContext: public BaseContext {
         TrendLineTracker doubleTrendLine; // Is the trend line for the current double look back period trend
 
         SMAMACD sMACD;
+
+        RSI rsi;       // RSI over lookBackPeriod
+        RSI doubleRsi; // RSI over doubleLookBackPeriod
 
     public:
         DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);

@@ -26,7 +26,6 @@ import sys
 import pickle
 
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 import torch
@@ -38,6 +37,9 @@ from architectures.cylinder.cylinder   import get_configs as cylinder_configs
 
 # Shared runtime
 from architectures.base import GenericMLP, make_loader, train_model, evaluate, TrainResult
+
+# Gradient boosting baseline
+from tree_models import run_tree_models
 
 
 # ---------------------------------------------------------------------------
@@ -100,7 +102,7 @@ def _trendline_features(ready_flag: bool, tl: dict) -> list:
 
 def extract_context_features(ctx: dict) -> list:
     """
-    Flatten one DowContext JSON object into 63 ordered floats.
+    Flatten one DowContext JSON object into 67 ordered floats.
 
     Block layout:
       priceStatistics   (8)
@@ -110,6 +112,7 @@ def extract_context_features(ctx: dict) -> list:
       trendLine         (5)
       doubleTrend       (17)
       doubleTrendLine   (5)
+      rsi / doubleRsi   (4)
     """
     features = []
     features.extend(_stats_features(ctx.get("priceStatistics", {})))
@@ -121,7 +124,11 @@ def extract_context_features(ctx: dict) -> list:
     features.extend(_trendline_features(ctx.get("trendLineReady", False), ctx.get("trendLine", {})))
     features.extend(_trend_features(ctx.get("doubleTrendReady", False), ctx.get("doubleTrend", {})))
     features.extend(_trendline_features(ctx.get("doubleTrendLineReady", False), ctx.get("doubleTrendLine", {})))
-    return features  # 8+8+3+17+5+17+5 = 63
+    features.append(float(ctx.get("rsiValue", 50.0)))
+    features.append(1.0 if ctx.get("rsiReady", False) else 0.0)
+    features.append(float(ctx.get("doubleRsiValue", 50.0)))
+    features.append(1.0 if ctx.get("doubleRsiReady", False) else 0.0)
+    return features  # 8+8+3+17+5+17+5+4 = 67
 
 
 # ---------------------------------------------------------------------------
@@ -130,20 +137,21 @@ def extract_context_features(ctx: dict) -> list:
 
 def load_positions(path: str):
     """
-    Load data.json and return (X, y) arrays.
+    Load data.json and return (X, y, dates) arrays.
 
     Filters out positions where pnl == 0.0 AND sellDate is empty
     (unclosed / still-open trades).
 
-    Feature vector per position (64 total):
-      [positionType, *entryContext×63]
+    Feature vector per position (68 total):
+      [positionType, *entryContext×67]
 
     Label: 1 if pnl > 0 else 0
+    dates: list of purchaseDate strings (ISO format) for temporal splitting
     """
     with open(path, "r") as f:
         positions = json.load(f)
 
-    X_rows, y_rows = [], []
+    X_rows, y_rows, dates = [], [], []
     skipped = 0
 
     for pos in positions:
@@ -159,11 +167,12 @@ def load_positions(path: str):
 
         X_rows.append([position_type] + ctx_features)
         y_rows.append(1 if pnl > 0.0 else 0)
+        dates.append(pos.get("purchaseDate", ""))
 
     if skipped:
         print(f"[data]  Skipped {skipped} unclosed positions.")
 
-    return np.array(X_rows, dtype=np.float32), np.array(y_rows, dtype=np.float32)
+    return np.array(X_rows, dtype=np.float32), np.array(y_rows, dtype=np.float32), dates
 
 
 # ---------------------------------------------------------------------------
@@ -206,7 +215,7 @@ def _divider(width: int = 88) -> str:
 
 
 def print_leaderboard(results: list, n_total: int):
-    """Print top-10 overall and top-5 per family."""
+    """Print top-10 overall, tree model summary, and top-5 per NN family."""
     W = 90
 
     print()
@@ -219,7 +228,19 @@ def print_leaderboard(results: list, n_total: int):
     for i, entry in enumerate(results[:10], start=1):
         print(_row(i, entry["family"], entry["cfg"]["name"], entry["result"]))
 
-    # Per-family top 5
+    # Tree model summary (always shown in full, regardless of overall rank)
+    tree_families = ("xgboost", "lightgbm")
+    tree_entries = [e for e in results if e["family"] in tree_families]
+    if tree_entries:
+        print()
+        print("  --- GRADIENT BOOSTING BASELINE ---")
+        print(_header())
+        print(_divider())
+        for entry in tree_entries:
+            overall_rank = results.index(entry) + 1
+            print(_row(overall_rank, entry["family"], entry["cfg"]["name"], entry["result"]))
+
+    # Per-family top 5 (NN families only)
     for family in ("funnel", "diamond", "cylinder"):
         family_results = [e for e in results if e["family"] == family]
         print()
@@ -281,16 +302,27 @@ def main():
     # Data — load, split, normalise (done once for all architectures)
     # ------------------------------------------------------------------
     print(f"[data]  Loading {data_path}")
-    X, y = load_positions(data_path)
+    X, y, dates = load_positions(data_path)
     print(f"[data]  Feature matrix: {X.shape}  (expected N×64)")
 
-    X_train, X_tmp, y_train, y_tmp = train_test_split(
-        X, y, test_size=0.30, random_state=args.seed, stratify=y
-    )
-    X_val, X_test, y_val, y_test = train_test_split(
-        X_tmp, y_tmp, test_size=0.50, random_state=args.seed, stratify=y_tmp
-    )
-    print(f"[data]  Split -> train={len(X_train)}  val={len(X_val)}  test={len(X_test)}")
+    # Temporal split — sort by purchaseDate ascending, slice sequentially.
+    # Prevents data leakage from future market regimes into training.
+    order = sorted(range(len(dates)), key=lambda i: dates[i])
+    X, y = X[order], y[order]
+    dates_sorted = [dates[i] for i in order]
+
+    n = len(X)
+    n_train = int(n * 0.70)
+    n_val   = int(n * 0.85)   # 70%–85% = val (15%), 85%–100% = test (15%)
+
+    X_train, y_train = X[:n_train],      y[:n_train]
+    X_val,   y_val   = X[n_train:n_val], y[n_train:n_val]
+    X_test,  y_test  = X[n_val:],        y[n_val:]
+
+    print(f"[data]  Temporal split -> train={len(X_train)}  val={len(X_val)}  test={len(X_test)}")
+    print(f"[data]  Train dates: {dates_sorted[0]} to {dates_sorted[n_train - 1]}")
+    print(f"[data]  Val   dates: {dates_sorted[n_train]} to {dates_sorted[n_val - 1]}")
+    print(f"[data]  Test  dates: {dates_sorted[n_val]} to {dates_sorted[-1]}")
 
     # Class balance in test set
     n_profitable = int(y_test.sum())
@@ -351,15 +383,26 @@ def main():
         )
 
     # ------------------------------------------------------------------
+    # Gradient boosting baseline (XGBoost + LightGBM)
+    # ------------------------------------------------------------------
+    print("\n[tree]  Running gradient boosting baseline models...")
+    tree_results = run_tree_models(
+        X_train, y_train, X_val, y_val, X_test, y_test,
+        pos_weight=float(pos_weight.item()),
+    )
+    results.extend(tree_results)
+    n_total += len(tree_results)
+
+    # ------------------------------------------------------------------
     # Sort and display leaderboard
     # ------------------------------------------------------------------
     results.sort(key=lambda e: (e["result"].auc_roc, e["result"].f1), reverse=True)
     print_leaderboard(results, n_total)
 
     # ------------------------------------------------------------------
-    # Save best model
+    # Save best NN model (tree models have model=None so skip them)
     # ------------------------------------------------------------------
-    best = results[0]
+    best = next(e for e in results if e["model"] is not None)
     nn_dir = os.path.dirname(__file__)
 
     model_path = os.path.join(nn_dir, "model.pt")
