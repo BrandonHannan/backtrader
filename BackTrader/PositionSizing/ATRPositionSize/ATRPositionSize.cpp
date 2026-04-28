@@ -1,10 +1,10 @@
 #include "ATRPositionSize.h"
 
 ATRPositionSize::ATRPositionSize(double riskAmount, int ATRPeriod, double ATRMultiplier): BasePositionSize(riskAmount),
-ATRPeriod(ATRPeriod), ATRMultiplier(ATRMultiplier), trueRangeSum(0.0), currentATR(0.0) {}
+ATRPeriod(ATRPeriod), ATRMultiplier(ATRMultiplier), atr(ATRPeriod) {}
 
 PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const {
-    if (this->currentATR <= 0 || position.isNull()){
+    if (atr.getATR() <= 0 || position.isNull()){
         return PositionPriceInfo(0.0, 0.0);
     }
 
@@ -12,7 +12,7 @@ PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, Positio
     double stopLossPrice = 0.0;
     double riskPerShare = 0.0;
     if (position.getPositiontype() == "LONG"){
-        stopLossPrice = data.open - (this->currentATR * this->ATRMultiplier);
+        stopLossPrice = data.open - (atr.getATR() * this->ATRMultiplier);
         riskPerShare = data.open - stopLossPrice;
         if (riskPerShare <= 0){
             // Avoid division by 0 or negative risk
@@ -24,7 +24,7 @@ PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, Positio
         return PositionPriceInfo(result, stopLossPrice);
     }
     else if (position.getPositiontype() == "SHORT"){
-        stopLossPrice = data.open + (this->currentATR * this->ATRMultiplier);
+        stopLossPrice = data.open + (atr.getATR() * this->ATRMultiplier);
         riskPerShare = stopLossPrice - data.open;
         if (riskPerShare <= 0){
             return PositionPriceInfo(0.0, 0.0);
@@ -51,30 +51,12 @@ Position ATRPositionSize::purchasePosition(double balance, const string stockNam
 }
 
 void ATRPositionSize::processNewData(const StockDataInstance &currentData, const StockDataInstance &previousData) {
-    double highMinusLow = currentData.high - currentData.low;
-    double highMinusPrevClose = abs(currentData.high - previousData.close);
-    double lowMinusPrevClose = abs(currentData.low - previousData.close);
-    double newTrueRange = max({highMinusLow, highMinusPrevClose, lowMinusPrevClose});
-
-    this->trueRangeWindow.push_back(newTrueRange);
-    this->trueRangeSum += newTrueRange;
-
-    if (this->trueRangeWindow.size() > this->ATRPeriod){
-        this->trueRangeSum -= this->trueRangeWindow.front();
-        this->trueRangeWindow.pop_front();
-    }
-
-    if (this->trueRangeWindow.size() == this->ATRPeriod) {
-        this->currentATR = this->trueRangeSum/this->ATRPeriod;
-    }
-    else{
-        this->currentATR = 0.0;
-    }
+    atr.processNewData(currentData, previousData);
 }
 
 void ATRPositionSize::updateStopLossPrice(Position &currentPosition, const StockDataInstance &data) const {
 
-    if (this->currentATR <= 0) {
+    if (atr.getATR() <= 0) {
         return;
     }
 
@@ -82,13 +64,13 @@ void ATRPositionSize::updateStopLossPrice(Position &currentPosition, const Stock
     double currentStopLoss = currentPosition.getStopLossPrice();
 
     if (positionType.getPositiontype() == "LONG"){
-        double newStopLossPrice = data.high - (this->currentATR * this->ATRMultiplier);
+        double newStopLossPrice = data.high - (atr.getATR() * this->ATRMultiplier);
         if (newStopLossPrice > currentStopLoss) {
             currentPosition.setStopLossPrice(newStopLossPrice);
         }
     }
     else if (positionType.getPositiontype() == "SHORT"){
-        double newStopLossPrice = data.low + (this->currentATR * this->ATRMultiplier);
+        double newStopLossPrice = data.low + (atr.getATR() * this->ATRMultiplier);
 
         if (newStopLossPrice < currentStopLoss) {
             currentPosition.setStopLossPrice(newStopLossPrice);
@@ -97,14 +79,9 @@ void ATRPositionSize::updateStopLossPrice(Position &currentPosition, const Stock
 }
 
 bool ATRPositionSize::isValid() const {
-    if (this->trueRangeWindow.size() == this->ATRPeriod){
-        return true;
-    }
-    return false;
+    return atr.isReady();
 }
 
 void ATRPositionSize::clear() {
-    this->trueRangeWindow.clear();
-    this->trueRangeSum = 0.0;
-    this->currentATR = 0.0;
+    atr.clear();
 }

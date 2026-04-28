@@ -1,14 +1,20 @@
-# Neural Network — Architecture & Guide
+# Neural Network — Orchestrator & Architecture Guide
 
 ## Overview
 
-This neural network predicts whether a trade will be **profitable** (`pnl > 0`) given only the market conditions that existed **at the moment the trade was entered**. It is a binary classifier trained on closed positions produced by the C++ backtester.
+This module trains a binary classifier that predicts whether a trade will be **profitable** (`pnl > 0`) given only the market conditions captured at the moment the trade was entered (the `entryContext` `DowContext` snapshot serialised by the C++ backtester).
 
 The fundamental question it answers:
 
-> *"Given the DowContext snapshot at trade entry — the trend state, trendlines, price statistics, and MACD — would this trade have made money?"*
+> *"Given the DowContext snapshot at trade entry — the trend state, trendlines, price/volume statistics, MACD, RSI, and ATR — would this trade have made money?"*
 
-`neural_network.py` is an **orchestrator**: it runs a 51-configuration grid search across three architecture families (Funnel, Diamond, Cylinder), prints a ranked leaderboard, and saves the best model automatically.
+[neural_network.py](neural_network.py) is an **orchestrator**, not a single model. Each run:
+
+1. Loads `output/data.json` and builds a 77-feature vector per trade
+2. Splits temporally (oldest 70% train, next 15% val, newest 15% test)
+3. Runs a 51-configuration grid search across three neural-network shape families — **Funnel**, **Diamond**, **Cylinder** (17 configs each, all built from `GenericMLP` in [architectures/base.py](architectures/base.py))
+4. Trains two gradient-boosting baselines — **XGBoost** and **LightGBM** — via [tree_models.py](tree_models.py)
+5. Sorts every entry by AUC-ROC (F1 tiebreaker), prints a leaderboard, and saves the best **neural** model's weights, the fitted scaler, and a JSON metadata file describing the winner
 
 ---
 
@@ -20,13 +26,13 @@ The fundamental question it answers:
 py -3.13 -m pip install -r NeuralNetwork/requirements.txt
 ```
 
-This installs: `torch`, `scikit-learn`, `numpy`.
+This installs `torch`, `scikit-learn`, `numpy`, `xgboost`, `lightgbm`.
 
-> **Windows note:** The bare `python` command resolves to the MSYS2 Python used by the C++ build tools, which has no pip and no packages. Always use `py -3.13` (the Windows Python Launcher) to run this script.
+> **Windows note:** the bare `python` command resolves to the MSYS2 Python used by the C++ build tools, which has no pip and no packages. Always use `py -3.13` (the Windows Python Launcher).
 
 ### 2. Generate the training data
 
-The C++ backtester must have already been run to produce `output/data.json`. If it doesn't exist:
+The C++ backtester must have been run to produce `output/data.json`. If it does not exist:
 
 ```bash
 cd BackTrader
@@ -49,117 +55,98 @@ For a quick development run (50 epochs, patience=7):
 py -3.13 NeuralNetwork/neural_network.py --fast
 ```
 
-Progress is printed for each of the 51 configurations:
+Per-configuration progress is printed:
 
 ```
 [01/51] funnel/funnel_2L_128              AUC=0.631  F1=0.583  Recall=0.541  Acc=0.618
 [02/51] funnel/funnel_3L_128              AUC=0.644  F1=0.601  Recall=0.567  Acc=0.631
 ...
 [51/51] cylinder/cylinder_5L_32           AUC=0.598  F1=0.552  Recall=0.489  Acc=0.601
+[tree]  Training XGBoost (scale_pos_weight=1.4912) ...
+[tree]  XGBoost done  AUC=0.6712  F1=0.6021  Recall=0.5832  Acc=0.6398
+[tree]  Training LightGBM (class_weight balanced) ...
+[tree]  LightGBM done AUC=0.6655  F1=0.5984  Recall=0.5810  Acc=0.6371
 ```
 
 ### 4. Reading the leaderboard
 
-After all 51 runs complete, a ranked table is printed:
+After every model is trained, three blocks are printed:
 
 ```
 ==========================================================================================
-  ARCHITECTURE GRID SEARCH — TOP 10 OVERALL  (51 configs, sorted by AUC-ROC)
+  ARCHITECTURE GRID SEARCH — TOP 10 OVERALL  (53 configs, sorted by AUC-ROC)
 ==========================================================================================
   Rank  Family    Config                          Acc     Prec    Recall  F1      AUC-ROC
   ----  --------  ------------------------------  ------  ------  ------  ------  -------
      1  cylinder  cylinder_3L_128                 0.6412  0.6120  0.5870  0.5993  0.6814
-     2  funnel    funnel_3L_256                   0.6341  0.6012  0.5712  0.5858  0.6729
+     2  xgboost   xgboost_d6_n500                 0.6398  0.6087  0.5832  0.5956  0.6712
+  ...
+
+  --- GRADIENT BOOSTING BASELINE ---
   ...
 
   --- TOP 5: FUNNEL ---
   ...
-
   --- TOP 5: DIAMOND ---
   ...
-
   --- TOP 5: CYLINDER ---
   ...
 ```
 
-- **AUC-ROC** — primary ranking metric. 0.5 = random, 1.0 = perfect. Values above 0.65 indicate genuine predictive signal.
-- **Recall** — critical for this use case: of all profitable trades, how many did the model catch?
-- **F1** — balances precision and recall; the most useful single number when classes are imbalanced.
+- **AUC-ROC** — primary ranking metric. 0.5 = random, 1.0 = perfect. Above 0.65 indicates genuine predictive signal.
+- **Recall** — of all profitable trades, how many did the model catch?
+- **F1** — best single number when classes are imbalanced (balances precision and recall).
+- **Tree-model rows** appear in the overall top-10 alongside neural configs and again grouped in the dedicated baseline block.
 
 ### 5. Command-line options
 
 ```
 py -3.13 NeuralNetwork/neural_network.py [OPTIONS]
 
-  --data PATH       Path to data.json      (default: output/data.json)
-  --epochs N        Max epochs per model   (default: 100)
-  --batch-size N    Mini-batch size        (default: 64)
-  --lr FLOAT        Adam learning rate     (default: 0.001)
-  --patience N      Early stopping patience (default: 15)
-  --seed N          Random seed            (default: 42)
+  --data PATH       Path to data.json       (default: output/data.json)
+  --epochs N        Max epochs per model    (default: 100)
+  --batch-size N    Mini-batch size         (default: 64)
+  --lr FLOAT        Adam learning rate      (default: 0.001)
+  --patience N      Early-stopping patience (default: 15)
+  --seed N          Random seed             (default: 42)
   --fast            Quick sweep: epochs=50, patience=7
 ```
 
-### 6. File outputs
+### 6. Export a single MLP-input sample
+
+After at least one run of `neural_network.py` (so `scaler.pkl` exists), you
+can dump exactly what the MLP receives as a JSON template:
+
+```bash
+py -3.13 NeuralNetwork/export_input_template.py
+```
+
+Writes [../output/data_ingestion_template.json](../output/data_ingestion_template.json) — one
+training-split row, fully extracted + winsorized + scaled, alongside the
+transformation parameters used. See [Normalisation.md](Normalisation.md) for a
+step-by-step explanation of every transformation in this file.
+
+Options:
+
+```
+py -3.13 NeuralNetwork/export_input_template.py [OPTIONS]
+
+  --data PATH       Path to data.json           (default: output/data.json)
+  --scaler PATH     Path to scaler.pkl bundle   (default: NeuralNetwork/scaler.pkl)
+  --out PATH        Where to write the template (default: output/data_ingestion_template.json)
+  --index N         Row index within the training split (default: 0 → first training row)
+```
+
+### 7. File outputs
 
 After a full run, three files are written:
 
-- `NeuralNetwork/scaler.pkl` — the fitted StandardScaler (for inference)
-- `NeuralNetwork/model.pt` — best model's PyTorch state dict
-- `NeuralNetwork/model_metadata.json` — family, config name, hidden_dims, dropout, and test metrics of the best model
-
----
-
-## Architecture Families
-
-### Directory structure
-
-```
-NeuralNetwork/
-├── neural_network.py          ← orchestrator (run this)
-├── architectures/
-│   ├── base.py                ← GenericMLP, train_model, evaluate, make_loader
-│   ├── funnel/
-│   │   ├── funnel.py          ← 17 configs (monotonically narrowing)
-│   │   └── ARCHITECTURE.md   ← detailed design docs + worked example
-│   ├── diamond/
-│   │   ├── diamond.py         ← 17 configs (compress → expand → compress)
-│   │   └── ARCHITECTURE.md
-│   └── cylinder/
-│       ├── cylinder.py        ← 17 configs (constant width)
-│       └── ARCHITECTURE.md
-```
-
-### Funnel — `architectures/funnel/`
-Starts wider than the input (64) and narrows steadily. Tests initial widths of 128/256/512/1024 with 2–4 hidden layers. Best when the useful decision signal emerges naturally from compression. See [architectures/funnel/ARCHITECTURE.md](architectures/funnel/ARCHITECTURE.md).
-
-### Diamond — `architectures/diamond/`
-Compresses to a tight bottleneck first, then expands wide in the middle, then compresses back. Bottlenecks range from 8–64 neurons; peaks from 64–256. Best when the features are noisy/redundant and useful interactions only emerge after pre-filtering. See [architectures/diamond/ARCHITECTURE.md](architectures/diamond/ARCHITECTURE.md).
-
-### Cylinder — `architectures/cylinder/`
-All hidden layers are the same width. Tests widths of 32/64/128/256/512 with 1–5 layers. Makes no assumption about where the useful signal forms — lets depth be the primary variable. Best when patterns require multi-step refinement without compression. See [architectures/cylinder/ARCHITECTURE.md](architectures/cylinder/ARCHITECTURE.md).
-
----
-
-## Key Design Decisions (vs. original single-model approach)
-
-### 1. Class imbalance correction (`pos_weight`)
-The original model used `BCELoss` which treats both classes equally. With ~40% profitable / ~60% loss trades, this caused the model to mostly predict "loss" (near-random AUC-ROC ≈ 0.49).
-
-The new approach computes:
-```
-pos_weight = num_loss_training_samples / num_profitable_training_samples  ≈ 1.49
-```
-And passes it to `BCEWithLogitsLoss`. This penalises missing a profitable trade ~49% more than incorrectly predicting one — matching the actual class ratio.
-
-### 2. Raw logit output (no Sigmoid in model)
-The model now outputs a raw logit. `BCEWithLogitsLoss` applies sigmoid internally using a numerically stable formula. Sigmoid is only applied at inference time. This prevents the numerical instability that occurs when the model outputs a very confident sigmoid probability (near 0 or 1) and then BCE takes `log(near_0)`.
-
-### 3. Learning rate scheduler
-`ReduceLROnPlateau(patience=5, factor=0.5)` halves the learning rate when validation loss stops improving. This lets the model make coarser updates early and finer updates later, recovering from stall points.
-
-### 4. Early stopping patience increased to 15
-The original patience was 10. With the LR scheduler needing 5 epochs to react and then the model needing time to recover, patience=15 gives the scheduler room to work before training is stopped.
+| File | Contents |
+|---|---|
+| [scaler.pkl](scaler.pkl) | Fitted `StandardScaler` (pickle). Load with `pickle.load(open('NeuralNetwork/scaler.pkl', 'rb'))` to normalise new data for inference. |
+| [model.pt](model.pt) | PyTorch state dict of the best-performing **neural** model (tree models are not saved). Load with `model = GenericMLP(input_dim=77, hidden_dims=...); model.load_state_dict(torch.load('NeuralNetwork/model.pt'))`. |
+| [model_metadata.json](model_metadata.json) | Family, config name, `hidden_dims`, dropout, and the five test metrics of the winning neural model. |
+| [../output/data_ingestion_template.json](../output/data_ingestion_template.json) | One fully-transformed training sample, exactly as `GenericMLP.forward()` receives it, plus the `winsor_lo`/`winsor_hi`/`scaler_mean`/`scaler_std` arrays as plain JSON. Generated by [export_input_template.py](export_input_template.py). |
 
 ---
 
@@ -167,9 +154,7 @@ The original patience was 10. With the LR scheduler needing 5 epochs to react an
 
 ### Source
 
-`output/data.json` is an array of JSON objects, one per closed position. Each object was written by `ExecuteAllSweeps()` in `BackTrader/StrategyRunner/DowATRStrategy/DowATRStrategy.h` and serialised via `Position::toJson()`.
-
-A position contains:
+`output/data.json` is an array of JSON objects, one per closed position, written by `ExecuteAllSweeps()` in [BackTrader/StrategyRunner/DowATRStrategy/DowATRStrategy.h](../BackTrader/StrategyRunner/DowATRStrategy/DowATRStrategy.h) via `Position::toJson()`:
 
 ```json
 {
@@ -190,260 +175,339 @@ A position contains:
 
 ### Filtering
 
-Positions are skipped if `pnl == 0.0` **and** `sellDate` is empty — these represent trades the backtester opened but never closed before the data ended. Trades where `pnl == 0.0` but `sellDate` is set (genuine breakeven trades) are kept and labelled as non-profitable (`y = 0`).
+A position is **skipped** if `pnl == 0.0` AND `sellDate == ""` — these are trades the backtester opened but never closed before the data ended. Genuine breakeven closes (`pnl == 0.0` with a non-empty `sellDate`) are kept and labelled as non-profitable (`y = 0`).
 
 ### Label
 
 ```
-y = 1  if pnl > 0  (profitable)
-y = 0  if pnl <= 0 (loss or breakeven)
+y = 1  if pnl  > 0    (profitable)
+y = 0  if pnl <= 0    (loss or breakeven)
 ```
+
+### Temporal split (not stratified)
+
+Positions are sorted by `purchaseDate` ascending and sliced sequentially:
+
+```
+oldest  ──────────────────────────────────────────────────────────  newest
+[============== 70% train ============][== 15% val ==][== 15% test ==]
+```
+
+See [neural_network.py:313-330](neural_network.py#L313-L330). This deliberately replaces the stratified random split used previously. **Why temporal:**
+
+- **Prevents future-regime leakage.** A random split lets 2024 trades inform a model that is then tested on 2010 trades, which is impossible in production. A temporal split forces the model to extrapolate to a market regime it has never seen — the only honest estimate of out-of-sample performance.
+- The cost is that test-set class balance is not guaranteed. The orchestrator prints test-set balance after splitting so any large deviation is visible.
 
 ---
 
-## Feature Engineering
+## Feature Vector (77 values, ATR/return-normalized)
 
-### Why only entry context?
+### Why only the entry context?
 
-Only `entryContext` is used as input. The `exitContext` is intentionally excluded because it contains information that would not have been available at the time the trade decision was made. Using it would create **data leakage** — the model would be learning from the future, producing inflated accuracy that would not generalise to live trading.
+Only `entryContext` is used as input. The `exitContext` is **deliberately excluded** because it contains information that would not have been available at the time the trade was opened — including it would create **data leakage** and inflate accuracy in a way that does not generalise to live trading. `tradeType` is also excluded: it is a human-readable label assigned by the developer and is derived from the same DowContext data the network already sees, so including it would be a redundant authored signal.
 
-### Feature vector layout (64 values)
+### Why stationarity transforms?
 
-Each position is reduced to a single flat array of 64 floating-point numbers:
+The 32-ticker commodity universe spans wildly different natural scales — GC=F trades around $2,000, ZC=F around $5, CL=F volume is ~500,000 contracts/day while LBS=F is ~500. After a global `StandardScaler`, raw features at those different scales become incomparable across tickers; the network spends parameters memorizing per-ticker baselines instead of learning the actual signal. Phase A of the data-quality work converts every feature into a **scale-free, cross-ticker-comparable form**: prices become ATR-normalized distances from `purchasePrice`, indices become `days-since-trend-start`, volumes get log-transformed and CoV-derived, slopes become per-bar returns. See [neural_network.py:`extract_context_features`](neural_network.py).
 
-```
-Index   Group                   Count   Description
------   -----                   -----   -----------
-0       positionType            1       LONG=1.0 / SHORT=0.0
-1–8     priceStatistics         8       See below
-9–16    volumeStatistics        8       See below
-17      macd                    1       MACD line value
-18      signal                  1       MACD signal line value
-19      macdReady               1       1.0 if MACD has enough history, else 0.0
-20      trendReady              1       1.0 if primary trend is confirmed
-21      trend.type              1       UPTREND=1.0 / NONE=0.0 / DOWNTREND=-1.0
-22–24   trend.e1                3       [index, close, isTrough]
-25–27   trend.e2                3       [index, close, isTrough]
-28–30   trend.e3                3       [index, close, isTrough]
-31–33   trend.e4                3       [index, close, isTrough]  (0.0 if absent)
-34–36   trend.e5                3       [index, close, isTrough]  (0.0 if absent)
-37–41   trendLine               5       See below
-42      doubleTrendReady        1       1.0 if double trend is confirmed
-43      doubleTrend.type        1       UPTREND=1.0 / NONE=0.0 / DOWNTREND=-1.0
-44–58   doubleTrend.e1–e5       15      Same layout as trend extremums
-59–63   doubleTrendLine         5       See below
-```
+### Layout (77 values per trade)
 
-**Statistics block (8 values)** — applies to both `priceStatistics` and `volumeStatistics`:
+| Offset | Group                          | Count | Notes |
+|-------:|--------------------------------|------:|-------|
+|     0  | positionType (LONG=1, SHORT=0) |   1   | unchanged |
+|   1–9  | priceStatistics                |   9   | ATR-normalized + new `price_cov` |
+|  10–18 | volumeStatistics               |   9   | log1p + new `vol_cov` |
+|  19–21 | macd / signal / macdReady      |   3   | macd and signal divided by `priceStatistics.mean` |
+|  22–38 | trend                          |  17   | extremum closes ATR-normalized; indices replaced by `days_since_e1` |
+|  39–44 | trendLine                      |   6   | ATR-normalized intercept + new `projected_atr_dist` |
+|  45–61 | doubleTrend                    |  17   | same shape as Trend, double-lookback |
+|  62–67 | doubleTrendLine                |   6   | same shape as TrendLine |
+|  68–71 | rsi / rsiReady / dRsi / dRsiReady | 4 | RSI is in [0, 100], left untransformed |
+|  72–76 | atr block                      |   5   | atr/price, atrReady, doubleAtr/price, doubleAtrReady, **vol_ratio = atr/doubleAtr** |
+| **Total** |                             | **77** | |
 
-| Index (within block) | Field | Meaning |
-|---|---|---|
-| 0 | mean | Rolling average of close / volume |
-| 1 | std | Rolling standard deviation |
-| 2 | min | Rolling minimum |
-| 3 | max | Rolling maximum |
-| 4 | slope | Linear regression slope over the lookback window |
-| 5 | slopeSE | Standard error of the slope |
-| 6 | slopeRSQ | R² of the linear fit |
-| 7 | slopeSignificant | 1.0 if slope is statistically significant, else 0.0 |
+`FEATURE_NAMES` in [neural_network.py](neural_network.py) gives the exact name of each column for diagnostics.
 
-**Trendline block (5 values)** — applies to both `trendLine` and `doubleTrendLine`:
+### Price statistics block (9 values)
 
-| Index (within block) | Field | Meaning |
-|---|---|---|
-| 0 | trendLineReady | 1.0 if trendline has been established |
-| 1 | isActive | 1.0 if price has not broken the line |
-| 2 | slope | Rise per bar of the trendline |
-| 3 | intercept | Price at the current bar's x-position |
-| 4 | dateDifference | Number of calendar days spanned by the line |
+| Index | Field            | Transform |
+|------:|------------------|-----------|
+| 0 | price_mean_atr     | `(mean - purchasePrice) / atr` |
+| 1 | price_std_atr      | `std / atr` |
+| 2 | price_min_atr      | `(min - purchasePrice) / atr` |
+| 3 | price_max_atr      | `(max - purchasePrice) / atr` |
+| 4 | price_slope_ret    | `slope / mean` (per-bar return) |
+| 5 | price_slopeSE_ret  | `slopeSE / mean` |
+| 6 | price_slopeRSQ     | unchanged (already in [0, 1]) |
+| 7 | price_slopeSig     | unchanged boolean |
+| 8 | **price_cov**      | `std / mean` — coefficient of variation, ticker-agnostic relative dispersion |
 
-**Extremum block (3 values per extremum, 5 extremums per trend)**:
+### Volume statistics block (9 values)
 
-| Index (within block) | Field | Meaning |
-|---|---|---|
-| 0 | index | Bar index in the data window (-1 = not yet set) |
-| 1 | close | Closing price at this swing point |
-| 2 | isTrough | 1.0 = swing low, 0.0 = swing high |
+| Index | Field             | Transform |
+|------:|-------------------|-----------|
+| 0 | vol_log_mean       | `log1p(mean)` |
+| 1 | vol_log_std        | `log1p(std)` |
+| 2 | vol_log_min        | `log1p(min)` |
+| 3 | vol_log_max        | `log1p(max)` |
+| 4 | vol_slope_frac     | `slope / mean` |
+| 5 | vol_slopeSE_frac   | `slopeSE / mean` |
+| 6 | vol_slopeRSQ       | unchanged |
+| 7 | vol_slopeSig       | unchanged boolean |
+| 8 | **vol_cov**        | `std / mean` |
 
-### Why `tradeType` is excluded
+### Trend block (17 values)
 
-`tradeType` is a human-readable string (e.g. `"LONG BREAKTHROUGH"`) assigned by the developer for identification. It encodes the developer's own classification of the trade, which is derived from the same DowContext data already present in the feature vector. Including it would introduce a redundant signal that is semantically authored, not independently measured, and could cause the network to overfit to label strings rather than learning from market structure.
+| Index | Field    | Meaning |
+|------:|----------|---------|
+|   0   | trendReady | 1.0 if the primary trend is confirmed |
+|   1   | trend.type | UPTREND=1.0 / NONE=0.0 / DOWNTREND=-1.0 |
+| 2–16  | e1–e5      | 5 extremums × 3 values: `[days_since_e1, close_atr_dist, isTrough]` |
+
+### Extremum sub-block (3 values per extremum)
+
+| Index | Field           | Meaning |
+|------:|-----------------|---------|
+| 0 | days_since_e1     | `(e_n.date - e1.date).days` (e1 itself = 0). Captures intra-trend pacing. |
+| 1 | close_atr_dist    | `(close - purchasePrice) / atr` — distance in volatility units |
+| 2 | isTrough          | 1.0 = swing low, 0.0 = swing high |
+
+When an extremum is missing (`index == -1`) all three values are zeroed so the network sees a neutral signal rather than a spurious `-purchasePrice/atr` distance from a fictitious zero-close.
+
+### Trendline block (6 values) — `trendLine` and `doubleTrendLine`
+
+| Index | Field              | Meaning |
+|------:|--------------------|---------|
+| 0 | trendLineReady       | 1.0 if a trendline has been established |
+| 1 | isActive             | 1.0 if price has not yet broken the line |
+| 2 | tl_slope_ret         | `slope / priceStatistics.mean` (per-bar return) |
+| 3 | tl_intercept_atr     | `(intercept - purchasePrice) / atr` |
+| 4 | dateDifference       | Number of calendar days spanned by the line |
+| 5 | **tl_proj_atr**      | `(purchasePrice - (intercept + slope*dateDifference)) / atr` — distance from current price to the trendline's projected current value, in volatility units |
+
+When the trendline is not active or not ready, fields 2–5 are zeroed.
 
 ### Normalisation
 
-All 64 features are passed through a `StandardScaler` before training:
+All 77 features pass through a configurable scaler:
 
 ```
-x_scaled = (x - mean) / std
+x_clipped = clip(x, lower_pct_bound, upper_pct_bound)   # winsorize, default 1%–99%
+x_scaled  = scaler.transform(x_clipped)                  # StandardScaler or RobustScaler
 ```
 
-The scaler is fitted exclusively on the **training split** and then applied to the validation and test splits. This is critical — if the scaler saw the test data, the test set would no longer be a true holdout and accuracy numbers would be optimistic.
+CLI flags:
+- `--scaler {standard,robust}` — default `standard`. `robust` uses median/IQR for fat-tail resilience.
+- `--winsorize <pct>` — default `1.0`. Clip each feature to `[pct, 100-pct]` percentile bounds computed from the train split. Set to `0` to disable.
 
-**Why StandardScaler over MinMaxScaler?**
+The scaler **and** the winsorize bounds are fitted **exclusively on the training split**, then both are applied to val and test. The bundle `{scaler, winsor_lo, winsor_hi, scaler_kind, winsorize_pct}` is persisted to [scaler.pkl](scaler.pkl) so inference replays both steps deterministically.
 
-The features in this dataset include values with very different natural ranges: extremum indices (0–2000+), prices (0.5–500+), slopes (near-zero), R² values (0–1), and binary flags (0 or 1). MinMax scaling compresses everything to [0, 1] but is highly sensitive to outliers — a single anomalous price spike would compress all other values into a tiny band. StandardScaler is more robust because it centres data around zero and scales by spread, so outliers have less destructive effect on the majority of values. It also works better with ReLU activations, which learn best from inputs centred near zero.
+After the Phase A stationarity transforms, the pre-scaling feature ranges have collapsed from a 9-order-of-magnitude spread to roughly 4 orders of magnitude — enough that the choice of scaler matters less than it used to, but RobustScaler is still a sensible default for financial data because of fat-tailed return distributions.
+
+### Feature diagnostics
+
+[feature_diagnostics.py](feature_diagnostics.py) loads the trained model + scaler bundle and writes [feature_report.txt](feature_report.txt) containing:
+
+- **Pearson correlation matrix**, with all pairs at `|r| ≥ 0.95` flagged for redundancy review
+- **Permutation importance** — for each feature, shuffle its column in the test set 3× and record the mean AUC-ROC drop. Negative-or-zero drops mark drop candidates
+- A concise drop-list of features that did not move the needle
+
+Run after `neural_network.py` has trained at least once: `py -3.13 NeuralNetwork/feature_diagnostics.py`.
 
 ---
 
-## Model Architecture
+## Orchestrator Flow
 
-### The chosen model: Multi-Layer Perceptron (MLP)
+The full pipeline lives in `main()` at [neural_network.py:273-435](neural_network.py#L273-L435):
 
 ```
-Input layer      64 neurons    (one per normalised feature)
-        |
-  Linear(64→128)               Learnable weight matrix W₁ (64×128) + bias b₁
-  BatchNorm1d(128)              Normalises activations within each mini-batch
-  ReLU                         Non-linearity: max(0, x)
-  Dropout(p=0.3)               Randomly zeroes 30% of neurons during training
-        |
-  Linear(128→64)               Learnable weight matrix W₂ (128×64) + bias b₂
-  BatchNorm1d(64)
-  ReLU
-  Dropout(p=0.3)
-        |
-  Linear(64→1)                 Learnable weight matrix W₃ (64×1) + bias b₃
-  Sigmoid                      Squashes output to probability in [0, 1]
-        |
-Output           1 value       P(trade is profitable)
+1. Parse CLI args (--epochs, --patience, --lr, --fast, ...)
+2. load_positions(data.json)              ← filter + extract 77 features per trade (ATR-normalized)
+3. Sort by purchaseDate; slice 70 / 15 / 15
+4. normalise(X_train, X_val, X_test)      ← fit StandardScaler on train, persist
+5. pos_weight = num_neg_train / num_pos_train       (~1.49)
+6. Build train_loader, val_loader (batch=64)
+7. for cfg in funnel.get_configs() + diamond.get_configs() + cylinder.get_configs():
+       model = GenericMLP(input_dim=77, hidden_dims=cfg["hidden_dims"], dropout=cfg["dropout"])
+       train_model(model, train_loader, val_loader, epochs, patience, lr, pos_weight)
+       evaluate(model, X_test, y_test)    ← Accuracy / Precision / Recall / F1 / AUC-ROC
+       results.append({...})
+8. tree_models.run_tree_models(...)       ← XGBoost + LightGBM, same splits, same pos_weight
+9. results.sort(key=AUC-ROC, F1)          ← merged ranking of NN + tree
+10. print_leaderboard(...)                ← top 10 overall + tree block + per-family top 5
+11. Save best NN model.state_dict() -> model.pt
+12. Save winner metadata -> model_metadata.json
 ```
 
-A prediction of ≥ 0.5 is classified as profitable (`y = 1`); < 0.5 is classified as a loss (`y = 0`).
+Every NN config shares the same `train_model` runtime in [architectures/base.py:96-179](architectures/base.py#L96-L179) — only `hidden_dims` and `dropout` change.
 
-### Why an MLP?
+---
 
-An MLP was selected over the alternatives below because it is the best match for this specific data and problem:
+## Architecture Families
 
-**Vs. Logistic Regression**
-Logistic regression fits a single linear boundary through the 66-dimensional feature space. Market profitability is unlikely to be linearly separable — for example, a trendline slope that predicts profit in an uptrend may predict loss in a downtrend. The MLP learns non-linear combinations of features through its hidden layers, capturing these conditional relationships. The two hidden layers give it enough capacity without being overparameterised.
+All three families instantiate the same [`GenericMLP`](architectures/base.py#L45-L74) class — they differ only in `hidden_dims`. The shape determines what kind of representation the network is forced to learn.
 
-**Vs. Random Forest / Gradient Boosting (e.g. XGBoost)**
-Tree-based ensembles are strong competitors for tabular data and would likely perform comparably here. An MLP was chosen because:
-1. The feature space contains meaningful *continuous* relationships (e.g. trendline slope + R² together convey strength of trend). Trees split features independently and must implicitly reconstruct these relationships through many splits. Linear layers learn weighted combinations directly.
-2. It is a natural foundation for later extension — for instance, processing the entry context with an LSTM if the context is ever provided as a time series rather than a summary snapshot.
-3. Consistency with the existing Python tooling in this repo (no new non-Python dependency).
+### Funnel — [architectures/funnel/](architectures/funnel/)
 
-**Vs. Convolutional Networks (CNN)**
-CNNs learn spatial patterns in grid-structured data (images, sequences). The 66-element feature vector here has no spatial topology — adjacent features are not necessarily related. A CNN would impose a structure that does not exist.
+- **Shape intuition:** monotonically narrowing — start wider than the input (77) and step down (e.g. `[1024, 256, 64]`).
+- **Config space:** 17 configs spanning initial widths 128 / 256 / 512 / 1024 and depths 2–4. Dropout 0.3 (standard) or 0.4 (steep / wide).
+- **Learning hypothesis:** **progressive distillation.** Each successive layer compresses the representation, forcing earlier wide layers to expose every weak combination of features and forcing later narrow layers to commit to the few combinations that actually predict profit. A useful representation is whatever survives the squeeze.
+- **Best when:** the discriminative signal is the *aggregate* of many small effects rather than a single high-level latent factor.
+- **Deep dive:** [architectures/funnel/ARCHITECTURE.md](architectures/funnel/ARCHITECTURE.md) — full configuration table, mathematics, worked numeric trace, and backprop diagram.
 
-**Vs. Recurrent Networks (LSTM / GRU)**
-LSTMs process sequences where order matters. The current input to this network is a single fixed-length snapshot, not a time series. An LSTM would be appropriate if the model received the raw OHLCV bars over the lookback window directly, but that would require a different data format from the C++ engine. If the data format is extended in the future, migrating to an LSTM encoder + MLP head would be a natural upgrade.
+### Diamond — [architectures/diamond/](architectures/diamond/)
 
-### Layer-by-layer explanation
+- **Shape intuition:** compress → expand → compress (e.g. `[32, 256, 128, 32]`). The first layer drops to a tight bottleneck; the middle widens out; the final hidden layer narrows again.
+- **Config space:** 17 configs with bottleneck widths 8 / 16 / 32 / 64, peak widths 64 / 128 / 256, and depths 3–5. Dropout 0.2 for tight bottlenecks (≤16), 0.3 elsewhere.
+- **Learning hypothesis:** **bottleneck regularisation.** A useful feature must "pay for its bandwidth" — the bottleneck cannot encode every input, so it learns a low-rank summary of the 77 features. The wide middle layer then has space to combine those compressed factors non-linearly before the final compression projects to a decision.
+- **Best when:** the raw feature vector is noisy or redundant (which it is — many DowContext fields are zero when trends/trendlines are absent), so pre-filtering pays off.
+- **Deep dive:** [architectures/diamond/ARCHITECTURE.md](architectures/diamond/ARCHITECTURE.md).
 
-**Linear layers**
-Each `nn.Linear(in, out)` learns a matrix of weights and a bias vector. During the forward pass it computes `output = input @ W.T + b`. The weights are updated during backpropagation to minimise the loss. The widths (128, 64) follow a funnel pattern — each layer compresses the representation, forcing the network to distil the most predictive information.
+### Cylinder — [architectures/cylinder/](architectures/cylinder/)
 
-**Batch Normalisation**
-After each linear layer, `BatchNorm1d` normalises the activations across the mini-batch: it subtracts the batch mean and divides by the batch standard deviation, then applies two learnable rescaling parameters (gamma, beta). This solves the **internal covariate shift** problem — as weights update during training, the distribution of activations seen by the next layer keeps shifting, which slows convergence. BatchNorm re-centres activations at each layer, allowing higher learning rates and more stable training. It also adds a mild regularisation effect.
+- **Shape intuition:** every hidden layer is the same width (e.g. `[128, 128, 128]`).
+- **Config space:** 17 configs covering widths 32 / 64 / 128 / 256 / 512 and depths 1–5. Dropout uniformly 0.3 — depth is the only experimental variable.
+- **Learning hypothesis:** **iterative refinement.** With no compression imposed, each layer can refine the representation produced by the previous one rather than reshape it. Constant width makes the Jacobians between layers square, which keeps gradient magnitudes more stable as depth grows — useful for testing whether *depth alone* helps.
+- **Best when:** the right representation is reached by repeated small adjustments rather than by re-projecting into a different dimensionality.
+- **Deep dive:** [architectures/cylinder/ARCHITECTURE.md](architectures/cylinder/ARCHITECTURE.md).
 
-**ReLU activation**
-`ReLU(x) = max(0, x)` introduces non-linearity. Without it, stacking multiple linear layers is equivalent to a single linear layer — no additional expressiveness is gained. ReLU was chosen over sigmoid or tanh for hidden layers because it does not saturate for positive inputs, so gradients flow cleanly during backpropagation (the **vanishing gradient** problem that plagues deep sigmoid networks is not present). ReLU is also computationally trivial.
+---
 
-**Dropout**
-During training, `Dropout(p=0.3)` randomly sets 30% of neuron outputs to zero on each forward pass. This forces the network to learn redundant representations — no single neuron can be relied upon — which dramatically reduces overfitting. During evaluation (`model.eval()`), dropout is disabled and all neurons contribute. With only ~6,700 training samples, overfitting is a real risk; dropout is the primary guard against it.
+## How Each Architecture Learns
 
-**Sigmoid output**
-The final `nn.Sigmoid()` maps the raw output (any real number) to the range [0, 1], which is interpreted as the probability the trade is profitable. This is required for `BCELoss` to be mathematically valid.
+### Shared scaffolding (identical across all 51 NN configs)
+
+Each network is a `GenericMLP` with the same per-layer pattern:
+
+```
+For each hidden width w in hidden_dims:
+    Linear(in → w)        ← learns weight matrix W and bias b
+    BatchNorm1d(w)        ← per-batch normalisation, two learnable rescale params
+    ReLU                  ← element-wise max(0, x); introduces non-linearity
+    Dropout(p)            ← randomly zeros p fraction of activations during training
+
+Final:
+    Linear(in → 1)        ← raw logit (no Sigmoid in the model)
+```
+
+Source: [architectures/base.py:58-74](architectures/base.py#L58-L74).
+
+**Forward pass per layer:** `z = x · Wᵀ + b`, then BatchNorm centres `z` to zero mean / unit variance over the mini-batch and rescales with learned `γ, β`, then ReLU clips negatives, then Dropout zeroes a random fraction of outputs.
+
+**Loss:** `BCEWithLogitsLoss(pos_weight=num_neg/num_pos)` ([base.py:119](architectures/base.py#L119)). It applies the sigmoid internally with a numerically stable formulation (`log(1 + exp(-|x|))`) so the model can output unbounded raw logits without `log(0)` blow-ups. The `pos_weight ≈ 1.49` correction penalises a missed profitable trade ~49% more than a missed loss, matching the actual class ratio (~60% loss / ~40% profit).
+
+**Backward pass:** PyTorch autograd walks the chain rule. For each layer `k`, the gradient of the loss with respect to its weights is `∂L/∂W_k = δ_k · a_{k-1}ᵀ`, where `δ_k` is the back-propagated error signal. `loss.backward()` ([base.py:137](architectures/base.py#L137)) populates every parameter's `.grad`, and `optimizer.step()` ([base.py:138](architectures/base.py#L138)) applies the Adam update.
+
+**Optimizer:** Adam (lr=1e-3) — maintains a per-parameter adaptive learning rate using running averages of the first and second moments of the gradient. More stable than vanilla SGD on tabular data with mixed feature scales.
+
+**Scheduler:** `ReduceLROnPlateau(mode="min", patience=5, factor=0.5)` ([base.py:121-123](architectures/base.py#L121-L123)). When validation loss does not improve for 5 epochs, the learning rate is halved — letting the model take coarse steps early and fine steps late.
+
+**Early stopping:** training stops when val loss has not improved for `patience` epochs (default 15; `--fast` lowers it to 7). The model is restored to the weights from its best validation epoch ([base.py:177-178](architectures/base.py#L177-L178)). With scheduler patience=5 and early-stopping patience=15, the LR scheduler gets up to three halving attempts before training is killed.
+
+### How the shapes differ in what they learn
+
+The scaffolding is identical — what changes is the geometry of the gradient flow:
+
+- **Funnel (wide → narrow).** Early wide layers receive distributed gradient signal — many neurons share the responsibility for any one feature combination, so each individual weight gets a small update. The narrowing forces a *concentration* of error: by the last hidden layer, only a few neurons exist, so each one receives a strong, targeted gradient. The net effect: early layers freely explore every weak interaction; late layers commit hard to the few that matter. Loss landscape is forgiving early, sharp late.
+
+- **Diamond (compress → expand → compress).** The bottleneck layer is the gradient bottleneck too — every gradient flowing back to the input layer must pass through it. This *forces feature competition*: a feature that does not survive the bottleneck cannot influence the output, so the bottleneck weights become an implicit feature selector. The wide middle layer sees only the surviving signals and has plenty of capacity to combine them non-linearly. The final compression chooses the decision-relevant combinations. This is why diamond is most useful when the input is noisy/redundant: the bottleneck learns "what to pay attention to" before the wide layer learns "how to combine it."
+
+- **Cylinder (constant width).** Because every layer has the same width, the per-layer Jacobian is square, and the gradient magnitude is more stable from layer to layer. Deep cylinders behave like an iterative refinement loop — each layer learns a small correction to the previous representation rather than a different projection of it. The risk is that a too-narrow constant width leaves no room for the network to disentangle features at all (configs with width=32 or 1 layer are intentionally included as floor cases); the reward is that depth can be increased without the gradient instability that would plague a deep funnel or deep diamond.
+
+For per-shape worked numeric examples and step-by-step backprop walkthroughs, see each family's `ARCHITECTURE.md`.
+
+---
+
+## Gradient-Boosting Baselines
+
+In addition to the 51 neural configs, [tree_models.py](tree_models.py) trains two strong tabular baselines on the **same splits** with the **same `pos_weight`**:
+
+| Model | Key hyperparameters | Source |
+|-------|---------------------|--------|
+| **XGBoost** (`xgboost_d6_n500`) | `n_estimators=500, max_depth=6, learning_rate=0.05, scale_pos_weight=pos_weight (~1.49), subsample=0.8, colsample_bytree=0.8, early_stopping_rounds=20` on val | [tree_models.py:57-69](tree_models.py#L57-L69) |
+| **LightGBM** (`lightgbm_l63_n500`) | `n_estimators=500, num_leaves=63, learning_rate=0.05, class_weight="balanced", subsample=0.8, colsample_bytree=0.8`, val eval set | [tree_models.py:85-99](tree_models.py#L85-L99) |
+
+Their results are merged into the leaderboard ([neural_network.py:393-399](neural_network.py#L393-L399)) and printed in a dedicated **GRADIENT BOOSTING BASELINE** block. **Why include them:** gradient-boosted trees are notoriously strong on tabular data — they set a floor that any neural config has to clear to be worth its added complexity. If the best NN cannot beat XGBoost on AUC-ROC, the right move is usually to ship the tree model. The orchestrator still saves the best **neural** config to `model.pt` (tree results have `model=None`, so the save logic at [neural_network.py:410](neural_network.py#L410) skips them).
 
 ---
 
 ## Training Procedure
 
-### Loss function: Binary Cross-Entropy (BCELoss)
+### Loss: `BCEWithLogitsLoss` with `pos_weight`
 
 ```
-BCE = -[y * log(p) + (1 - y) * log(1 - p)]
+pos_weight = num_neg_train / num_pos_train   ≈ 1.49
+loss       = BCEWithLogitsLoss(pos_weight=pos_weight)(logit, y)
 ```
 
-Where `y` is the true label (0 or 1) and `p` is the predicted probability. When the model is confident and correct (p close to 1 when y=1, or p close to 0 when y=0), the loss is near zero. When the model is confident and wrong, the loss is large (log of a near-zero number). This asymmetric penalty drives the model toward calibrated probabilities, not just correct rankings.
+Combines a sigmoid and binary cross-entropy in a single numerically stable formula. With `pos_weight = 1.49`, the loss for a missed profitable trade (`y=1` predicted as 0) is multiplied by 1.49 — directly compensating for the ~60/40 class imbalance. The earlier `BCELoss` without weighting drove the model to predict "loss" almost everywhere (Recall ≈ 0.006, AUC-ROC ≈ 0.49 — near random).
 
-**Why not MSE?** Mean squared error treats the output as a continuous value and penalises distance. For binary classification the output is a probability, and BCE is the theoretically correct loss derived from maximum likelihood estimation under a Bernoulli distribution.
+### Why raw logits (no Sigmoid in the model)
 
-### Optimiser: Adam
+`BCEWithLogitsLoss` applies sigmoid internally using `log(1 + exp(-|x|))`, which is stable for very confident inputs. Putting an explicit `Sigmoid()` before `BCELoss` produces values close to 0 or 1, and `log(near_0)` blows up. Sigmoid is applied only at inference: `torch.sigmoid(logits)` → threshold at 0.5.
 
-Adam (Adaptive Moment Estimation) maintains a per-parameter learning rate, scaled by the running average of past gradients (first moment) and squared gradients (second moment). Compared to vanilla SGD:
+### Optimizer: Adam (lr=1e-3)
 
-- Converges faster because it adapts the learning rate to each parameter
-- Less sensitive to the initial learning rate choice
-- Handles sparse gradients gracefully (relevant for features like `macdReady` that are 0 for many samples)
+Per-parameter adaptive learning rate using the running first and second moments of the gradient. Less sensitive to learning-rate choice than SGD, handles sparse gradients (many DowContext flags are 0 when trends/trendlines are absent), and is the standard starting point for tabular MLPs.
 
-The default learning rate of `0.001` is the standard starting point for Adam on tabular data.
+### LR scheduler: `ReduceLROnPlateau(patience=5, factor=0.5)`
 
-### Data splits
-
-```
-Full dataset  (N positions)
-      |
-      +-- 70% Training set    — used to update weights
-      |
-      +-- 15% Validation set  — used to monitor generalisation during training
-      |
-      +-- 15% Test set        — held out entirely; used only for final evaluation
-```
-
-Splitting is **stratified** — each split has the same proportion of profitable / non-profitable trades as the full dataset. Without stratification, a random split could put most of the profitable trades in training and leave the test set unrepresentative.
-
-The test set is never seen by the model or the scaler until the final `evaluate()` call. This makes the reported metrics an honest estimate of how well the model would perform on future unseen trades.
+Halves the learning rate when validation loss stops improving for 5 consecutive epochs. Lets the model take large steps early to find a good basin and small steps late to converge inside it.
 
 ### Early stopping
 
-```python
-if val_loss < best_val_loss:
-    save best weights
-    reset patience counter
-else:
-    increment patience counter
-    if patience counter >= 10:
-        stop training, restore best weights
-```
+| Mode    | Early-stopping patience | Scheduler patience | Halving attempts before stop |
+|---------|------------------------:|-------------------:|-----------------------------:|
+| default |                      15 |                  5 |                            3 |
+| `--fast`|                       7 |                  5 |                            1 |
 
-Training stops if the validation loss has not improved for 10 consecutive epochs. The model is then restored to the weights from its best validation epoch. This prevents overfitting without requiring manual tuning of the epoch count — the network trains for exactly as long as it is learning something useful.
+Best-validation weights are restored when training ends.
 
 ### Mini-batches
 
-Weights are updated once per mini-batch of 64 samples, not once per epoch. This means:
-- Gradients are estimated from 64 samples, introducing noise that helps escape local minima
-- Parameters update many times per epoch (~74 updates per epoch for 4,700 training samples), so learning is fast
-- BatchNorm requires a reasonable batch size to compute stable statistics; 64 is sufficient
+Updates run once per mini-batch of 64. Gradient noise from small batches helps escape local minima; many updates per epoch (~74 for ~4,700 train samples) makes early learning fast; batch size ≥ 32 is enough for stable BatchNorm statistics.
 
 ---
 
 ## Interpreting the Output
 
-After training completes, the script prints:
-
-```
---- Test Results ---
-  Accuracy  : 0.XXXX
-  Precision : 0.XXXX
-  Recall    : 0.XXXX
-  F1        : 0.XXXX
-  AUC-ROC   : 0.XXXX
-
-  Class balance: NNN profitable / NNN loss  (NNN total)
-```
-
-### What to look for
+After every model is trained, the leaderboard prints accuracy, precision, recall, F1, and AUC-ROC for the test split.
 
 | Metric | Interpretation |
 |---|---|
-| **Accuracy > 0.55** | Better than guessing; the model has found a signal |
-| **AUC-ROC > 0.65** | Meaningful separation of profitable vs loss trades |
-| **F1 > 0.60** | Reasonable balance of catching profitable trades without too many false positives |
-| **Precision vs Recall tradeoff** | High precision = fewer false alarms; high recall = fewer missed winners. Depending on trading costs, one may matter more than the other |
+| **Accuracy > 0.55** | Better than majority-class guessing; the model has found *some* signal |
+| **AUC-ROC > 0.65** | Meaningful separation of profitable from loss trades regardless of threshold |
+| **F1 > 0.60** | Reasonable balance — catching profitable trades without too many false positives |
+| **Precision vs Recall** | Higher precision = fewer false alarms; higher recall = fewer missed winners. Trading-cost economics decide which matters more |
 
 ### What the model cannot tell you
 
-- The model predicts whether a trade configuration is historically associated with profit. It does not guarantee future performance.
-- Market regimes change. A model trained on 2006–2024 data may behave differently in a new regime.
-- The model does not account for correlation between trades on the same ticker or time period.
+- It predicts whether a trade *configuration* is historically associated with profit. It does **not** guarantee future performance.
+- Market regimes change. A model trained on 2006–2024 may behave differently in a new regime — this is exactly why the test split is the **most recent** 15% of trades, not a random sample.
+- It does not account for correlation between trades opened on the same ticker or in overlapping time windows.
 
 ---
 
-## File Outputs
+## Directory Map
 
-| File | Contents |
-|---|---|
-| `NeuralNetwork/scaler.pkl` | Fitted `StandardScaler` serialised with pickle. Load with `pickle.load(open('NeuralNetwork/scaler.pkl', 'rb'))` to normalise new data for inference. |
-| `NeuralNetwork/model.pt` | PyTorch state dict (weights only). Load with `model = TradeMLP(64); model.load_state_dict(torch.load('NeuralNetwork/model.pt'))`. |
+```
+NeuralNetwork/
+├── neural_network.py            ← orchestrator (run this)
+├── tree_models.py               ← XGBoost + LightGBM baselines
+├── requirements.txt
+├── scaler.pkl                   ← (generated) fitted StandardScaler
+├── model.pt                     ← (generated) best NN state dict
+├── model_metadata.json          ← (generated) winner family/config/metrics
+├── ARCHITECTURE.md              ← this file
+└── architectures/
+    ├── base.py                  ← GenericMLP, train_model, evaluate, make_loader, TrainResult
+    ├── funnel/
+    │   ├── funnel.py            ← 17 configs (monotonically narrowing)
+    │   └── ARCHITECTURE.md      ← design rationale, math, worked example, backprop
+    ├── diamond/
+    │   ├── diamond.py           ← 17 configs (compress → expand → compress)
+    │   └── ARCHITECTURE.md
+    └── cylinder/
+        ├── cylinder.py          ← 17 configs (constant width)
+        └── ARCHITECTURE.md
+```

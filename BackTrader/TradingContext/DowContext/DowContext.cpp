@@ -12,7 +12,9 @@ DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalL
     doubleTrendLine(TrendLineTracker(trendLineMode)), 
     sMACD(SMAMACD(lookBackPeriod, doubleLookBackPeriod, signalLookBackPeriod)),
     rsi(RSI(lookBackPeriod)),
-    doubleRsi(RSI(doubleLookBackPeriod)) {}
+    doubleRsi(RSI(doubleLookBackPeriod)),
+    atr(ATR(lookBackPeriod)),
+    doubleAtr(ATR(doubleLookBackPeriod)) {}
 
 void DowContext::updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData){
     double currentClose = currentData.close;
@@ -36,6 +38,9 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         this->rsi.processNextDay(currentClose);
         this->doubleRsi.processNextDay(previousClose);
         this->doubleRsi.processNextDay(currentClose);
+
+        this->atr.processNewData(currentData, previousData);
+        this->doubleAtr.processNewData(currentData, previousData);
 
         Trend currentTrend = this->trend.getCurrentTrend();
         Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
@@ -61,6 +66,9 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
 
         this->rsi.processNextDay(currentClose);
         this->doubleRsi.processNextDay(currentClose);
+
+        this->atr.processNewData(currentData, previousData);
+        this->doubleAtr.processNewData(currentData, previousData);
 
         Trend currentTrend = this->trend.getCurrentTrend();
         Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
@@ -267,6 +275,11 @@ json DowContext::getContextData() const {
     data["doubleRsiReady"] = doubleRsi.isReady();
     data["doubleRsiValue"] = doubleRsi.isReady() ? doubleRsi.getRSI() : 50.0;
 
+    data["atrReady"]       = atr.isReady();
+    data["atrValue"]       = atr.isReady() ? atr.getATR() : 0.0;
+    data["doubleAtrReady"] = doubleAtr.isReady();
+    data["doubleAtrValue"] = doubleAtr.isReady() ? doubleAtr.getATR() : 0.0;
+
     return data;
 }
 
@@ -284,5 +297,7 @@ void DowContext::clear(){
     this->sMACD = SMAMACD(this->lookBackPeriod, this->doubleLookBackPeriod, this->signalLookBackPeriod);
     this->rsi = RSI(this->lookBackPeriod);
     this->doubleRsi = RSI(this->doubleLookBackPeriod);
+    this->atr = ATR(this->lookBackPeriod);
+    this->doubleAtr = ATR(this->doubleLookBackPeriod);
 }
 

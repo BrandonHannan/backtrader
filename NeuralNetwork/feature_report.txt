@@ -1,0 +1,168 @@
+FEATURE DIAGNOSTICS REPORT
+======================================================================
+
+Best model: cylinder/cylinder_4L_256
+Baseline AUC-ROC on test: 0.5104
+Scaler: robust, winsorize_pct=1.0
+Train samples: 7309, Test samples: 1567
+
+--- HIGH-CORRELATION PAIRS (|r| >= 0.95) ---
+rank        r  feature_a                     feature_b                   
+   1  +1.0000  trend_e2_days                 dtrend_e2_days              
+   2  +1.0000  trend_e3_days                 dtrend_e3_days              
+   3  +1.0000  doubleRsiReady                doubleAtrReady              
+   4  +1.0000  tl_slope_ret                  dtl_slope_ret               
+   5  +0.9987  vol_log_std                   vol_log_max                 
+   6  +0.9950  vol_log_mean                  vol_log_max                 
+   7  +0.9933  vol_log_mean                  vol_log_std                 
+   8  +0.9927  tl_dateDiff                   dtl_dateDiff                
+   9  +0.9874  vol_slopeSE_frac              vol_cov                     
+  10  +0.9726  tl_intercept_atr              dtl_intercept_atr           
+  11  +0.9695  tl_proj_atr                   dtl_proj_atr                
+  12  +0.9671  trend_e2_close_atr            dtrend_e2_close_atr         
+  13  +0.9575  trend_e3_close_atr            dtrend_e3_close_atr         
+  14  +0.9548  vol_log_mean                  vol_log_min                 
+
+--- PERMUTATION IMPORTANCE (sorted by AUC drop, desc) ---
+rank  feature                        mean_drop       std
+   1  dtl_slope_ret                   +0.00975   0.00830
+   2  trend_e1_close_atr              +0.00476   0.00055
+   3  tl_intercept_atr                +0.00463   0.00491
+   4  price_cov                       +0.00342   0.00255
+   5  dtrend_e1_close_atr             +0.00288   0.00033
+   6  vol_slopeSE_frac                +0.00259   0.00050
+   7  dtrend_e2_days                  +0.00247   0.00014
+   8  dtl_intercept_atr               +0.00192   0.00063
+   9  vol_ratio                       +0.00170   0.00212
+  10  dtl_proj_atr                    +0.00098   0.00104
+  11  rsi                             +0.00085   0.00090
+  12  price_mean_atr                  +0.00080   0.00058
+  13  trend_e2_close_atr              +0.00074   0.00100
+  14  trend_e2_days                   +0.00040   0.00041
+  15  tl_proj_atr                     +0.00020   0.00102
+  16  vol_slopeRSQ                    +0.00007   0.00109
+  17  positionType                    +0.00000   0.00000
+  18  macd_ret                        +0.00000   0.00000
+  19  signal_ret                      +0.00000   0.00000
+  20  macdReady                       +0.00000   0.00000
+  21  trend_ready                     +0.00000   0.00000
+  22  trend_type                      +0.00000   0.00000
+  23  trend_e1_days                   +0.00000   0.00000
+  24  trend_e1_trough                 +0.00000   0.00000
+  25  trend_e2_trough                 +0.00000   0.00000
+  26  trend_e3_trough                 +0.00000   0.00000
+  27  trend_e4_days                   +0.00000   0.00000
+  28  trend_e4_close_atr              +0.00000   0.00000
+  29  trend_e4_trough                 +0.00000   0.00000
+  30  trend_e5_days                   +0.00000   0.00000
+  31  trend_e5_close_atr              +0.00000   0.00000
+  32  trend_e5_trough                 +0.00000   0.00000
+  33  tl_ready                        +0.00000   0.00000
+  34  tl_active                       +0.00000   0.00000
+  35  dtrend_ready                    +0.00000   0.00000
+  36  dtrend_type                     +0.00000   0.00000
+  37  dtrend_e1_days                  +0.00000   0.00000
+  38  dtrend_e1_trough                +0.00000   0.00000
+  39  dtrend_e2_trough                +0.00000   0.00000
+  40  dtrend_e3_trough                +0.00000   0.00000
+  41  dtrend_e4_days                  +0.00000   0.00000
+  42  dtrend_e4_close_atr             +0.00000   0.00000
+  43  dtrend_e4_trough                +0.00000   0.00000
+  44  dtrend_e5_days                  +0.00000   0.00000
+  45  dtrend_e5_close_atr             +0.00000   0.00000
+  46  dtrend_e5_trough                +0.00000   0.00000
+  47  dtl_ready                       +0.00000   0.00000
+  48  dtl_active                      +0.00000   0.00000
+  49  rsiReady                        +0.00000   0.00000
+  50  doubleRsiReady                  +0.00000   0.00000
+  51  atrReady                        +0.00000   0.00000
+  52  doubleAtrReady                  +0.00000   0.00000
+  53  dtrend_e2_close_atr             -0.00019   0.00100
+  54  vol_log_std                     -0.00068   0.00056
+  55  doubleRsi                       -0.00093   0.00111
+  56  price_min_atr                   -0.00107   0.00049
+  57  tl_slope_ret                    -0.00109   0.00537
+  58  tl_dateDiff                     -0.00111   0.00141
+  59  vol_slope_frac                  -0.00113   0.00101
+  60  vol_slopeSig                    -0.00122   0.00090
+  61  doubleAtr_ret                   -0.00159   0.00095
+  62  trend_e3_close_atr              -0.00193   0.00086
+  63  dtl_dateDiff                    -0.00195   0.00163
+  64  dtrend_e3_close_atr             -0.00213   0.00054
+  65  price_slopeRSQ                  -0.00252   0.00059
+  66  vol_log_mean                    -0.00318   0.00083
+  67  price_slope_ret                 -0.00335   0.00191
+  68  price_slopeSE_ret               -0.00372   0.00077
+  69  price_slopeSig                  -0.00428   0.00078
+  70  price_max_atr                   -0.00443   0.00277
+  71  vol_log_min                     -0.00457   0.00114
+  72  atr_ret                         -0.00469   0.00151
+  73  vol_cov                         -0.00472   0.00087
+  74  vol_log_max                     -0.00557   0.00035
+  75  trend_e3_days                   -0.00615   0.00065
+  76  price_std_atr                   -0.00656   0.00247
+  77  dtrend_e3_days                  -0.00660   0.00051
+
+--- DROP CANDIDATES ---
+Features with mean_drop <= 0 (shuffling them does not hurt AUC):
+  positionType                  drop=+0.00000  std=0.00000
+  macd_ret                      drop=+0.00000  std=0.00000
+  signal_ret                    drop=+0.00000  std=0.00000
+  macdReady                     drop=+0.00000  std=0.00000
+  trend_ready                   drop=+0.00000  std=0.00000
+  trend_type                    drop=+0.00000  std=0.00000
+  trend_e1_days                 drop=+0.00000  std=0.00000
+  trend_e1_trough               drop=+0.00000  std=0.00000
+  trend_e2_trough               drop=+0.00000  std=0.00000
+  trend_e3_trough               drop=+0.00000  std=0.00000
+  trend_e4_days                 drop=+0.00000  std=0.00000
+  trend_e4_close_atr            drop=+0.00000  std=0.00000
+  trend_e4_trough               drop=+0.00000  std=0.00000
+  trend_e5_days                 drop=+0.00000  std=0.00000
+  trend_e5_close_atr            drop=+0.00000  std=0.00000
+  trend_e5_trough               drop=+0.00000  std=0.00000
+  tl_ready                      drop=+0.00000  std=0.00000
+  tl_active                     drop=+0.00000  std=0.00000
+  dtrend_ready                  drop=+0.00000  std=0.00000
+  dtrend_type                   drop=+0.00000  std=0.00000
+  dtrend_e1_days                drop=+0.00000  std=0.00000
+  dtrend_e1_trough              drop=+0.00000  std=0.00000
+  dtrend_e2_trough              drop=+0.00000  std=0.00000
+  dtrend_e3_trough              drop=+0.00000  std=0.00000
+  dtrend_e4_days                drop=+0.00000  std=0.00000
+  dtrend_e4_close_atr           drop=+0.00000  std=0.00000
+  dtrend_e4_trough              drop=+0.00000  std=0.00000
+  dtrend_e5_days                drop=+0.00000  std=0.00000
+  dtrend_e5_close_atr           drop=+0.00000  std=0.00000
+  dtrend_e5_trough              drop=+0.00000  std=0.00000
+  dtl_ready                     drop=+0.00000  std=0.00000
+  dtl_active                    drop=+0.00000  std=0.00000
+  rsiReady                      drop=+0.00000  std=0.00000
+  doubleRsiReady                drop=+0.00000  std=0.00000
+  atrReady                      drop=+0.00000  std=0.00000
+  doubleAtrReady                drop=+0.00000  std=0.00000
+  dtrend_e2_close_atr           drop=-0.00019  std=0.00100
+  vol_log_std                   drop=-0.00068  std=0.00056
+  doubleRsi                     drop=-0.00093  std=0.00111
+  price_min_atr                 drop=-0.00107  std=0.00049
+  tl_slope_ret                  drop=-0.00109  std=0.00537
+  tl_dateDiff                   drop=-0.00111  std=0.00141
+  vol_slope_frac                drop=-0.00113  std=0.00101
+  vol_slopeSig                  drop=-0.00122  std=0.00090
+  doubleAtr_ret                 drop=-0.00159  std=0.00095
+  trend_e3_close_atr            drop=-0.00193  std=0.00086
+  dtl_dateDiff                  drop=-0.00195  std=0.00163
+  dtrend_e3_close_atr           drop=-0.00213  std=0.00054
+  price_slopeRSQ                drop=-0.00252  std=0.00059
+  vol_log_mean                  drop=-0.00318  std=0.00083
+  price_slope_ret               drop=-0.00335  std=0.00191
+  price_slopeSE_ret             drop=-0.00372  std=0.00077
+  price_slopeSig                drop=-0.00428  std=0.00078
+  price_max_atr                 drop=-0.00443  std=0.00277
+  vol_log_min                   drop=-0.00457  std=0.00114
+  atr_ret                       drop=-0.00469  std=0.00151
+  vol_cov                       drop=-0.00472  std=0.00087
+  vol_log_max                   drop=-0.00557  std=0.00035
+  trend_e3_days                 drop=-0.00615  std=0.00065
+  price_std_atr                 drop=-0.00656  std=0.00247
+  dtrend_e3_days                drop=-0.00660  std=0.00051

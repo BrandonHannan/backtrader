@@ -1,0 +1,127 @@
+Number of Stocks: 68
+Select execution mode:
+  1 - ExecuteBaseCase (single run with default parameters)
+  2 - ExecuteAllSweeps (full parameter sweep)
+Enter choice: 
+========== Base Case Results ==========
+Total Trades:       10442
+Winning Trades:     4198
+Losing Trades:      6232
+Break-Even Trades:  12
+Win Rate:           40.20%
+Long Trades:        10442
+Short Trades:       0
+
+--- P&L ---
+Total P&L:          $39438488.53
+Avg P&L per Trade:  $3776.91
+Avg Winning Trade:  $13118.75
+Avg Losing Trade:   $-2508.67
+Best Trade:         $43793831.61
+Worst Trade:        $-1377373.23
+Profit Factor:      3.52
+
+--- Trade Duration ---
+Longest Trade:      113 days
+Shortest Trade:     0 days
+
+--- Trade Types ---
+  LONG BREAKTHROUGH: 10442
+
+--- Yearly P&L ---
+  1998: $97.38 (11 trades)
+  1999: $-128.89 (16 trades)
+  2000: $24.64 (62 trades)
+  2001: $-1482.80 (189 trades)
+  2002: $841.01 (222 trades)
+  2003: $1030.60 (235 trades)
+  2004: $1345.72 (221 trades)
+  2005: $172.34 (249 trades)
+  2006: $1436.72 (231 trades)
+  2007: $3112.32 (215 trades)
+  2008: $192.86 (210 trades)
+  2009: $2154.00 (216 trades)
+  2010: $2118.30 (220 trades)
+  2011: $1716.76 (242 trades)
+  2012: $3069.12 (226 trades)
+  2013: $-1547.73 (232 trades)
+  2014: $391.72 (257 trades)
+  2015: $-663.02 (253 trades)
+  2016: $3493.61 (274 trades)
+  2017: $5756.94 (282 trades)
+  2018: $-1676.68 (485 trades)
+  2019: $5243.82 (576 trades)
+  2020: $12347.62 (715 trades)
+  2021: $21906.84 (916 trades)
+  2022: $1135516.09 (850 trades)
+  2023: $211812.24 (992 trades)
+  2024: $42920899.84 (950 trades)
+  2025: $-4890692.84 (895 trades)
+
+--- Top 10 Most Profitable Trades ---
+  #1 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2024-03-15 @ $0.01   Exit: 2024-03-27 @ $7149.42
+       Shares: 6125.52   Stop: $7487.99   Days: 12   P&L: $43793831.61
+  #2 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2024-11-23 @ $0.01   Exit: 2024-12-03 @ $0.01
+       Shares: 922922072.54   Stop: $0.01   Days: 10   P&L: $3919280.89
+  #3 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-03-11 @ $2.81   Exit: 2025-03-17 @ $3.35
+       Shares: 3886556.25   Stop: $3.35   Days: 6   P&L: $2108225.10
+  #4 | OP-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2022-09-30 @ $0.00   Exit: 2022-10-07 @ $0.85
+       Shares: 1334164.36   Stop: $0.87   Days: 7   P&L: $1134274.54
+  #5 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-04-14 @ $2.42   Exit: 2025-04-30 @ $2.65
+       Shares: 2955095.78   Stop: $2.65   Days: 16   P&L: $695280.05
+  #6 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-07-11 @ $1.85   Exit: 2025-07-23 @ $1.96
+       Shares: 5098104.99   Stop: $1.96   Days: 12   P&L: $588315.93
+  #7 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-01-17 @ $0.01   Exit: 2025-01-19 @ $0.01
+       Shares: 1251206421.54   Stop: $0.01   Days: 2   P&L: $575180.04
+  #8 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-08-30 @ $1.62   Exit: 2025-09-15 @ $1.72
+       Shares: 4845822.26   Stop: $1.72   Days: 16   P&L: $504381.19
+  #9 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2024-08-14 @ $0.01   Exit: 2024-08-28 @ $0.01
+       Shares: 1444696465.78   Stop: $0.01   Days: 14   P&L: $442799.37
+  #10 | OP-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2023-11-03 @ $1.37   Exit: 2023-11-14 @ $1.73
+       Shares: 332660.50   Stop: $1.73   Days: 11   P&L: $118566.65
+
+--- Top 10 Least Profitable Trades ---
+  #1 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-08-24 @ $1.86   Exit: 2025-08-25 @ $1.60
+       Shares: 5175399.57   Stop: $1.60   Days: 1   P&L: $-1377373.23
+  #2 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-03-25 @ $3.64   Exit: 2025-04-02 @ $3.00
+       Shares: 2012172.04   Stop: $3.00   Days: 8   P&L: $-1288728.42
+  #3 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2024-09-24 @ $0.00   Exit: 2024-10-01 @ $0.00
+       Shares: 1375788450.87   Stop: $0.00   Days: 7   P&L: $-1285261.36
+  #4 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2024-09-14 @ $0.01   Exit: 2024-09-16 @ $0.01
+       Shares: 2319308675.45   Stop: $0.01   Days: 2   P&L: $-1257993.53
+  #5 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-06-11 @ $2.21   Exit: 2025-06-13 @ $1.90
+       Shares: 4076620.47   Stop: $1.90   Days: 2   P&L: $-1225750.93
+  #6 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-11-09 @ $1.04   Exit: 2025-11-13 @ $0.89
+       Shares: 7626180.17   Stop: $0.89   Days: 4   P&L: $-1114805.41
+  #7 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-01-04 @ $0.01   Exit: 2025-01-07 @ $0.01
+       Shares: 1052280436.70   Stop: $0.01   Days: 3   P&L: $-1084900.87
+  #8 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2024-05-31 @ $0.01   Exit: 2024-06-14 @ $0.00
+       Shares: 200980337.07   Stop: $0.00   Days: 14   P&L: $-935824.79
+  #9 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-05-24 @ $2.48   Exit: 2025-05-30 @ $2.18
+       Shares: 2905048.10   Stop: $2.18   Days: 6   P&L: $-874904.72
+  #10 | TIA-USD | LONG | LONG BREAKTHROUGH
+       Entry: 2025-07-29 @ $1.89   Exit: 2025-07-31 @ $1.68
+       Shares: 4168159.26   Stop: $1.68   Days: 2   P&L: $-854457.32
+=======================================
+
+Positions written to ../output/data.json
+Execution Time: 14.84s

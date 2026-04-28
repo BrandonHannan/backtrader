@@ -8,10 +8,13 @@ and saves the best model.
 Input : output/data.json  (array of closed Position objects from the C++ backtester)
 Output: binary classification — 1 (profitable, pnl > 0) / 0 (loss)
 
-Feature vector (64 values per position):
+Feature vector (77 values per position, ATR/return-normalized for cross-ticker stationarity):
   Position-level  : positionType                                          (1)
-  Entry context   : price stats, volume stats, MACD, trend, trendline,   (63)
-                    doubleTrend, doubleTrendLine
+  Entry context   : price stats (ATR-distance + CoV), volume stats       (76)
+                    (log + CoV), MACD/mean, trend (days-since-e1 +
+                    ATR-distance closes), trendLine (slope/mean +
+                    intercept-distance + projected-distance), RSI,
+                    ATR/price + volatility regime ratio
 
 Run:
     py -3.13 NeuralNetwork/neural_network.py
@@ -20,13 +23,14 @@ Run:
 """
 
 import argparse
+import datetime as dt
 import json
 import os
 import sys
 import pickle
 
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler, StandardScaler
 
 import torch
 
@@ -47,88 +51,206 @@ from tree_models import run_tree_models
 # ---------------------------------------------------------------------------
 
 TREND_TYPE_MAP = {"UPTREND": 1.0, "NONE": 0.0, "DOWNTREND": -1.0}
+EPS = 1e-9
+
+FEATURE_NAMES = (
+    ["positionType"]
+    + [f"price_{n}" for n in ("mean_atr", "std_atr", "min_atr", "max_atr",
+                              "slope_ret", "slopeSE_ret", "slopeRSQ", "slopeSig", "cov")]
+    + [f"vol_{n}"   for n in ("log_mean", "log_std", "log_min", "log_max",
+                              "slope_frac", "slopeSE_frac", "slopeRSQ", "slopeSig", "cov")]
+    + ["macd_ret", "signal_ret", "macdReady"]
+    + ["trend_ready", "trend_type"]
+    + [f"trend_e{i}_{f}" for i in range(1, 6) for f in ("days", "close_atr", "trough")]
+    + ["tl_ready", "tl_active", "tl_slope_ret", "tl_intercept_atr", "tl_dateDiff", "tl_proj_atr"]
+    + ["dtrend_ready", "dtrend_type"]
+    + [f"dtrend_e{i}_{f}" for i in range(1, 6) for f in ("days", "close_atr", "trough")]
+    + ["dtl_ready", "dtl_active", "dtl_slope_ret", "dtl_intercept_atr", "dtl_dateDiff", "dtl_proj_atr"]
+    + ["rsi", "rsiReady", "doubleRsi", "doubleRsiReady"]
+    + ["atr_ret", "atrReady", "doubleAtr_ret", "doubleAtrReady", "vol_ratio"]
+)
+assert len(FEATURE_NAMES) == 77, f"FEATURE_NAMES length {len(FEATURE_NAMES)} != 77"
 
 
-def _stats_features(stats: dict) -> list:
-    """Extract 8 features from a price/volume statistics block."""
+def _safe_div(num: float, den: float) -> float:
+    """Divide with a magnitude guard. Returns 0.0 when denominator is too small."""
+    den_f = float(den)
+    if abs(den_f) <= EPS:
+        return 0.0
+    return float(num) / den_f
+
+
+def _days_diff(later: str, earlier: str) -> float:
+    """Days between two ISO-format date strings. Returns 0.0 on parse failure."""
+    if not later or not earlier:
+        return 0.0
+    try:
+        a = dt.date.fromisoformat(later)
+        b = dt.date.fromisoformat(earlier)
+        return float((a - b).days)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def _price_stats_features(stats: dict, purchase_price: float, atr_value: float) -> list:
+    """
+    Price statistics, normalized for cross-ticker comparability. 9 features:
+      [mean_atr_dist, std_atr, min_atr_dist, max_atr_dist,
+       slope_return, slopeSE_return, slopeRSQ, slopeSignificant, price_cov]
+    """
+    mean = float(stats.get("mean", 0.0))
+    std = float(stats.get("std", 0.0))
+    pmin = float(stats.get("min", 0.0))
+    pmax = float(stats.get("max", 0.0))
+    slope = float(stats.get("slope", 0.0))
+    slope_se = float(stats.get("slopeSE", 0.0))
     return [
-        float(stats.get("mean", 0.0)),
-        float(stats.get("std", 0.0)),
-        float(stats.get("min", 0.0)),
-        float(stats.get("max", 0.0)),
-        float(stats.get("slope", 0.0)),
-        float(stats.get("slopeSE", 0.0)),
+        _safe_div(mean - purchase_price, atr_value),
+        _safe_div(std, atr_value),
+        _safe_div(pmin - purchase_price, atr_value),
+        _safe_div(pmax - purchase_price, atr_value),
+        _safe_div(slope, mean),
+        _safe_div(slope_se, mean),
         float(stats.get("slopeRSQ", 0.0)),
         1.0 if stats.get("slopeSignificant", False) else 0.0,
+        _safe_div(std, mean),
     ]
 
 
-def _extremum_features(ex: dict) -> list:
-    """Extract 3 features from a single extremum: index, close, isTrough."""
+def _volume_stats_features(stats: dict) -> list:
+    """
+    Volume statistics, log-transformed plus CoV-derived. 9 features:
+      [log_mean, log_std, log_min, log_max,
+       slope_frac, slopeSE_frac, slopeRSQ, slopeSignificant, vol_cov]
+    """
+    mean = float(stats.get("mean", 0.0))
+    std = float(stats.get("std", 0.0))
+    vmin = float(stats.get("min", 0.0))
+    vmax = float(stats.get("max", 0.0))
+    slope = float(stats.get("slope", 0.0))
+    slope_se = float(stats.get("slopeSE", 0.0))
     return [
-        float(ex.get("index", -1)),
-        float(ex.get("close", 0.0)),
+        float(np.log1p(max(mean, 0.0))),
+        float(np.log1p(max(std, 0.0))),
+        float(np.log1p(max(vmin, 0.0))),
+        float(np.log1p(max(vmax, 0.0))),
+        _safe_div(slope, mean),
+        _safe_div(slope_se, mean),
+        float(stats.get("slopeRSQ", 0.0)),
+        1.0 if stats.get("slopeSignificant", False) else 0.0,
+        _safe_div(std, mean),
+    ]
+
+
+def _extremum_features(ex: dict, anchor_date: str, purchase_price: float, atr_value: float) -> list:
+    """
+    3 features from a single extremum:
+      [days_since_anchor, close_atr_dist, isTrough]
+
+    Missing extremums (index == -1 or empty date) are zeroed out across all
+    three features so the network sees a neutral signal instead of a
+    spurious -purchasePrice/atrValue distance from a fictitious zero-close.
+    """
+    if ex.get("index", -1) == -1 or not ex.get("date", ""):
+        return [0.0, 0.0, 0.0]
+    return [
+        _days_diff(ex.get("date", ""), anchor_date),
+        _safe_div(float(ex.get("close", 0.0)) - purchase_price, atr_value),
         1.0 if ex.get("isTrough", False) else 0.0,
     ]
 
 
-def _trend_features(ready_flag: bool, trend: dict) -> list:
+def _trend_features(ready_flag: bool, trend: dict, purchase_price: float, atr_value: float) -> list:
     """
-    Extract 17 features from a trend block.
+    17 features from a trend block. e1.date is the duration anchor.
     Layout: [trendReady, trendType, e1×3, e2×3, e3×3, e4×3, e5×3]
     """
+    anchor_date = trend.get("e1", {}).get("date", "")
     features = [
         1.0 if ready_flag else 0.0,
         TREND_TYPE_MAP.get(trend.get("type", "NONE"), 0.0),
     ]
     for key in ("e1", "e2", "e3", "e4", "e5"):
-        features.extend(_extremum_features(trend.get(key, {})))
+        features.extend(_extremum_features(trend.get(key, {}), anchor_date, purchase_price, atr_value))
     return features  # 2 + 5×3 = 17
 
 
-def _trendline_features(ready_flag: bool, tl: dict) -> list:
+def _trendline_features(ready_flag: bool, tl: dict, purchase_price: float,
+                       atr_value: float, mean_price: float) -> list:
     """
-    Extract 5 features from a trendline block.
-    Layout: [trendLineReady, isActive, slope, intercept, dateDifference]
+    6 features from a trendline block:
+      [trendLineReady, isActive, slope_return, intercept_atr_dist,
+       dateDifference, projected_atr_dist]
+
+    When the trendline is not ready, the structural fields default to zero in
+    the JSON. Zero out the derived distances explicitly so a missing trendline
+    reports a neutral signal rather than -purchasePrice/atrValue.
     """
+    is_active = bool(tl.get("isActive", False))
+    if not ready_flag or not is_active:
+        return [
+            1.0 if ready_flag else 0.0,
+            1.0 if is_active else 0.0,
+            0.0, 0.0, 0.0, 0.0,
+        ]
+    slope = float(tl.get("slope", 0.0))
+    intercept = float(tl.get("intercept", 0.0))
+    date_diff = float(tl.get("dateDifference", 0.0))
+    projected = intercept + slope * date_diff
     return [
-        1.0 if ready_flag else 0.0,
-        1.0 if tl.get("isActive", False) else 0.0,
-        float(tl.get("slope", 0.0)),
-        float(tl.get("intercept", 0.0)),
-        float(tl.get("dateDifference", 0.0)),
+        1.0,
+        1.0,
+        _safe_div(slope, mean_price),
+        _safe_div(intercept - purchase_price, atr_value),
+        date_diff,
+        _safe_div(purchase_price - projected, atr_value),
     ]
 
 
-def extract_context_features(ctx: dict) -> list:
+def extract_context_features(ctx: dict, purchase_price: float) -> list:
     """
-    Flatten one DowContext JSON object into 67 ordered floats.
+    Flatten one DowContext JSON object into 76 stationary, ATR/return-normalized floats.
 
     Block layout:
-      priceStatistics   (8)
-      volumeStatistics  (8)
-      macd / signal     (3)
-      trend             (17)
-      trendLine         (5)
+      priceStatistics   (9)   ATR-distance + price CoV
+      volumeStatistics  (9)   log-transform + volume CoV
+      macd block        (3)   macd/mean, signal/mean, macdReady
+      trend             (17)  days-since-e1 + ATR-distance closes
+      trendLine         (6)   slope/mean, ATR-distance intercept, projected distance
       doubleTrend       (17)
-      doubleTrendLine   (5)
-      rsi / doubleRsi   (4)
+      doubleTrendLine   (6)
+      rsi / doubleRsi   (4)   already in [0, 100], unchanged
+      atr block         (5)   atr/price, doubleAtr/price, ready flags, volatility_ratio
     """
+    atr_value = float(ctx.get("atrValue", 0.0))
+    double_atr_value = float(ctx.get("doubleAtrValue", 0.0))
+    price_stats = ctx.get("priceStatistics", {})
+    mean_price = float(price_stats.get("mean", 0.0))
+
     features = []
-    features.extend(_stats_features(ctx.get("priceStatistics", {})))
-    features.extend(_stats_features(ctx.get("volumeStatistics", {})))
-    features.append(float(ctx.get("macd", 0.0)))
-    features.append(float(ctx.get("signal", 0.0)))
+    features.extend(_price_stats_features(price_stats, purchase_price, atr_value))
+    features.extend(_volume_stats_features(ctx.get("volumeStatistics", {})))
+    features.append(_safe_div(float(ctx.get("macd", 0.0)), mean_price))
+    features.append(_safe_div(float(ctx.get("signal", 0.0)), mean_price))
     features.append(1.0 if ctx.get("macdReady", False) else 0.0)
-    features.extend(_trend_features(ctx.get("trendReady", False), ctx.get("trend", {})))
-    features.extend(_trendline_features(ctx.get("trendLineReady", False), ctx.get("trendLine", {})))
-    features.extend(_trend_features(ctx.get("doubleTrendReady", False), ctx.get("doubleTrend", {})))
-    features.extend(_trendline_features(ctx.get("doubleTrendLineReady", False), ctx.get("doubleTrendLine", {})))
+    features.extend(_trend_features(ctx.get("trendReady", False), ctx.get("trend", {}),
+                                    purchase_price, atr_value))
+    features.extend(_trendline_features(ctx.get("trendLineReady", False), ctx.get("trendLine", {}),
+                                        purchase_price, atr_value, mean_price))
+    features.extend(_trend_features(ctx.get("doubleTrendReady", False), ctx.get("doubleTrend", {}),
+                                    purchase_price, double_atr_value))
+    features.extend(_trendline_features(ctx.get("doubleTrendLineReady", False), ctx.get("doubleTrendLine", {}),
+                                        purchase_price, double_atr_value, mean_price))
     features.append(float(ctx.get("rsiValue", 50.0)))
     features.append(1.0 if ctx.get("rsiReady", False) else 0.0)
     features.append(float(ctx.get("doubleRsiValue", 50.0)))
     features.append(1.0 if ctx.get("doubleRsiReady", False) else 0.0)
-    return features  # 8+8+3+17+5+17+5+4 = 67
+    features.append(_safe_div(atr_value, purchase_price))
+    features.append(1.0 if ctx.get("atrReady", False) else 0.0)
+    features.append(_safe_div(double_atr_value, purchase_price))
+    features.append(1.0 if ctx.get("doubleAtrReady", False) else 0.0)
+    features.append(_safe_div(atr_value, double_atr_value))
+    return features  # 9+9+3+17+6+17+6+4+5 = 76
 
 
 # ---------------------------------------------------------------------------
@@ -142,8 +264,8 @@ def load_positions(path: str):
     Filters out positions where pnl == 0.0 AND sellDate is empty
     (unclosed / still-open trades).
 
-    Feature vector per position (68 total):
-      [positionType, *entryContext×67]
+    Feature vector per position (77 total):
+      [positionType, *entryContext×76]
 
     Label: 1 if pnl > 0 else 0
     dates: list of purchaseDate strings (ISO format) for temporal splitting
@@ -163,7 +285,8 @@ def load_positions(path: str):
             continue
 
         position_type = 1.0 if pos.get("positionType", "LONG") == "LONG" else 0.0
-        ctx_features = extract_context_features(pos.get("entryContext", {}))
+        purchase_price = float(pos.get("purchasePrice", 0.0))
+        ctx_features = extract_context_features(pos.get("entryContext", {}), purchase_price)
 
         X_rows.append([position_type] + ctx_features)
         y_rows.append(1 if pnl > 0.0 else 0)
@@ -179,15 +302,62 @@ def load_positions(path: str):
 # Normalisation
 # ---------------------------------------------------------------------------
 
-def normalise(X_train, X_val, X_test, scaler_path: str):
-    """Fit StandardScaler on train; transform all splits. Save scaler."""
-    scaler = StandardScaler()
+SCALER_FACTORIES = {
+    "standard": StandardScaler,
+    "robust":   RobustScaler,
+}
+
+
+def _winsorize_fit(X_train, lower_pct: float, upper_pct: float):
+    """Compute per-column clip bounds from the training split."""
+    lo = np.percentile(X_train, lower_pct, axis=0)
+    hi = np.percentile(X_train, upper_pct, axis=0)
+    return lo, hi
+
+
+def _winsorize_apply(X, lo, hi):
+    return np.clip(X, lo, hi)
+
+
+def normalise(X_train, X_val, X_test, scaler_path: str,
+              scaler_kind: str = "standard",
+              winsorize_pct: float = 1.0):
+    """
+    Fit scaler on train; transform all splits. Save scaler bundle.
+
+    scaler_kind: "standard" or "robust" — selects StandardScaler vs RobustScaler.
+    winsorize_pct: clip each feature to [pct, 100-pct] percentile bounds computed
+        on the train split, applied to all splits before scaling. 0 disables it.
+
+    The saved pickle bundles {scaler, lo, hi, kind} so inference can replay both
+    the clipping and the scaling deterministically.
+    """
+    if scaler_kind not in SCALER_FACTORIES:
+        raise ValueError(f"Unknown scaler_kind={scaler_kind!r}. "
+                         f"Expected one of {list(SCALER_FACTORIES)}")
+
+    lo = hi = None
+    if winsorize_pct > 0:
+        lo, hi = _winsorize_fit(X_train, winsorize_pct, 100.0 - winsorize_pct)
+        X_train = _winsorize_apply(X_train, lo, hi)
+        X_val   = _winsorize_apply(X_val,   lo, hi)
+        X_test  = _winsorize_apply(X_test,  lo, hi)
+        print(f"[norm]  Winsorized at [{winsorize_pct}%, {100.0 - winsorize_pct}%]")
+
+    scaler = SCALER_FACTORIES[scaler_kind]()
     X_train = scaler.fit_transform(X_train)
     X_val   = scaler.transform(X_val)
     X_test  = scaler.transform(X_test)
+
     with open(scaler_path, "wb") as f:
-        pickle.dump(scaler, f)
-    print(f"[norm]  Scaler saved -> {scaler_path}")
+        pickle.dump({
+            "scaler": scaler,
+            "winsor_lo": lo,
+            "winsor_hi": hi,
+            "scaler_kind": scaler_kind,
+            "winsorize_pct": winsorize_pct,
+        }, f)
+    print(f"[norm]  Scaler ({scaler_kind}) saved -> {scaler_path}")
     return X_train, X_val, X_test
 
 
@@ -284,6 +454,18 @@ def main():
         action="store_true",
         help="Quick sweep: epochs=50, patience=7 (for development iteration)",
     )
+    parser.add_argument(
+        "--scaler",
+        choices=list(SCALER_FACTORIES.keys()),
+        default="standard",
+        help="Feature scaler: 'standard' (mean/std) or 'robust' (median/IQR)",
+    )
+    parser.add_argument(
+        "--winsorize",
+        type=float,
+        default=1.0,
+        help="Per-feature clip percentile (0 disables). Default 1.0 = clip to [1%%, 99%%]",
+    )
     args = parser.parse_args()
 
     if args.fast:
@@ -303,7 +485,7 @@ def main():
     # ------------------------------------------------------------------
     print(f"[data]  Loading {data_path}")
     X, y, dates = load_positions(data_path)
-    print(f"[data]  Feature matrix: {X.shape}  (expected N×64)")
+    print(f"[data]  Feature matrix: {X.shape}  (expected N×77)")
 
     # Temporal split — sort by purchaseDate ascending, slice sequentially.
     # Prevents data leakage from future market regimes into training.
@@ -330,7 +512,11 @@ def main():
     print(f"[data]  Test class balance: {n_profitable} profitable / {n_loss} loss")
 
     scaler_path = os.path.join(os.path.dirname(__file__), "scaler.pkl")
-    X_train, X_val, X_test = normalise(X_train, X_val, X_test, scaler_path)
+    X_train, X_val, X_test = normalise(
+        X_train, X_val, X_test, scaler_path,
+        scaler_kind=args.scaler,
+        winsorize_pct=args.winsorize,
+    )
 
     # Class-imbalance correction: penalise missing profitable trades proportionally
     num_pos = float(y_train.sum())

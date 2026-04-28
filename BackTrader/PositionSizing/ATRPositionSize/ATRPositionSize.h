@@ -1,7 +1,7 @@
 #ifndef ATRPOSITIONSIZE_H
 #define ATRPOSITIONSIZE_H
 #include "../BasePositionSize.h"
-#include <deque>
+#include "../../Indicators/ATR/ATR.h"
 
 using namespace std;
 
@@ -9,9 +9,7 @@ class ATRPositionSize: public BasePositionSize{
     private:
         int ATRPeriod;
         double ATRMultiplier;
-        deque<double> trueRangeWindow;
-        double trueRangeSum;
-        double currentATR;
+        ATR atr;
     protected:
         PositionPriceInfo calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const override;
     public:

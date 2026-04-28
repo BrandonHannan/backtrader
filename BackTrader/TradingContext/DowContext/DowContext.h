@@ -7,6 +7,7 @@
 #include "../../Indicators/TrendLineTracker/TrendLineTracker.h"
 #include "../../Indicators/SMAMACD/SMAMACD.h"
 #include "../../Indicators/RSI/RSI.h"
+#include "../../Indicators/ATR/ATR.h"
 #include <cmath>
 #include <queue>
 
@@ -29,6 +30,9 @@ class DowContext: public BaseContext {
 
         RSI rsi;       // RSI over lookBackPeriod
         RSI doubleRsi; // RSI over doubleLookBackPeriod
+
+        ATR atr;        // ATR over lookBackPeriod
+        ATR doubleAtr;  // ATR over doubleLookBackPeriod
 
     public:
         DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);
