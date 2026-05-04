@@ -8,13 +8,18 @@ and saves the best model.
 Input : output/data.json  (array of closed Position objects from the C++ backtester)
 Output: binary classification — 1 (profitable, pnl > 0) / 0 (loss)
 
-Feature vector (77 values per position, ATR/return-normalized for cross-ticker stationarity):
+Feature vector (33 values per position, ATR/return-normalized for cross-ticker
+stationarity, all continuous except positionType):
   Position-level  : positionType                                          (1)
-  Entry context   : price stats (ATR-distance + CoV), volume stats       (76)
-                    (log + CoV), MACD/mean, trend (days-since-e1 +
-                    ATR-distance closes), trendLine (slope/mean +
-                    intercept-distance + projected-distance), RSI,
-                    ATR/price + volatility regime ratio
+  Price stats     : (mean,std,min,max - p)/atr, std/mean, slope/slopeSE   (6)
+  Volume stats    : log1p(mean), max/mean, min/mean, std/mean, t-stat     (5)
+  MACD            : macd/atr, signal/atr                                  (2)
+  Trend           : duration_days, range_atr, extrema_count               (3)
+  TrendLine       : slope/mean, (intercept-p)/atr, dateDiff, proj/atr     (4)
+  DoubleTrend     : duration_days, range_atr, extrema_count               (3)
+  DoubleTrendLine : slope/mean, (intercept-p)/atr, dateDiff, proj/atr     (4)
+  RSI             : rsi, doubleRsi (in [0, 100])                          (2)
+  ATR             : atr/p, doubleAtr/p, atr/doubleAtr                     (3)
 
 Run:
     py -3.13 NeuralNetwork/neural_network.py
@@ -50,26 +55,21 @@ from tree_models import run_tree_models
 # Feature extraction
 # ---------------------------------------------------------------------------
 
-TREND_TYPE_MAP = {"UPTREND": 1.0, "NONE": 0.0, "DOWNTREND": -1.0}
 EPS = 1e-9
 
 FEATURE_NAMES = (
     ["positionType"]
-    + [f"price_{n}" for n in ("mean_atr", "std_atr", "min_atr", "max_atr",
-                              "slope_ret", "slopeSE_ret", "slopeRSQ", "slopeSig", "cov")]
-    + [f"vol_{n}"   for n in ("log_mean", "log_std", "log_min", "log_max",
-                              "slope_frac", "slopeSE_frac", "slopeRSQ", "slopeSig", "cov")]
-    + ["macd_ret", "signal_ret", "macdReady"]
-    + ["trend_ready", "trend_type"]
-    + [f"trend_e{i}_{f}" for i in range(1, 6) for f in ("days", "close_atr", "trough")]
-    + ["tl_ready", "tl_active", "tl_slope_ret", "tl_intercept_atr", "tl_dateDiff", "tl_proj_atr"]
-    + ["dtrend_ready", "dtrend_type"]
-    + [f"dtrend_e{i}_{f}" for i in range(1, 6) for f in ("days", "close_atr", "trough")]
-    + ["dtl_ready", "dtl_active", "dtl_slope_ret", "dtl_intercept_atr", "dtl_dateDiff", "dtl_proj_atr"]
-    + ["rsi", "rsiReady", "doubleRsi", "doubleRsiReady"]
-    + ["atr_ret", "atrReady", "doubleAtr_ret", "doubleAtrReady", "vol_ratio"]
+    + [f"price_{n}" for n in ("mean_atr", "std_atr", "min_atr", "max_atr", "cov", "t")]
+    + [f"vol_{n}"   for n in ("log_mean", "max_over_mean", "min_over_mean", "cov", "t")]
+    + ["macd_atr", "signal_atr"]
+    + ["trend_duration_days", "trend_range_atr", "trend_extrema_count"]
+    + ["tl_slope_ret", "tl_intercept_atr", "tl_dateDiff", "tl_proj_atr"]
+    + ["dtrend_duration_days", "dtrend_range_atr", "dtrend_extrema_count"]
+    + ["dtl_slope_ret", "dtl_intercept_atr", "dtl_dateDiff", "dtl_proj_atr"]
+    + ["rsi", "doubleRsi"]
+    + ["atr_ret", "doubleAtr_ret", "vol_ratio"]
 )
-assert len(FEATURE_NAMES) == 77, f"FEATURE_NAMES length {len(FEATURE_NAMES)} != 77"
+assert len(FEATURE_NAMES) == 33, f"FEATURE_NAMES length {len(FEATURE_NAMES)} != 33"
 
 
 def _safe_div(num: float, den: float) -> float:
@@ -94,9 +94,12 @@ def _days_diff(later: str, earlier: str) -> float:
 
 def _price_stats_features(stats: dict, purchase_price: float, atr_value: float) -> list:
     """
-    Price statistics, normalized for cross-ticker comparability. 9 features:
-      [mean_atr_dist, std_atr, min_atr_dist, max_atr_dist,
-       slope_return, slopeSE_return, slopeRSQ, slopeSignificant, price_cov]
+    Price statistics, normalized for cross-ticker comparability. 6 features:
+      [mean_atr_dist, std_atr, min_atr_dist, max_atr_dist, price_cov, price_t]
+
+    The four legacy slope features (slope_ret, slopeSE_ret, slopeRSQ,
+    slopeSignificant) collapse into a single t-statistic = slope/slopeSE,
+    which carries the same momentum-vs-noise signal in one continuous value.
     """
     mean = float(stats.get("mean", 0.0))
     std = float(stats.get("std", 0.0))
@@ -109,19 +112,19 @@ def _price_stats_features(stats: dict, purchase_price: float, atr_value: float) 
         _safe_div(std, atr_value),
         _safe_div(pmin - purchase_price, atr_value),
         _safe_div(pmax - purchase_price, atr_value),
-        _safe_div(slope, mean),
-        _safe_div(slope_se, mean),
-        float(stats.get("slopeRSQ", 0.0)),
-        1.0 if stats.get("slopeSignificant", False) else 0.0,
         _safe_div(std, mean),
+        _safe_div(slope, slope_se),
     ]
 
 
 def _volume_stats_features(stats: dict) -> list:
     """
-    Volume statistics, log-transformed plus CoV-derived. 9 features:
-      [log_mean, log_std, log_min, log_max,
-       slope_frac, slopeSE_frac, slopeRSQ, slopeSignificant, vol_cov]
+    Volume statistics. 5 features:
+      [log_mean, max_over_mean, min_over_mean, vol_cov, vol_t]
+
+    log_mean is the baseline magnitude; max/mean and min/mean surface volume
+    spikes; std/mean is the coefficient of variation; slope/slopeSE is the
+    trend-momentum t-statistic.
     """
     mean = float(stats.get("mean", 0.0))
     std = float(stats.get("std", 0.0))
@@ -131,75 +134,60 @@ def _volume_stats_features(stats: dict) -> list:
     slope_se = float(stats.get("slopeSE", 0.0))
     return [
         float(np.log1p(max(mean, 0.0))),
-        float(np.log1p(max(std, 0.0))),
-        float(np.log1p(max(vmin, 0.0))),
-        float(np.log1p(max(vmax, 0.0))),
-        _safe_div(slope, mean),
-        _safe_div(slope_se, mean),
-        float(stats.get("slopeRSQ", 0.0)),
-        1.0 if stats.get("slopeSignificant", False) else 0.0,
+        _safe_div(vmax, mean),
+        _safe_div(vmin, mean),
         _safe_div(std, mean),
+        _safe_div(slope, slope_se),
     ]
 
 
-def _extremum_features(ex: dict, anchor_date: str, purchase_price: float, atr_value: float) -> list:
+def _trend_features(trend: dict, purchase_date: str, atr_value: float) -> list:
     """
-    3 features from a single extremum:
-      [days_since_anchor, close_atr_dist, isTrough]
+    3 summary features from a trend block:
+      [duration_days, range_atr, extrema_count]
 
-    Missing extremums (index == -1 or empty date) are zeroed out across all
-    three features so the network sees a neutral signal instead of a
-    spurious -purchasePrice/atrValue distance from a fictitious zero-close.
+    Replaces the prior per-extremum (e1..e5) layout, which forced the MLP to
+    interpret zero-padded missing positions as real coordinate values. Summary
+    statistics are immune to that pathology.
+      duration_days   = days from e1 to purchaseDate
+      range_atr       = (max(close) - min(close)) / atr across valid extrema,
+                        or 0.0 when fewer than 2 extrema exist
+      extrema_count   = number of valid (index >= 0, non-empty date) extrema
     """
-    if ex.get("index", -1) == -1 or not ex.get("date", ""):
-        return [0.0, 0.0, 0.0]
-    return [
-        _days_diff(ex.get("date", ""), anchor_date),
-        _safe_div(float(ex.get("close", 0.0)) - purchase_price, atr_value),
-        1.0 if ex.get("isTrough", False) else 0.0,
-    ]
-
-
-def _trend_features(ready_flag: bool, trend: dict, purchase_price: float, atr_value: float) -> list:
-    """
-    17 features from a trend block. e1.date is the duration anchor.
-    Layout: [trendReady, trendType, e1×3, e2×3, e3×3, e4×3, e5×3]
-    """
-    anchor_date = trend.get("e1", {}).get("date", "")
-    features = [
-        1.0 if ready_flag else 0.0,
-        TREND_TYPE_MAP.get(trend.get("type", "NONE"), 0.0),
-    ]
+    closes = []
+    valid_count = 0
+    e1_date = ""
     for key in ("e1", "e2", "e3", "e4", "e5"):
-        features.extend(_extremum_features(trend.get(key, {}), anchor_date, purchase_price, atr_value))
-    return features  # 2 + 5×3 = 17
+        ex = trend.get(key, {})
+        if ex.get("index", -1) == -1 or not ex.get("date", ""):
+            continue
+        valid_count += 1
+        closes.append(float(ex.get("close", 0.0)))
+        if key == "e1":
+            e1_date = ex.get("date", "")
+
+    duration_days = _days_diff(purchase_date, e1_date) if e1_date else 0.0
+    range_atr = _safe_div(max(closes) - min(closes), atr_value) if len(closes) >= 2 else 0.0
+    return [duration_days, range_atr, float(valid_count)]
 
 
-def _trendline_features(ready_flag: bool, tl: dict, purchase_price: float,
+def _trendline_features(tl: dict, purchase_price: float,
                        atr_value: float, mean_price: float) -> list:
     """
-    6 features from a trendline block:
-      [trendLineReady, isActive, slope_return, intercept_atr_dist,
-       dateDifference, projected_atr_dist]
+    4 features from a trendline block:
+      [slope_return, intercept_atr_dist, dateDifference, projected_atr_dist]
 
-    When the trendline is not ready, the structural fields default to zero in
-    the JSON. Zero out the derived distances explicitly so a missing trendline
-    reports a neutral signal rather than -purchasePrice/atrValue.
+    When the trendline is broken (not isActive) or absent, all four values are
+    zeroed so the network sees a neutral signal rather than a spurious
+    -purchasePrice/atrValue distance from a fictitious zero-intercept.
     """
-    is_active = bool(tl.get("isActive", False))
-    if not ready_flag or not is_active:
-        return [
-            1.0 if ready_flag else 0.0,
-            1.0 if is_active else 0.0,
-            0.0, 0.0, 0.0, 0.0,
-        ]
+    if not tl.get("isActive", False):
+        return [0.0, 0.0, 0.0, 0.0]
     slope = float(tl.get("slope", 0.0))
     intercept = float(tl.get("intercept", 0.0))
     date_diff = float(tl.get("dateDifference", 0.0))
     projected = intercept + slope * date_diff
     return [
-        1.0,
-        1.0,
         _safe_div(slope, mean_price),
         _safe_div(intercept - purchase_price, atr_value),
         date_diff,
@@ -207,20 +195,20 @@ def _trendline_features(ready_flag: bool, tl: dict, purchase_price: float,
     ]
 
 
-def extract_context_features(ctx: dict, purchase_price: float) -> list:
+def extract_context_features(ctx: dict, purchase_price: float, purchase_date: str) -> list:
     """
-    Flatten one DowContext JSON object into 76 stationary, ATR/return-normalized floats.
+    Flatten one DowContext JSON object into 32 stationary, ATR/return-normalized floats.
 
     Block layout:
-      priceStatistics   (9)   ATR-distance + price CoV
-      volumeStatistics  (9)   log-transform + volume CoV
-      macd block        (3)   macd/mean, signal/mean, macdReady
-      trend             (17)  days-since-e1 + ATR-distance closes
-      trendLine         (6)   slope/mean, ATR-distance intercept, projected distance
-      doubleTrend       (17)
-      doubleTrendLine   (6)
-      rsi / doubleRsi   (4)   already in [0, 100], unchanged
-      atr block         (5)   atr/price, doubleAtr/price, ready flags, volatility_ratio
+      priceStatistics   (6)   ATR-distance + CoV + t-stat
+      volumeStatistics  (5)   log-mean + spike ratios + CoV + t-stat
+      macd block        (2)   macd/atr, signal/atr  (ATR-normalized for scale alignment)
+      trend             (3)   duration_days, range_atr, extrema_count
+      trendLine         (4)   slope/mean, ATR-distance intercept, dateDiff, projected distance
+      doubleTrend       (3)   same shape as trend
+      doubleTrendLine   (4)   same shape as trendLine
+      rsi / doubleRsi   (2)   already in [0, 100], unchanged
+      atr block         (3)   atr/price, doubleAtr/price, volatility_ratio
     """
     atr_value = float(ctx.get("atrValue", 0.0))
     double_atr_value = float(ctx.get("doubleAtrValue", 0.0))
@@ -230,27 +218,20 @@ def extract_context_features(ctx: dict, purchase_price: float) -> list:
     features = []
     features.extend(_price_stats_features(price_stats, purchase_price, atr_value))
     features.extend(_volume_stats_features(ctx.get("volumeStatistics", {})))
-    features.append(_safe_div(float(ctx.get("macd", 0.0)), mean_price))
-    features.append(_safe_div(float(ctx.get("signal", 0.0)), mean_price))
-    features.append(1.0 if ctx.get("macdReady", False) else 0.0)
-    features.extend(_trend_features(ctx.get("trendReady", False), ctx.get("trend", {}),
-                                    purchase_price, atr_value))
-    features.extend(_trendline_features(ctx.get("trendLineReady", False), ctx.get("trendLine", {}),
+    features.append(_safe_div(float(ctx.get("macd", 0.0)), atr_value))
+    features.append(_safe_div(float(ctx.get("signal", 0.0)), atr_value))
+    features.extend(_trend_features(ctx.get("trend", {}), purchase_date, atr_value))
+    features.extend(_trendline_features(ctx.get("trendLine", {}),
                                         purchase_price, atr_value, mean_price))
-    features.extend(_trend_features(ctx.get("doubleTrendReady", False), ctx.get("doubleTrend", {}),
-                                    purchase_price, double_atr_value))
-    features.extend(_trendline_features(ctx.get("doubleTrendLineReady", False), ctx.get("doubleTrendLine", {}),
+    features.extend(_trend_features(ctx.get("doubleTrend", {}), purchase_date, double_atr_value))
+    features.extend(_trendline_features(ctx.get("doubleTrendLine", {}),
                                         purchase_price, double_atr_value, mean_price))
     features.append(float(ctx.get("rsiValue", 50.0)))
-    features.append(1.0 if ctx.get("rsiReady", False) else 0.0)
     features.append(float(ctx.get("doubleRsiValue", 50.0)))
-    features.append(1.0 if ctx.get("doubleRsiReady", False) else 0.0)
     features.append(_safe_div(atr_value, purchase_price))
-    features.append(1.0 if ctx.get("atrReady", False) else 0.0)
     features.append(_safe_div(double_atr_value, purchase_price))
-    features.append(1.0 if ctx.get("doubleAtrReady", False) else 0.0)
     features.append(_safe_div(atr_value, double_atr_value))
-    return features  # 9+9+3+17+6+17+6+4+5 = 76
+    return features  # 6+5+2+3+4+3+4+2+3 = 32
 
 
 # ---------------------------------------------------------------------------
@@ -264,8 +245,8 @@ def load_positions(path: str):
     Filters out positions where pnl == 0.0 AND sellDate is empty
     (unclosed / still-open trades).
 
-    Feature vector per position (77 total):
-      [positionType, *entryContext×76]
+    Feature vector per position (33 total):
+      [positionType, *entryContext×32]
 
     Label: 1 if pnl > 0 else 0
     dates: list of purchaseDate strings (ISO format) for temporal splitting
@@ -286,11 +267,12 @@ def load_positions(path: str):
 
         position_type = 1.0 if pos.get("positionType", "LONG") == "LONG" else 0.0
         purchase_price = float(pos.get("purchasePrice", 0.0))
-        ctx_features = extract_context_features(pos.get("entryContext", {}), purchase_price)
+        purchase_date = pos.get("purchaseDate", "")
+        ctx_features = extract_context_features(pos.get("entryContext", {}), purchase_price, purchase_date)
 
         X_rows.append([position_type] + ctx_features)
         y_rows.append(1 if pnl > 0.0 else 0)
-        dates.append(pos.get("purchaseDate", ""))
+        dates.append(purchase_date)
 
     if skipped:
         print(f"[data]  Skipped {skipped} unclosed positions.")

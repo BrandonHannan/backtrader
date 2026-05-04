@@ -17,6 +17,8 @@ class SMAMACD: public Indicator {
     public:
         SMAMACD(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod);
 
+        void processNextDay(double close);
+
         double getMACD() const;
 
         double getSignal() const;

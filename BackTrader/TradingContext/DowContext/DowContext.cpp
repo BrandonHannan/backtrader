@@ -39,6 +39,9 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         this->doubleRsi.processNextDay(previousClose);
         this->doubleRsi.processNextDay(currentClose);
 
+        this->sMACD.processNextDay(previousClose);
+        this->sMACD.processNextDay(currentClose);
+
         this->atr.processNewData(currentData, previousData);
         this->doubleAtr.processNewData(currentData, previousData);
 
@@ -66,6 +69,8 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
 
         this->rsi.processNextDay(currentClose);
         this->doubleRsi.processNextDay(currentClose);
+
+        this->sMACD.processNextDay(currentClose);
 
         this->atr.processNewData(currentData, previousData);
         this->doubleAtr.processNewData(currentData, previousData);

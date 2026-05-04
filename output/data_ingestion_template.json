@@ -1,13 +1,13 @@
 {
   "metadata": {
     "_README": "Top-level metadata about the source position and pipeline configuration. None of these fields are ingested by the MLP - they exist only so this template is reproducible.",
-    "source_data": "c:\\Users\\brand\\Documents\\Repos\\backtrader\\output\\data.json",
-    "scaler_bundle": "c:\\Users\\brand\\Documents\\Repos\\backtrader\\NeuralNetwork\\scaler.pkl",
+    "source_data": "C:\\Users\\brand\\Documents\\Repos\\backtrader\\output\\data.json",
+    "scaler_bundle": "C:\\Users\\brand\\Documents\\Repos\\backtrader\\NeuralNetwork\\scaler.pkl",
     "scaler_kind": "standard",
     "winsorize_pct": 1.0,
     "split": "train",
     "split_index": 0,
-    "feature_count": 77,
+    "feature_count": 33,
     "source_position": {
       "stockName": "PL=F",
       "positionType": "LONG",
@@ -29,77 +29,33 @@
       0.48375171422958374,
       -14.204654693603516,
       -3.166891098022461,
-      -0.031225070357322693,
-      0.00018834923685062677,
-      0.00028952467255294323,
-      0.0,
       0.006135350558906794,
+      -12.051074028015137,
       0.0,
       0.0,
       0.0,
       0.0,
-      -0.2111233025789261,
-      0.0,
-      6.558637687703595e-05,
+      -9.327398300170898,
       0.0,
       0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
-      0.0,
-      -11.911450386047363,
-      1.0,
-      1.0,
-      -6.867369174957275,
-      0.0,
-      2.0,
-      -7.758697032928467,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
+      5.0,
+      0.11431392282247543,
+      3.0,
       -0.03832824528217316,
       -10.81918716430664,
       2.0,
       -11.330317497253418,
-      1.0,
-      1.0,
-      0.0,
-      -12.936616897583008,
-      1.0,
-      1.0,
-      -7.363645076751709,
-      0.0,
-      2.0,
-      -8.067622184753418,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
+      5.0,
+      0.0019570840522646904,
+      3.0,
       -0.03832824528217316,
       -12.35703182220459,
       2.0,
       -11.202042579650879,
       30.048931121826172,
-      1.0,
       34.07384490966797,
-      0.07999999821186066,
       0.004154255148023367,
-      1.0,
       7.098765490809456e-05,
-      0.07999999821186066,
       0.009959558956325054
     ],
     "winsor_hi": [
@@ -108,77 +64,33 @@
       4.9594197273254395,
       0.37593260407447815,
       10.070645332336426,
-      0.05098080635070801,
-      0.008435294963419437,
-      0.9290772676467896,
-      1.0,
       0.3761146366596222,
+      14.328521728515625,
       23.500526428222656,
-      22.285442352294922,
-      23.040910720825195,
-      24.10109519958496,
-      0.20951125025749207,
-      0.13978581130504608,
-      1.0,
-      1.0,
+      16.066755294799805,
+      0.799357533454895,
       3.5063443183898926,
+      6.435349464416504,
       0.0,
       0.0,
-      0.0,
-      1.0,
-      1.0,
-      0.0,
-      0.73336261510849,
-      1.0,
-      13.0,
-      2.290473699569702,
-      0.0,
-      15.0,
-      1.6160885095596313,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
+      22.0,
+      8.759142875671387,
+      3.0,
       0.08346917480230331,
       12.135499000549316,
       58.91999816894531,
       14.047470092773438,
-      1.0,
-      1.0,
-      0.0,
-      0.7072948217391968,
-      1.0,
-      13.0,
-      2.246861457824707,
-      0.0,
-      15.0,
-      1.6440129280090332,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
+      22.0,
+      9.058586120605469,
+      3.0,
       0.08346917480230331,
       12.226977348327637,
       59.91999816894531,
       13.697846412658691,
       84.01347351074219,
-      1.0,
       77.30038452148438,
-      1.0,
       0.21945969760417938,
-      1.0,
       0.21695618331432343,
-      1.0,
       1.5468602180480957
     ],
     "scaler_mean": [
@@ -187,77 +99,33 @@
       1.4126566371785287,
       -3.2723956026210717,
       1.5180137247304724,
-      0.000559832772758812,
-      0.0015065631963225533,
-      0.4387934957603019,
-      0.6627445614995211,
       0.057451071687267485,
+      0.019861225732408817,
       10.911044409676197,
-      10.359731361706242,
-      8.720817351882737,
-      11.846741932021363,
-      0.0019264739596319602,
-      0.027729347724679543,
-      0.24083560444167398,
-      0.34108633191955123,
+      3.277941267864537,
+      0.2861658685167975,
       0.7701223474008666,
+      -0.07650878568970745,
       0.0,
       0.0,
-      0.0,
-      1.0,
-      1.0,
-      0.0,
-      -2.4346151375649314,
-      1.0,
-      3.1644547817758926,
-      -0.7522436969032518,
-      0.0,
-      4.957312901901765,
-      -1.248592957734495,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
+      9.561499521138323,
+      1.661947838997756,
+      3.0,
       0.0006397677303743126,
       -0.5645168275798824,
       12.424829643521953,
       1.2941806557806041,
-      1.0,
-      1.0,
-      0.0,
-      -2.4693399930294064,
-      1.0,
-      3.1644547817758926,
-      -0.7611937852514747,
-      0.0,
-      4.957312901901765,
-      -1.2598288497757788,
-      1.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
+      9.561499521138323,
+      1.6835778216263215,
+      3.0,
       0.0006414361724449813,
       -0.6377296664070162,
       12.483113950540696,
       1.2864112111821746,
       54.2438947933613,
-      1.0,
       52.495270210148156,
-      0.9906854562686657,
       0.042851585967325814,
-      1.0,
       0.04172910410101249,
-      0.9906854562686657,
       1.0085330883537713
     ],
     "scaler_std": [
@@ -266,85 +134,41 @@
       0.8009230671789763,
       2.6779334406157878,
       2.216117820126964,
-      0.01120404744934612,
-      0.0014936911784619155,
-      0.2889528493563587,
-      0.47277289230909386,
       0.06394809643252734,
+      5.530086061443743,
       5.862977594607572,
-      5.519419909280535,
-      6.9532641949934115,
-      5.709933752155338,
-      0.07124479740614129,
-      0.028953592819082444,
-      0.24067675452931592,
-      0.4740743044051205,
+      3.1096497341044094,
+      0.2503681394282953,
       0.7373556700097307,
+      2.9401147730353716,
       1.0,
       1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      2.2151471075512017,
-      1.0,
-      2.443291018650862,
-      1.3748130072263949,
-      1.0,
-      2.8421962112015993,
-      1.492674809373354,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
+      3.5835627154502734,
+      1.5362728098755412,
       1.0,
       0.015259072859292058,
       3.4525088834589095,
       11.342307871882731,
       3.702559724627985,
-      1.0,
-      1.0,
-      1.0,
-      2.380619066761342,
-      1.0,
-      2.443291018650862,
-      1.4229615727131852,
-      1.0,
-      2.8421962112015993,
-      1.5480767076578084,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-      1.0,
+      3.5835627154502734,
+      1.6353943352842206,
       1.0,
       0.015259304219544127,
       3.583220361370987,
       11.467581929449679,
       3.662858728456101,
       10.669308663740113,
-      1.0,
       8.25563566373067,
-      0.09210113747702346,
       0.04132062335073597,
-      1.0,
       0.04078048568273565,
-      0.09210113747702346,
       0.20838894385468437
     ]
   },
   "mlp_input": {
-    "_README": "This is exactly what GenericMLP.forward() receives. The MLP ingests ONLY the 'value' field of each entry as a flat float32 tensor of length 77. Every other field ('index', 'name', 'raw', 'winsorized', '_not_ingested_by_mlp') is metadata included for human readability and is NOT part of the model input.",
+    "_README": "This is exactly what GenericMLP.forward() receives. The MLP ingests ONLY the 'value' field of each entry as a flat float32 tensor of length 33. Every other field ('index', 'name', 'raw', 'winsorized', '_not_ingested_by_mlp') is metadata included for human readability and is NOT part of the model input.",
     "tensor_shape": [
       1,
-      77
+      33
     ],
     "tensor_dtype": "float32",
     "values": [
@@ -421,58 +245,6 @@
           "winsorized"
         ],
         "index": 5,
-        "name": "price_slope_ret",
-        "raw": -0.005453417077660561,
-        "winsorized": -0.005453417077660561,
-        "value": -0.5367033545337505
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 6,
-        "name": "price_slopeSE_ret",
-        "raw": 0.0008637395803816617,
-        "winsorized": 0.0008637395803816617,
-        "value": -0.4303591165362711
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 7,
-        "name": "price_slopeRSQ",
-        "raw": 0.6889212727546692,
-        "winsorized": 0.6889212727546692,
-        "value": 0.8656352673161933
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 8,
-        "name": "price_slopeSig",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.7133561250799991
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 9,
         "name": "price_cov",
         "raw": 0.037886086851358414,
         "winsorized": 0.037886086851358414,
@@ -485,7 +257,20 @@
           "raw",
           "winsorized"
         ],
-        "index": 10,
+        "index": 6,
+        "name": "price_t",
+        "raw": -6.313728332519531,
+        "winsorized": -6.313728332519531,
+        "value": -1.1452967436456902
+      },
+      {
+        "_not_ingested_by_mlp": [
+          "index",
+          "name",
+          "raw",
+          "winsorized"
+        ],
+        "index": 7,
         "name": "vol_log_mean",
         "raw": 7.452547550201416,
         "winsorized": 7.452547550201416,
@@ -498,11 +283,11 @@
           "raw",
           "winsorized"
         ],
-        "index": 11,
-        "name": "vol_log_std",
-        "raw": 6.682178497314453,
-        "winsorized": 6.682178497314453,
-        "value": -0.6662933650342909
+        "index": 8,
+        "name": "vol_max_over_mean",
+        "raw": 2.2115190029144287,
+        "winsorized": 2.2115190029144287,
+        "value": -0.34293967364052397
       },
       {
         "_not_ingested_by_mlp": [
@@ -511,11 +296,11 @@
           "raw",
           "winsorized"
         ],
-        "index": 12,
-        "name": "vol_log_min",
-        "raw": 4.804020881652832,
-        "winsorized": 4.804020881652832,
-        "value": -0.5633032717281378
+        "index": 9,
+        "name": "vol_min_over_mean",
+        "raw": 0.07021616399288177,
+        "winsorized": 0.07021616399288177,
+        "value": -0.8625286948132755
       },
       {
         "_not_ingested_by_mlp": [
@@ -524,72 +309,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 13,
-        "name": "vol_log_max",
-        "raw": 8.245909690856934,
-        "winsorized": 8.245909690856934,
-        "value": -0.63062592272725
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 14,
-        "name": "vol_slope_frac",
-        "raw": 0.01014301273971796,
-        "winsorized": 0.01014301273971796,
-        "value": 0.11532826366599698
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 15,
-        "name": "vol_slopeSE_frac",
-        "raw": 0.018754614517092705,
-        "winsorized": 0.018754614517092705,
-        "value": -0.3099695869754672
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 16,
-        "name": "vol_slopeRSQ",
-        "raw": 0.015989862382411957,
-        "winsorized": 0.015989862382411957,
-        "value": -0.9342229269253106
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 17,
-        "name": "vol_slopeSig",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": -0.7194786318308357
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 18,
+        "index": 10,
         "name": "vol_cov",
         "raw": 0.46253058314323425,
         "winsorized": 0.46253058314323425,
@@ -602,8 +322,21 @@
           "raw",
           "winsorized"
         ],
-        "index": 19,
-        "name": "macd_ret",
+        "index": 11,
+        "name": "vol_t",
+        "raw": 0.5408275723457336,
+        "winsorized": 0.5408275723457336,
+        "value": 0.20997015616438117
+      },
+      {
+        "_not_ingested_by_mlp": [
+          "index",
+          "name",
+          "raw",
+          "winsorized"
+        ],
+        "index": 12,
+        "name": "macd_atr",
         "raw": 0.0,
         "winsorized": 0.0,
         "value": 0.0
@@ -615,8 +348,8 @@
           "raw",
           "winsorized"
         ],
-        "index": 20,
-        "name": "signal_ret",
+        "index": 13,
+        "name": "signal_atr",
         "raw": 0.0,
         "winsorized": 0.0,
         "value": 0.0
@@ -628,10 +361,36 @@
           "raw",
           "winsorized"
         ],
-        "index": 21,
-        "name": "macdReady",
-        "raw": 0.0,
-        "winsorized": 0.0,
+        "index": 14,
+        "name": "trend_duration_days",
+        "raw": 13.0,
+        "winsorized": 13.0,
+        "value": 0.9595201066348941
+      },
+      {
+        "_not_ingested_by_mlp": [
+          "index",
+          "name",
+          "raw",
+          "winsorized"
+        ],
+        "index": 15,
+        "name": "trend_range_atr",
+        "raw": 2.2820701599121094,
+        "winsorized": 2.2820701599121094,
+        "value": 0.40365377615749876
+      },
+      {
+        "_not_ingested_by_mlp": [
+          "index",
+          "name",
+          "raw",
+          "winsorized"
+        ],
+        "index": 16,
+        "name": "trend_extrema_count",
+        "raw": 3.0,
+        "winsorized": 3.0,
         "value": 0.0
       },
       {
@@ -641,254 +400,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 22,
-        "name": "trend_ready",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 23,
-        "name": "trend_type",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 24,
-        "name": "trend_e1_days",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 25,
-        "name": "trend_e1_close_atr",
-        "raw": -3.4585390090942383,
-        "winsorized": -3.4585390090942383,
-        "value": -0.4622374144086679
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 26,
-        "name": "trend_e1_trough",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 27,
-        "name": "trend_e2_days",
-        "raw": 2.0,
-        "winsorized": 2.0,
-        "value": -0.4765927484229373
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 28,
-        "name": "trend_e2_close_atr",
-        "raw": -1.176468849182129,
-        "winsorized": -1.176468849182129,
-        "value": -0.30856934728507307
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 29,
-        "name": "trend_e2_trough",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 30,
-        "name": "trend_e3_days",
-        "raw": 6.0,
-        "winsorized": 6.0,
-        "value": 0.36685964677203514
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 31,
-        "name": "trend_e3_close_atr",
-        "raw": -1.6867460012435913,
-        "winsorized": -1.6867460012435913,
-        "value": -0.2935354979917154
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 32,
-        "name": "trend_e3_trough",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 33,
-        "name": "trend_e4_days",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 34,
-        "name": "trend_e4_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 35,
-        "name": "trend_e4_trough",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 36,
-        "name": "trend_e5_days",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 37,
-        "name": "trend_e5_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 38,
-        "name": "trend_e5_trough",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 39,
-        "name": "tl_ready",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 40,
-        "name": "tl_active",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 41,
+        "index": 17,
         "name": "tl_slope_ret",
         "raw": -0.0016860381001606584,
         "winsorized": -0.0016860381001606584,
@@ -901,7 +413,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 42,
+        "index": 18,
         "name": "tl_intercept_atr",
         "raw": 3.3309707641601562,
         "winsorized": 3.3309707641601562,
@@ -914,7 +426,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 43,
+        "index": 19,
         "name": "tl_dateDiff",
         "raw": 29.0,
         "winsorized": 29.0,
@@ -927,7 +439,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 44,
+        "index": 20,
         "name": "tl_proj_atr",
         "raw": -0.7795889377593994,
         "winsorized": -0.7795889377593994,
@@ -940,11 +452,11 @@
           "raw",
           "winsorized"
         ],
-        "index": 45,
-        "name": "dtrend_ready",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
+        "index": 21,
+        "name": "dtrend_duration_days",
+        "raw": 13.0,
+        "winsorized": 13.0,
+        "value": 0.9595201066348941
       },
       {
         "_not_ingested_by_mlp": [
@@ -953,23 +465,23 @@
           "raw",
           "winsorized"
         ],
-        "index": 46,
-        "name": "dtrend_type",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 47,
-        "name": "dtrend_e1_days",
+        "index": 22,
+        "name": "dtrend_range_atr",
         "raw": 0.0,
-        "winsorized": 0.0,
+        "winsorized": 0.0019570840522646904,
+        "value": -1.0282662115750831
+      },
+      {
+        "_not_ingested_by_mlp": [
+          "index",
+          "name",
+          "raw",
+          "winsorized"
+        ],
+        "index": 23,
+        "name": "dtrend_extrema_count",
+        "raw": 3.0,
+        "winsorized": 3.0,
         "value": 0.0
       },
       {
@@ -979,215 +491,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 48,
-        "name": "dtrend_e1_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 1.0372680062538366
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 49,
-        "name": "dtrend_e1_trough",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 50,
-        "name": "dtrend_e2_days",
-        "raw": 2.0,
-        "winsorized": 2.0,
-        "value": -0.4765927484229373
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 51,
-        "name": "dtrend_e2_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.534936290514222
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 52,
-        "name": "dtrend_e2_trough",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 53,
-        "name": "dtrend_e3_days",
-        "raw": 6.0,
-        "winsorized": 6.0,
-        "value": 0.36685964677203514
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 54,
-        "name": "dtrend_e3_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.8138026000545286
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 55,
-        "name": "dtrend_e3_trough",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 56,
-        "name": "dtrend_e4_days",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 57,
-        "name": "dtrend_e4_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 58,
-        "name": "dtrend_e4_trough",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 59,
-        "name": "dtrend_e5_days",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 60,
-        "name": "dtrend_e5_close_atr",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 61,
-        "name": "dtrend_e5_trough",
-        "raw": 0.0,
-        "winsorized": 0.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 62,
-        "name": "dtl_ready",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 63,
-        "name": "dtl_active",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 64,
+        "index": 24,
         "name": "dtl_slope_ret",
         "raw": -0.0016860381001606584,
         "winsorized": -0.0016860381001606584,
@@ -1200,7 +504,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 65,
+        "index": 25,
         "name": "dtl_intercept_atr",
         "raw": 0.0,
         "winsorized": 0.0,
@@ -1213,7 +517,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 66,
+        "index": 26,
         "name": "dtl_dateDiff",
         "raw": 29.0,
         "winsorized": 29.0,
@@ -1226,7 +530,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 67,
+        "index": 27,
         "name": "dtl_proj_atr",
         "raw": 0.0,
         "winsorized": 0.0,
@@ -1239,7 +543,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 68,
+        "index": 28,
         "name": "rsi",
         "raw": 41.50897216796875,
         "winsorized": 41.50897216796875,
@@ -1252,20 +556,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 69,
-        "name": "rsiReady",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 70,
+        "index": 29,
         "name": "doubleRsi",
         "raw": 50.0,
         "winsorized": 50.0,
@@ -1278,20 +569,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 71,
-        "name": "doubleRsiReady",
-        "raw": 0.0,
-        "winsorized": 0.07999999821186066,
-        "value": -9.887885025133315
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 72,
+        "index": 30,
         "name": "atr_ret",
         "raw": 0.01932876743376255,
         "winsorized": 0.01932876743376255,
@@ -1304,20 +582,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 73,
-        "name": "atrReady",
-        "raw": 1.0,
-        "winsorized": 1.0,
-        "value": 0.0
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 74,
+        "index": 31,
         "name": "doubleAtr_ret",
         "raw": 0.0,
         "winsorized": 7.098765490809456e-05,
@@ -1330,20 +595,7 @@
           "raw",
           "winsorized"
         ],
-        "index": 75,
-        "name": "doubleAtrReady",
-        "raw": 0.0,
-        "winsorized": 0.07999999821186066,
-        "value": -9.887885025133315
-      },
-      {
-        "_not_ingested_by_mlp": [
-          "index",
-          "name",
-          "raw",
-          "winsorized"
-        ],
-        "index": 76,
+        "index": 32,
         "name": "vol_ratio",
         "raw": 0.0,
         "winsorized": 0.009959558956325054,
@@ -1356,77 +608,33 @@
       0.7045203381632152,
       -0.06951009448179682,
       0.8180779121778903,
-      -0.5367033545337505,
-      -0.4303591165362711,
-      0.8656352673161933,
-      0.7133561250799991,
       -0.30595101226433535,
+      -1.1452967436456902,
       -0.5898874426291014,
-      -0.6662933650342909,
-      -0.5633032717281378,
-      -0.63062592272725,
-      0.11532826366599698,
-      -0.3099695869754672,
-      -0.9342229269253106,
-      -0.7194786318308357,
+      -0.34293967364052397,
+      -0.8625286948132755,
       -0.41715521663185035,
+      0.20997015616438117,
       0.0,
       0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      -0.4622374144086679,
-      0.0,
-      -0.4765927484229373,
-      -0.30856934728507307,
-      0.0,
-      0.36685964677203514,
-      -0.2935354979917154,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
+      0.9595201066348941,
+      0.40365377615749876,
       0.0,
       -0.1524211760427282,
       1.1283063196168606,
       1.4613578245012584,
       -0.5600907879341137,
-      0.0,
-      0.0,
-      0.0,
-      1.0372680062538366,
-      0.0,
-      -0.4765927484229373,
-      0.534936290514222,
-      0.0,
-      0.36685964677203514,
-      0.8138026000545286,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
+      0.9595201066348941,
+      -1.0282662115750831,
       0.0,
       -0.15252820437412928,
       0.1779766807763429,
       1.440311144151724,
       -0.35120415679378336,
       -1.1936033558268375,
-      0.0,
       -0.3022505245853545,
-      -9.887885025133315,
       -0.5692755003693403,
-      0.0,
       -1.0215208511785894,
-      -9.887885025133315,
       -4.791873843814768
     ]
   }

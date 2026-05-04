@@ -261,22 +261,22 @@ Commodity futures tickers used for backtesting:
 
 **Input:** `output/data.json` — array of closed `Position` objects written by `ExecuteAllSweeps()`.
 
-**Feature vector (77 values per trade — ATR/return-normalized for cross-ticker stationarity):**
+**Feature vector (33 values per trade — ATR/return-normalized for cross-ticker stationarity, all continuous except `positionType`):**
 
 | Group | Count | Fields |
 |---|---|---|
 | Position-level | 1 | `positionType` (LONG=1/SHORT=0) |
-| Price statistics | 9 | (mean,min,max - purchasePrice)/atr, std/atr, slope/mean, slopeSE/mean, slopeRSQ, slopeSignificant, **price_cov = std/mean** |
-| Volume statistics | 9 | log1p(mean,std,min,max), slope/mean, slopeSE/mean, slopeRSQ, slopeSignificant, **vol_cov = std/mean** |
-| MACD | 3 | macd/mean, signal/mean, macdReady |
-| Trend | 17 | trendReady, trend.type (−1/0/1), e1–e5 [days_since_e1, (close-purchasePrice)/atr, isTrough] |
-| TrendLine | 6 | trendLineReady, isActive, slope/mean, (intercept-purchasePrice)/atr, dateDifference, **trendline_distance_atr** |
-| DoubleTrend | 17 | same shape as Trend, anchored to its own e1.date |
-| DoubleTrendLine | 6 | same shape as TrendLine |
-| RSI | 4 | rsi, rsiReady, doubleRsi, doubleRsiReady (RSI is in [0, 100], left untransformed) |
-| ATR | 5 | atr/purchasePrice, atrReady, doubleAtr/purchasePrice, doubleAtrReady, **volatility_ratio = atr/doubleAtr** |
+| Price statistics | 6 | (mean,std,min,max - purchasePrice)/atr, **price_cov = std/mean**, **price_t = slope/slopeSE** |
+| Volume statistics | 5 | log1p(mean), **max/mean**, **min/mean**, **vol_cov = std/mean**, **vol_t = slope/slopeSE** |
+| MACD | 2 | macd/atr, signal/atr |
+| Trend | 3 | duration_days (e1→purchaseDate), range_atr ((max-min close)/atr across extrema), extrema_count |
+| TrendLine | 4 | slope/mean, (intercept-purchasePrice)/atr, dateDifference, **trendline_distance_atr** |
+| DoubleTrend | 3 | same shape as Trend, anchored to its own e1.date |
+| DoubleTrendLine | 4 | same shape as TrendLine |
+| RSI | 2 | rsi, doubleRsi (RSI is in [0, 100], left untransformed) |
+| ATR | 3 | atr/purchasePrice, doubleAtr/purchasePrice, **volatility_ratio = atr/doubleAtr** |
 
-Stationarity transforms applied in [neural_network.py:`extract_context_features`](NeuralNetwork/neural_network.py): all raw prices are converted to ATR-normalized distances from `purchasePrice`; raw extremum bar indices replaced with `(extremum.date - e1.date).days` so the duration is intra-trend; missing extremums (`index == -1`) zero-fill all three of their feature slots; raw volumes are `log1p`-transformed; slopes are normalized by lookback mean to express per-bar returns. `tradeType` and `exitContext` are excluded as before — the former is a human-readable label, the latter would be data leakage.
+Stationarity transforms applied in [neural_network.py:`extract_context_features`](NeuralNetwork/neural_network.py): all raw prices are converted to ATR-normalized distances from `purchasePrice`; the trend block is summarised into duration / peak-to-trough range / extremum count instead of per-extremum coordinates (zero-padding missing positions is MLP-hostile); raw volumes use a `log1p` baseline plus `max/mean` and `min/mean` spike ratios; slope significance collapses into a single t-statistic `slope/slopeSE`; MACD is ATR-normalized so it shares scale with every other price-distance feature. All `*Ready`, `isActive`, `isTrough`, and `slopeSignificant` boolean flags have been removed (rigid 0/1 channels waste MLP capacity). `tradeType` and `exitContext` are excluded — the former is a human-readable label, the latter would be data leakage.
 
 **Class imbalance handling:** The dataset has ~40% profitable / ~60% loss trades. `BCEWithLogitsLoss(pos_weight = num_loss / num_profit ≈ 1.49)` corrects for this by penalising missed profitable trades proportionally. The original `BCELoss` without weighting caused Recall ≈ 0.006 and AUC-ROC ≈ 0.49 (near-random).
 

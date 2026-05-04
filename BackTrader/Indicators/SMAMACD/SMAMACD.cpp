@@ -5,6 +5,13 @@ SMAMACD::SMAMACD(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBac
         shortTerm(lookBackPeriod), longTerm(doubleLookBackPeriod), signal(signalLookBackPeriod) {}
 
 
+void SMAMACD::processNextDay(double close) {
+    this->shortTerm.addDataPoint(close);
+    this->longTerm.addDataPoint(close);
+    this->signal.addDataPoint(close);
+}
+
+
 double SMAMACD::getMACD() const {
     if (!this->shortTerm.isReady() || !this->longTerm.isReady()){
         return 0.0;
