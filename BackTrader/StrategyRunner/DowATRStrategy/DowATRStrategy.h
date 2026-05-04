@@ -4,26 +4,31 @@
 #include "../../InputParameters/DowContextParameters/DowContextInputParameters.h"
 #include "../../PositionSizing/ATRPositionSize/ATRPositionSize.h"
 #include "../../TradingContext/DowContext/DowContext.h"
+#include "../../Functions/MacroFeatures/MacroFeatures.h"
 #include "../StrategyRunner.h"
 #include "DowATRBaseCase.h"
 #include <fstream>
 #include <filesystem>
 #include <iomanip>
 
-using namespace std;    
+using namespace std;
 
-void ExecuteAllSweeps(unordered_map<string, StockData> &data){
+void ExecuteAllSweeps(unordered_map<string, StockData> &data,
+                      const MacroFeatures::RelatedMap &related){
     filesystem::create_directories("../output");
     ofstream file("../output/Returns.txt");
     DowContextInputParameters dowParams;
     DowBaseCase dowBase;
+    MacroFeatures macro(data, related);
     vector<unique_ptr<ISweepJob>> mySweeps;
 
     mySweeps.push_back(make_unique<StrategyRunner<int>>(
         "Lookback", dowParams.lookbackPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(testVal, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -31,7 +36,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "Double Lookback", dowParams.doubleLookbackPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(dowBase.lookback, testVal, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -39,7 +46,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "Signal Lookback", dowParams.signalLookBackPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, testVal, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -47,7 +56,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "Risk Amount", dowParams.RiskAmountArray, dowBase.balance, [&](double testVal) {
             auto sizer = make_unique<ATRPositionSize>(testVal, dowBase.atrPeriod, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -55,7 +66,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "ATR Period", dowParams.ATRPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, testVal, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -63,7 +76,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "ATR Multiplier", dowParams.ATRMultiplierArray, dowBase.balance, [&](double testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, testVal);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -71,7 +86,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "Trend Mode", dowParams.trendModes, dowBase.balance, [&](TrendMode testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, testVal, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -79,7 +96,9 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         "Trend Line Mode", dowParams.trendLineModes, dowBase.balance, [&](TrendLineMode testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, testVal);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 
@@ -91,6 +110,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
         auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
         auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
         auto baseStrategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+        baseStrategy->setMacroFeatures(&macro);
 
         for (const auto& [ticker, stockData] : data) {
             size_t n = stockData.close.size();
@@ -114,13 +134,16 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data){
     return;
 }
 
-void ExecuteBaseCase(unordered_map<string, StockData> &data){
+void ExecuteBaseCase(unordered_map<string, StockData> &data,
+                     const MacroFeatures::RelatedMap &related){
     filesystem::create_directories("../output");
     DowBaseCase dowBase;
+    MacroFeatures macro(data, related);
 
     auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
     auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
     auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+    strategy->setMacroFeatures(&macro);
 
     for (const auto& [ticker, stockData] : data) {
         size_t n = stockData.close.size();
@@ -248,21 +271,25 @@ void ExecuteBaseCase(unordered_map<string, StockData> &data){
     cout << "Positions written to ../output/data.json\n";
 }
 
-void ExecuteAllSweeps2D(unordered_map<string, StockData> &data){
+void ExecuteAllSweeps2D(unordered_map<string, StockData> &data,
+                        const MacroFeatures::RelatedMap &related){
     filesystem::create_directories("../output");
     ofstream file("../output/Returns.txt");
     DowContextInputParameters dowParams;
     DowBaseCase dowBase;
+    MacroFeatures macro(data, related);
     vector<unique_ptr<ISweepJob>> mySweeps;
 
     mySweeps.push_back(make_unique<StrategyRunner2D<int, double>>(
-        "ATR Period", "ATR Multiplier", 
-        dowParams.ATRPeriodArray, dowParams.ATRMultiplierArray, 
-        dowBase.balance, 
+        "ATR Period", "ATR Multiplier",
+        dowParams.ATRPeriodArray, dowParams.ATRMultiplierArray,
+        dowBase.balance,
         [&](int atrPer, double atrMult) { // Lambda captures both parameters
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, atrPer, atrMult);
             auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
-            return make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
         }
     ));
 }

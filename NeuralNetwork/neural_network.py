@@ -68,8 +68,9 @@ FEATURE_NAMES = (
     + ["dtl_slope_ret", "dtl_intercept_atr", "dtl_dateDiff", "dtl_proj_atr"]
     + ["rsi", "doubleRsi"]
     + ["atr_ret", "doubleAtr_ret", "vol_ratio"]
+    + ["macro_agreement", "macro_rel_momentum", "macro_confluence", "macro_ecosystem_vol"]
 )
-assert len(FEATURE_NAMES) == 33, f"FEATURE_NAMES length {len(FEATURE_NAMES)} != 33"
+assert len(FEATURE_NAMES) == 37, f"FEATURE_NAMES length {len(FEATURE_NAMES)} != 37"
 
 
 def _safe_div(num: float, den: float) -> float:
@@ -195,9 +196,25 @@ def _trendline_features(tl: dict, purchase_price: float,
     ]
 
 
+def _macro_features(macro: dict) -> list:
+    """
+    4 cross-asset features computed in C++ MacroFeatures::compute. When the
+    block is missing or marked invalid (no related-stocks entry, insufficient
+    history, etc.), all four features are zeroed.
+    """
+    if not macro or not macro.get("valid", False):
+        return [0.0, 0.0, 0.0, 0.0]
+    return [
+        float(macro.get("agreementScore", 0.0)),
+        float(macro.get("relativeMomentum", 0.0)),
+        float(macro.get("confluenceRatio", 0.0)),
+        float(macro.get("ecosystemVolRatio", 0.0)),
+    ]
+
+
 def extract_context_features(ctx: dict, purchase_price: float, purchase_date: str) -> list:
     """
-    Flatten one DowContext JSON object into 32 stationary, ATR/return-normalized floats.
+    Flatten one DowContext JSON object into 36 stationary, ATR/return-normalized floats.
 
     Block layout:
       priceStatistics   (6)   ATR-distance + CoV + t-stat
@@ -209,6 +226,7 @@ def extract_context_features(ctx: dict, purchase_price: float, purchase_date: st
       doubleTrendLine   (4)   same shape as trendLine
       rsi / doubleRsi   (2)   already in [0, 100], unchanged
       atr block         (3)   atr/price, doubleAtr/price, volatility_ratio
+      macroContext      (4)   agreement, relMomentum, confluence, ecosystemVol
     """
     atr_value = float(ctx.get("atrValue", 0.0))
     double_atr_value = float(ctx.get("doubleAtrValue", 0.0))
@@ -231,7 +249,8 @@ def extract_context_features(ctx: dict, purchase_price: float, purchase_date: st
     features.append(_safe_div(atr_value, purchase_price))
     features.append(_safe_div(double_atr_value, purchase_price))
     features.append(_safe_div(atr_value, double_atr_value))
-    return features  # 6+5+2+3+4+3+4+2+3 = 32
+    features.extend(_macro_features(ctx.get("macroContext", {})))
+    return features  # 6+5+2+3+4+3+4+2+3+4 = 36
 
 
 # ---------------------------------------------------------------------------
@@ -245,8 +264,8 @@ def load_positions(path: str):
     Filters out positions where pnl == 0.0 AND sellDate is empty
     (unclosed / still-open trades).
 
-    Feature vector per position (33 total):
-      [positionType, *entryContext×32]
+    Feature vector per position (37 total):
+      [positionType, *entryContext×36]
 
     Label: 1 if pnl > 0 else 0
     dates: list of purchaseDate strings (ISO format) for temporal splitting

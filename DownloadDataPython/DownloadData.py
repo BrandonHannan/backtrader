@@ -33,7 +33,8 @@ def parse_ticker_index(md_path):
                 categories[current].extend(line.split())
     return categories
 
-def parse_related_stocks(md_path):
+def parse_related_stocks_raw(md_path):
+    """Return the full primary→{related: sign} dict from the markdown JSON block."""
     try:
         with open(md_path, encoding="utf-8") as f:
             text = f.read()
@@ -56,12 +57,14 @@ def parse_related_stocks(md_path):
         return {}
 
     try:
-        raw = json.loads(text[json_start:json_end + 1])
+        return json.loads(text[json_start:json_end + 1])
     except json.JSONDecodeError as e:
         print(f"Warning: invalid JSON in {md_path}: {e}. Related-ticker expansion disabled.")
         return {}
 
-    return {primary: list(related.keys()) for primary, related in raw.items()}
+
+def parse_related_stocks(md_path):
+    return {primary: list(related.keys()) for primary, related in parse_related_stocks_raw(md_path).items()}
 
 def expand_with_related(selected, related_map):
     expanded = []
@@ -178,9 +181,16 @@ if __name__ == "__main__":
     REL_PATH = os.path.join(HERE, "RelatedStocks.md")
 
     categories = parse_ticker_index(MD_PATH)
-    related_map = parse_related_stocks(REL_PATH)
+    related_raw = parse_related_stocks_raw(REL_PATH)
+    related_map = {primary: list(related.keys()) for primary, related in related_raw.items()}
     selected = select_tickers(categories)
     tickers = expand_with_related(selected, related_map)
+
+    # Emit clean JSON dict (with +/-/mixed signs) for the C++ MacroFeatures module to consume.
+    out_dir = os.path.join(HERE, "..", "output")
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "related_stocks.json"), "w", encoding="utf-8") as f:
+        json.dump(related_raw, f, indent=2)
 
     data = dict()
 

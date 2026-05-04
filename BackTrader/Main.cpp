@@ -4,6 +4,8 @@
 #include "./TradingStrategy/Custom/CustomStrategy.h"
 #include "./PositionSizing/ATRPositionSize/ATRPositionSize.h"
 #include "./TradingContext/BreakoutContext/BreakoutContext.h"
+#include "./Functions/MacroFeatures/MacroFeatures.h"
+#include "./include/nlohmann/json.hpp"
 #include <iostream>
 #include <algorithm>
 #include <time.h>
@@ -30,6 +32,37 @@ int main(){
     {
         ofstream configFile("../output/configuration.json");
         configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
+    }
+
+    // Load cross-asset related-stocks mapping written by DownloadData.py.
+    MacroFeatures::RelatedMap relatedMap;
+    {
+        ifstream relFile("../output/related_stocks.json");
+        if (relFile.is_open()) {
+            try {
+                nlohmann::json relJson;
+                relFile >> relJson;
+                for (auto it = relJson.begin(); it != relJson.end(); ++it) {
+                    const string& primary = it.key();
+                    vector<pair<string, int>> entries;
+                    for (auto kit = it.value().begin(); kit != it.value().end(); ++kit) {
+                        const string& signStr = kit.value().get<string>();
+                        int sign = 0;
+                        if (signStr == "+") sign = 1;
+                        else if (signStr == "-") sign = -1;
+                        // "mixed" or anything else stays 0
+                        entries.emplace_back(kit.key(), sign);
+                    }
+                    relatedMap[primary] = move(entries);
+                }
+                cout << "Loaded related-stocks map for " << relatedMap.size() << " primary tickers." << endl;
+            } catch (const exception& e) {
+                cout << "Warning: failed to parse ../output/related_stocks.json: " << e.what() << endl;
+                relatedMap.clear();
+            }
+        } else {
+            cout << "Note: ../output/related_stocks.json not found; macroContext will be valid:false for all positions." << endl;
+        }
     }
 
     // for (auto stockData : data){
@@ -79,9 +112,9 @@ int main(){
     clock_t start = clock();
 
     if (choice == 1) {
-        ExecuteBaseCase(data);
+        ExecuteBaseCase(data, relatedMap);
     } else if (choice == 2) {
-        ExecuteAllSweeps(data);
+        ExecuteAllSweeps(data, relatedMap);
     } else {
         cout << "Invalid choice. Exiting.\n";
         return 1;

@@ -98,7 +98,11 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     newPosition.setTradeType(trade.tradeType);
                     string positionStats = context->getStats();
                     newPosition.setStats(positionStats);
-                    newPosition.setEntryContextData(context->getContextData());
+                    nlohmann::json entryCtx = context->getContextData();
+                    if (this->macroFeatures != nullptr) {
+                        entryCtx["macroContext"] = this->macroFeatures->compute(stockName, currentDate);
+                    }
+                    newPosition.setEntryContextData(entryCtx);
 
                     this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
                     
