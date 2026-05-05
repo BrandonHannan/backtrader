@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags. -std=c++20 for the standard, -Wall for all warnings.
-CXXFLAGS = -std=c++20 -Wall -g -I./inlcude #-arch x86_64 -g
+CXXFLAGS = -std=c++20 -Wall -g -I./include #-arch x86_64 -g
 
 # For Apple Silicon Macs (M1/M2/M3)
 # BOOST_INCLUDE_PATH = -I/usr/local/include
@@ -29,7 +29,7 @@ all: $(TARGET)
 
 # Rule to create the executable from the source files
 $(TARGET): $(SRCS)
-	$(CXX) $(CXXFLAGS) $(BOOST_INCLUDE_PATH) -o $(TARGET) $(SRCS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRCS)
 
 # $(BOOST_LIB_PATH) $(BOOST_LIBS)
 
