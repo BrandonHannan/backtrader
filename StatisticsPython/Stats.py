@@ -4,6 +4,7 @@ import re
 import os
 import TestSystem as TS
 import time
+import json
 
 # --- 2. Data Parsing Function ---
 def parse_returns_file(file_path):
@@ -51,6 +52,7 @@ def parse_returns_file(file_path):
 if __name__ == '__main__':
     # --- Configuration ---
     OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'output')
+    DATA_FILE = os.path.join(OUTPUT_DIR, 'data.json');
     INPUT_FILE = os.path.join(OUTPUT_DIR, 'Returns.txt')
     OUTPUT_CSV = os.path.join(OUTPUT_DIR, 'strategy_lookback_optimization_results.csv')
     _config_path = os.path.join(OUTPUT_DIR, "configuration.json")
@@ -58,6 +60,16 @@ if __name__ == '__main__':
         import json
         with open(_config_path) as _f:
             INITIAL_CAPITAL = json.load(_f)["initial_balance"]
+        
+        with open(DATA_FILE) as _f:
+            data = json.load(_f)
+            seen_tickers = set()
+            for trade in data:
+                if trade["stockName"] not in seen_tickers:
+                    seen_tickers.add(trade["stockName"])
+            
+            INITIAL_CAPITAL = 1000.0 * len(seen_tickers)
+            print(INITIAL_CAPITAL)
     else:
         INITIAL_CAPITAL = 68000.0  # fallback if C++ hasn't been run yet
     
