@@ -1,6 +1,7 @@
 #include "./DowContext.h"
 
-DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode): 
+DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode,
+                    double agreementThreshold, double relativeMomentumThreshold, double breakoutConfluenceThreshold, double ecosystemVolatilityThreshold):
     BaseContext(lookBackPeriod), 
     doubleLookBackPeriod(doubleLookBackPeriod), 
     signalLookBackPeriod(signalLookBackPeriod),
@@ -14,7 +15,11 @@ DowContext::DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalL
     rsi(RSI(lookBackPeriod)),
     doubleRsi(RSI(doubleLookBackPeriod)),
     atr(ATR(lookBackPeriod)),
-    doubleAtr(ATR(doubleLookBackPeriod)) {}
+    doubleAtr(ATR(doubleLookBackPeriod)),
+    agreementThreshold(agreementThreshold),
+    relativeMomentumThreshold(relativeMomentumThreshold),
+    breakoutConfluenceThreshold(breakoutConfluenceThreshold),
+    ecosystemVolatilityThreshold(ecosystemVolatilityThreshold) {}
 
 void DowContext::updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData){
     double currentClose = currentData.close;
@@ -109,6 +114,41 @@ Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData) const
         // if ((macd - signal) > 0){
         //     return Trade("LONG", "LONG BREAKTHROUGH");
         // }
+    }
+
+    return Trade();
+}
+
+Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData, const MacroFeatures &macroFeatures, const string& primary) const {
+    Trend currentTrend = this->trend.getCurrentTrend();
+    Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
+    double maxPrice = this->priceStatistics.getMax();
+    double macd = this->sMACD.getMACD();
+    double signal = this->sMACD.getSignal();
+
+    Trendline currentTrendLine = this->trendLine.getActiveTrend();
+
+    if (currentTrend.type == TrendType::NONE){
+        return Trade();
+    }
+
+    if (currentTrend.type == TrendType::UPTREND && currentData.close > maxPrice){
+        if (macroFeatures.isValid(primary, currentData.date)){
+            json macroContext = macroFeatures.compute(primary, currentData.date);
+            double agreementScore = macroContext.value("agreementScore", 0.0);
+            double relativeMomentumScore = macroContext.value("relativeMomentum", 0.0);
+            double breakoutConfluenceScore = macroContext.value("confluenceRatio", 0.0);
+            double ecosystemVolatilityScore = macroContext.value("ecosystemVolRatio", 0.0);
+            if (agreementScore > this->agreementThreshold){
+                if (relativeMomentumScore > this->relativeMomentumThreshold){
+                    if (breakoutConfluenceScore > this->breakoutConfluenceThreshold){
+                        if (ecosystemVolatilityScore > this->ecosystemVolatilityThreshold){
+                            return Trade("LONG", "LONG BREAKTHROUGH");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return Trade();

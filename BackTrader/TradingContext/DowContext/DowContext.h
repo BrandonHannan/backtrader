@@ -34,12 +34,20 @@ class DowContext: public BaseContext {
         ATR atr;        // ATR over lookBackPeriod
         ATR doubleAtr;  // ATR over doubleLookBackPeriod
 
+        double agreementThreshold;
+        double relativeMomentumThreshold;
+        double breakoutConfluenceThreshold;
+        double ecosystemVolatilityThreshold;
+
     public:
-        DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode);
+        DowContext(int lookBackPeriod, int doubleLookBackPeriod, int signalLookBackPeriod, TrendMode trendMode, TrendLineMode trendLineMode,
+                    double agreementThreshold, double relativeMomentumThreshold, double breakoutConfluenceThreshold, double ecosystemVolatilityThreshold);
 
         void updateContext(const StockDataInstance &currentData, const StockDataInstance &previousData) override;
 
         Trade shouldExecuteTrade(const StockDataInstance &currentData) const override;
+
+        Trade shouldExecuteTrade(const StockDataInstance &currentData, const MacroFeatures &macroFeatures, const string& primary) const override;
 
         bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const override;
 

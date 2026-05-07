@@ -31,6 +31,8 @@ public:
     nlohmann::json compute(const string& primaryTicker,
                            const string& primaryDate) const;
 
+    bool isValid(const string& primary, const string& primaryDate) const;
+
 private:
     const unordered_map<string, StockData>& data_;
     const RelatedMap& related_;

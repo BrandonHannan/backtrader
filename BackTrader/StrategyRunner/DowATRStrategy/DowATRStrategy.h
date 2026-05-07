@@ -25,7 +25,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<int>>(
         "Lookback", dowParams.lookbackPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(testVal, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(testVal, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -35,7 +35,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<int>>(
         "Double Lookback", dowParams.doubleLookbackPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(dowBase.lookback, testVal, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, testVal, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -45,7 +45,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<int>>(
         "Signal Lookback", dowParams.signalLookBackPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, testVal, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, testVal, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -55,7 +55,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<double>>(
         "Risk Amount", dowParams.RiskAmountArray, dowBase.balance, [&](double testVal) {
             auto sizer = make_unique<ATRPositionSize>(testVal, dowBase.atrPeriod, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -65,7 +65,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<int>>(
         "ATR Period", dowParams.ATRPeriodArray, dowBase.balance, [&](int testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, testVal, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -75,7 +75,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<double>>(
         "ATR Multiplier", dowParams.ATRMultiplierArray, dowBase.balance, [&](double testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, testVal);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -85,7 +85,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<TrendMode>>(
         "Trend Mode", dowParams.trendModes, dowBase.balance, [&](TrendMode testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, testVal, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, testVal, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -95,7 +95,47 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     mySweeps.push_back(make_unique<StrategyRunner<TrendLineMode>>(
         "Trend Line Mode", dowParams.trendLineModes, dowBase.balance, [&](TrendLineMode testVal) {
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, testVal);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, testVal, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
+        }
+    ));
+
+    mySweeps.push_back(make_unique<StrategyRunner<double>>(
+        "Agreement Threshold", dowParams.agreementThresholdArray, dowBase.balance, [&](double testVal) {
+            auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, testVal, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
+        }
+    ));
+
+    mySweeps.push_back(make_unique<StrategyRunner<double>>(
+        "Relative Momentum Threshold", dowParams.relativeMomentumThresholdArray, dowBase.balance, [&](double testVal) {
+            auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, testVal, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
+        }
+    ));
+
+     mySweeps.push_back(make_unique<StrategyRunner<double>>(
+        "Breakout Confluence Threshold", dowParams.breakoutConfluenceThresholdArray, dowBase.balance, [&](double testVal) {
+            auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, testVal, dowBase.ecosystemVolatilityThreshold);
+            auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
+            strategy->setMacroFeatures(&macro);
+            return strategy;
+        }
+    ));
+
+    mySweeps.push_back(make_unique<StrategyRunner<double>>(
+        "Ecosystem Volatility Threshold", dowParams.ecosystemVolatilityThresholdArray, dowBase.balance, [&](double testVal) {
+            auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, testVal);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;
@@ -108,7 +148,7 @@ void ExecuteAllSweeps(unordered_map<string, StockData> &data,
     // Execute base case and write all positions to data.json
     {
         auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-        auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+        auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
         auto baseStrategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
         baseStrategy->setMacroFeatures(&macro);
 
@@ -138,10 +178,10 @@ void ExecuteBaseCase(unordered_map<string, StockData> &data,
                      const MacroFeatures::RelatedMap &related){
     filesystem::create_directories("../output");
     DowBaseCase dowBase;
-    MacroFeatures macro(data, related);
+    MacroFeatures macro(data, related, dowBase.lookback, dowBase.lookback, dowBase.atrPeriod, dowBase.atrPeriod);
 
     auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, dowBase.atrPeriod, dowBase.atrMultiplier);
-    auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+    auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
     auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
     strategy->setMacroFeatures(&macro);
 
@@ -286,7 +326,7 @@ void ExecuteAllSweeps2D(unordered_map<string, StockData> &data,
         dowBase.balance,
         [&](int atrPer, double atrMult) { // Lambda captures both parameters
             auto sizer = make_unique<ATRPositionSize>(dowBase.riskAmount, atrPer, atrMult);
-            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode);
+            auto context = make_unique<DowContext>(dowBase.lookback, dowBase.doubleLookback, dowBase.signalLookback, dowBase.trendMode, dowBase.trendLineMode, dowBase.agreementThreshold, dowBase.relativeMomentumThreshold, dowBase.breakoutConfluenceThreshold, dowBase.ecosystemVolatilityThreshold);
             auto strategy = make_unique<CustomStrategy>(dowBase.balance, move(sizer), move(context));
             strategy->setMacroFeatures(&macro);
             return strategy;

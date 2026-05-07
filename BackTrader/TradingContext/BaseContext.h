@@ -6,6 +6,7 @@
 #include "../Objects/Trade/Trade.h"
 #include "../Functions/StringHelper.h"
 #include "../Functions/WindowStatistics.h"
+#include "../Functions/MacroFeatures/MacroFeatures.h"
 #include "../include/nlohmann/json.hpp"
 #include <unordered_set>
 
@@ -36,6 +37,11 @@ class BaseContext {
         // - Position Type (LONG or SHORT)
         // - Trade Type
         virtual Trade shouldExecuteTrade(const StockDataInstance &currentData) const = 0;
+
+        // Returns these attributes of a new Position:
+        // - Position Type (LONG or SHORT)
+        // - Trade Type
+        virtual Trade shouldExecuteTrade(const StockDataInstance &currentData, const MacroFeatures &macroFeatures, const string& primary) const = 0;
 
         // Should return TRUE to sell the current position or FALSE to not
         virtual bool shouldSellTrade(const Position &currentPosition, const StockDataInstance &currentData) const = 0;

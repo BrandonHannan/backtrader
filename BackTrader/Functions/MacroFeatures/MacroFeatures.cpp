@@ -208,3 +208,33 @@ json MacroFeatures::compute(const string& primary, const string& primaryDate) co
     result["valid"] = true;
     return result;
 }
+
+bool MacroFeatures::isValid(const string& primary, const string& primaryDate) const {
+    if (data_.empty() || related_.empty()){
+        return false;
+    }
+
+    auto relIt = related_.find(primary);
+    if (relIt == related_.end() || relIt->second.empty()){
+        return false;
+    }
+
+    auto dataIt = data_.find(primary);
+    if (dataIt == data_.end()){
+        return false;
+    }
+    const StockData& primaryData = dataIt->second;
+    {
+        size_t n = primaryData.close.size();
+        if (n == 0 || primaryData.date.size() != n){
+            return false;
+        }
+    }
+
+    int endIdx_primary = findFallbackIndex(primaryData.date, primaryDate);
+    if (endIdx_primary < returnLookback_ || endIdx_primary < smaLookback_ || endIdx_primary < atrPeriod_ || endIdx_primary < atrSmaLookback_){
+        return false;
+    }
+
+    return true;
+}

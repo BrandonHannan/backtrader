@@ -89,7 +89,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         if (currentPosition.getIsClosed() && currentBalance > 0 && i < size - 2){
             // Check if the position size and context instances are ready and full of data
             if (sizer->isValid() && context->isValid()){
-                Trade trade = context->shouldExecuteTrade(currentInstance);
+                Trade trade = context->shouldExecuteTrade(currentInstance, *this->macroFeatures, stockName);
+                // Trade trade = context->shouldExecuteTrade(currentInstance);
                 if (trade.isValid){
                     sizer->processNewData(currentInstance, previousInstance);
                     hasSizerUpdated = true;

@@ -15,6 +15,10 @@ class DowContextInputParameters: public GenericInputParameters{
         vector<TrendMode> trendModes = {TrendMode::THREE_POINT, TrendMode::FIVE_POINT};
         vector<TrendLineMode> trendLineModes = {TrendLineMode::MINIMUM, TrendLineMode::MAXIMUM};
         vector<int> ATRPeriodArray = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+        vector<double> agreementThresholdArray = {0.5, 0.6, 0.7, 0.8, 0.9};
+        vector<double> relativeMomentumThresholdArray = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
+        vector<double> breakoutConfluenceThresholdArray = {0.5, 0.6, 0.7, 0.8, 0.9};
+        vector<double> ecosystemVolatilityThresholdArray = {0.5, 0.75, 1.0, 1.5, 1.75, 2.0, 2.5};
 };
 
 #endif
