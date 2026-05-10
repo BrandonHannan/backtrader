@@ -128,28 +128,36 @@ Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData, const
 
     Trendline currentTrendLine = this->trendLine.getActiveTrend();
 
-    if (currentTrend.type == TrendType::NONE){
-        return Trade();
+    if (currentData.close > maxPrice){
+        return Trade("LONG", "LONG BREAKTHROUGH");
     }
 
-    if (currentTrend.type == TrendType::UPTREND && currentData.close > maxPrice){
-        if (macroFeatures.isValid(primary, currentData.date)){
-            json macroContext = macroFeatures.compute(primary, currentData.date);
-            double agreementScore = macroContext.value("agreementScore", 0.0);
-            double relativeMomentumScore = macroContext.value("relativeMomentum", 0.0);
-            double breakoutConfluenceScore = macroContext.value("confluenceRatio", 0.0);
-            double ecosystemVolatilityScore = macroContext.value("ecosystemVolRatio", 0.0);
-            if (agreementScore > this->agreementThreshold){
-                if (relativeMomentumScore > this->relativeMomentumThreshold){
-                    if (breakoutConfluenceScore > this->breakoutConfluenceThreshold){
-                        if (ecosystemVolatilityScore > this->ecosystemVolatilityThreshold){
-                            return Trade("LONG", "LONG BREAKTHROUGH");
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // if (currentTrend.type == TrendType::NONE){
+    //     return Trade();
+    // }
+
+    // if (currentTrend.type == TrendType::UPTREND && currentData.close > maxPrice){
+    //     return Trade("LONG", "LONG BREAKTHROUGH");
+    // }
+
+    // if (currentTrend.type == TrendType::UPTREND && currentData.close > maxPrice){
+    //     if (macroFeatures.isValid(primary, currentData.date)){
+    //         json macroContext = macroFeatures.compute(primary, currentData.date);
+    //         double agreementScore = macroContext.value("agreementScore", 0.0);
+    //         double relativeMomentumScore = macroContext.value("relativeMomentum", 0.0);
+    //         double breakoutConfluenceScore = macroContext.value("confluenceRatio", 0.0);
+    //         double ecosystemVolatilityScore = macroContext.value("ecosystemVolRatio", 0.0);
+    //         if (agreementScore > this->agreementThreshold){
+    //             if (relativeMomentumScore > this->relativeMomentumThreshold){
+    //                 if (breakoutConfluenceScore > this->breakoutConfluenceThreshold){
+    //                     if (ecosystemVolatilityScore > this->ecosystemVolatilityThreshold){
+    //                         return Trade("LONG", "LONG BREAKTHROUGH");
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     return Trade();
 }
@@ -158,12 +166,12 @@ bool DowContext::shouldSellTrade(const Position &currentPosition, const StockDat
     bool shouldSell = this->checkStopLossPrice(currentPosition, currentData);
 
     // Sell Current Position if current price violates current trend line
-    // Trendline currentTrendLine = this->trendLine.getActiveTrend();
-    // Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
+    Trendline currentTrendLine = this->trendLine.getActiveTrend();
+    Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
 
-    // if (currentTrendLine.isActive && !currentTrendLine.isPointValidWithinTrendLine(currentData)){
-    //     shouldSell = true;
-    // }
+    if (currentTrendLine.isActive && !currentTrendLine.isPointValidWithinTrendLine(currentData)){
+        shouldSell = true;
+    }
 
     return shouldSell;
 }
@@ -175,7 +183,7 @@ bool DowContext::isValid() const {
     //     return true;
     // }
 
-    if (this->trend.isReady() && this->trendLine.isReady() /*&& this->doubleTrend.isReady() && this->doubleTrendLine.isReady()*/){
+    if (this->trend.isReady() && this->trendLine.isReady() && priceStatistics.isReady() && volumeStatistics.isReady()){
         // if (this->sMACD.isReady()){
         //     return true;
         // }

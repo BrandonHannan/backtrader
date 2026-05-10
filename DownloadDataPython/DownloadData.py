@@ -1,8 +1,6 @@
 from datetime import datetime
 import os
-import random
 import json
-from math import ceil
 
 def format_array(data):
     data = list(data)
@@ -76,103 +74,6 @@ def expand_with_related(selected, related_map):
     print(f"Expanded {len(selected)} -> {len(deduped)} tickers (added {added} related).")
     return deduped
 
-def _prompt_custom_blend(categories, names, n):
-    raw = input("\nSelect categories (comma-separated numbers, e.g. 1,3,5): ").strip()
-    parts = [p.strip() for p in raw.split(",")]
-    indices = []
-    for p in parts:
-        if not p.isdigit() or not (1 <= int(p) <= n):
-            print(f"Invalid category number '{p}'. Falling back to Commodity Futures — Core.")
-            return categories[names[0]]
-        idx = int(p) - 1
-        if idx not in indices:
-            indices.append(idx)
-
-    if not indices:
-        print("No categories selected. Falling back to Commodity Futures — Core.")
-        return categories[names[0]]
-
-    print()
-    samples = []
-    summary_parts = []
-    for idx in indices:
-        name = names[idx]
-        pool = categories[name]
-        pct_raw = input(f"  % of '{name}' to include ({len(pool)} tickers): ").strip()
-        if not pct_raw.isdigit() or not (1 <= int(pct_raw) <= 100):
-            print(f"Invalid percentage '{pct_raw}'. Falling back to Commodity Futures — Core.")
-            return categories[names[0]]
-        pct = int(pct_raw)
-        count = max(1, ceil(len(pool) * pct / 100))
-        selected = random.sample(pool, count)
-        samples.append((name, selected))
-        summary_parts.append(f"{count} from '{name}' ({pct}%)")
-
-    combined = list(dict.fromkeys(ticker for _, s in samples for ticker in s))
-    print(f"\nCustom blend: {' + '.join(summary_parts)} = {len(combined)} tickers.")
-    return combined
-
-
-def select_tickers(categories):
-    names = list(categories.keys())
-    n = len(names)
-
-    print("\nSelect tickers to download:")
-    for i, name in enumerate(names, 1):
-        count = len(categories[name])
-        print(f"  {i:>2}. {name}  ({count} tickers)")
-    print(f"  {n + 1:>2}. [random]       — 100 random tickers from all categories")
-    print(f"  {n + 2:>2}. [blend]        — 50% from one category, 50% from another")
-    print(f"  {n + 3:>2}. [custom blend] — choose multiple categories with % of each to include")
-
-    choice = input("\nEnter selection: ").strip()
-
-    if choice == str(n + 1):
-        pool = list(dict.fromkeys(
-            ticker for tickers in categories.values() for ticker in tickers
-        ))
-        selected = random.sample(pool, min(100, len(pool)))
-        print(f"\nRandomly selected {len(selected)} tickers from all categories.")
-        return selected
-
-    if choice == str(n + 2):
-        print("\nBlend: enter two category numbers to split 50/50.")
-        a = input("  First category number: ").strip()
-        b = input("  Second category number: ").strip()
-        if not a.isdigit() or not b.isdigit():
-            print("Invalid input. Falling back to Commodity Futures — Core.")
-            return categories[names[0]]
-        a_idx, b_idx = int(a) - 1, int(b) - 1
-        if not (0 <= a_idx < n and 0 <= b_idx < n):
-            print("Invalid category numbers. Falling back to Commodity Futures — Core.")
-            return categories[names[0]]
-        pool_a = categories[names[a_idx]]
-        pool_b = categories[names[b_idx]]
-        take_a = min(50, len(pool_a))
-        take_b = min(50, len(pool_b))
-        if take_a < 50:
-            print(f"  Warning: '{names[a_idx]}' only has {take_a} tickers (fewer than 50).")
-        if take_b < 50:
-            print(f"  Warning: '{names[b_idx]}' only has {take_b} tickers (fewer than 50).")
-        selected_a = random.sample(pool_a, take_a)
-        selected_b = random.sample(pool_b, take_b)
-        combined = list(dict.fromkeys(selected_a + selected_b))
-        print(f"\nBlend: {take_a} from '{names[a_idx]}' + {take_b} from '{names[b_idx]}' = {len(combined)} tickers.")
-        return combined
-
-    if choice == str(n + 3):
-        return _prompt_custom_blend(categories, names, n)
-
-    if choice.isdigit():
-        idx = int(choice) - 1
-        if 0 <= idx < n:
-            selected = categories[names[idx]]
-            print(f"\nSelected '{names[idx]}': {len(selected)} tickers.")
-            return selected
-
-    print("Invalid selection. Falling back to Commodity Futures — Core.")
-    return categories[names[0]]
-
 if __name__ == "__main__":
     import yfinance as yf
 
@@ -182,15 +83,23 @@ if __name__ == "__main__":
 
     categories = parse_ticker_index(MD_PATH)
     related_raw = parse_related_stocks_raw(REL_PATH)
-    related_map = {primary: list(related.keys()) for primary, related in related_raw.items()}
-    selected = select_tickers(categories)
-    tickers = expand_with_related(selected, related_map)
+
+    universe = []
+    for cat_tickers in categories.values():
+        universe.extend(cat_tickers)
+    for primary, related in related_raw.items():
+        universe.append(primary)
+        universe.extend(related.keys())
+    tickers = list(dict.fromkeys(universe))
+    print(f"Downloading {len(tickers)} unique tickers across {len(categories)} categories.")
 
     # Emit clean JSON dict (with +/-/mixed signs) for the C++ MacroFeatures module to consume.
     out_dir = os.path.join(HERE, "..", "output")
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "related_stocks.json"), "w", encoding="utf-8") as f:
         json.dump(related_raw, f, indent=2)
+    with open(os.path.join(out_dir, "categories.json"), "w", encoding="utf-8") as f:
+        json.dump(categories, f, indent=2)
 
     data = dict()
 

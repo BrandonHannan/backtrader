@@ -10,6 +10,13 @@
 #include <algorithm>
 #include <time.h>
 #include <fstream>
+#include <sstream>
+#include <unordered_set>
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <limits>
+#include <utility>
 
 
 int main(){
@@ -18,21 +25,6 @@ int main(){
     // Use this For Windows
     //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
     unordered_map<string, StockData> data = ReadData("../data.txt");
-    int dataSize = 0;
-    for (const auto& [ticker, stockData] : data) {
-        size_t n = stockData.close.size();
-        if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
-            stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
-        dataSize = dataSize + 1;
-    }
-    cout << "Number of Stocks: " << dataSize << endl;
-
-    DowBaseCase dowBase;
-    double initial_balance = static_cast<double>(dataSize) * dowBase.balance;
-    {
-        ofstream configFile("../output/configuration.json");
-        configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
-    }
 
     // Load cross-asset related-stocks mapping written by DownloadData.py.
     MacroFeatures::RelatedMap relatedMap;
@@ -102,6 +94,128 @@ int main(){
 
     // CustomStrategy strategy = CustomStrategy(balance, move(sizer), move(context));
 
+    // Load category definitions written by DownloadData.py and prompt the user
+    // to scope the run down to a subset of tickers. Filtering happens here so
+    // executors and MacroFeatures see a single consistent trading universe.
+    vector<pair<string, vector<string>>> categories;
+    {
+        ifstream catFile("../output/categories.json");
+        if (catFile.is_open()) {
+            try {
+                nlohmann::json catJson;
+                catFile >> catJson;
+                for (auto it = catJson.begin(); it != catJson.end(); ++it) {
+                    vector<string> tickers;
+                    for (const auto& t : it.value()) tickers.push_back(t.get<string>());
+                    categories.emplace_back(it.key(), move(tickers));
+                }
+            } catch (const exception& e) {
+                cout << "Warning: failed to parse ../output/categories.json: " << e.what()
+                     << ". Skipping category filter." << endl;
+                categories.clear();
+            }
+        } else {
+            cout << "Note: ../output/categories.json not found; skipping category filter." << endl;
+        }
+    }
+
+    unordered_set<string> selectedTickers;
+    bool useFilter = false;
+    if (!categories.empty()) {
+        const int n = static_cast<int>(categories.size());
+        cout << "\nSelect tickers to run the strategy on:\n";
+        for (int i = 0; i < n; ++i) {
+            cout << "  " << (i + 1) << ". " << categories[i].first
+                 << " (" << categories[i].second.size() << " tickers)\n";
+        }
+        cout << "  " << (n + 1) << ". [All] - every loaded ticker\n";
+        cout << "  " << (n + 2) << ". [Specific ticker] - enter a single ticker symbol\n";
+        cout << "Enter selection (comma-separated numbers for multiple categories, e.g. 1,3): ";
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        string line;
+        getline(cin, line);
+
+        auto trim = [](string s) {
+            size_t a = s.find_first_not_of(" \t\r\n");
+            size_t b = s.find_last_not_of(" \t\r\n");
+            return (a == string::npos) ? string() : s.substr(a, b - a + 1);
+        };
+        line = trim(line);
+
+        bool fallbackToAll = false;
+        if (line.empty()) {
+            fallbackToAll = true;
+        } else if (line == to_string(n + 1)) {
+            // [All] -> no filter
+        } else if (line == to_string(n + 2)) {
+            cout << "Enter ticker symbol: ";
+            string ticker;
+            getline(cin, ticker);
+            ticker = trim(ticker);
+            if (data.find(ticker) == data.end()) {
+                cout << "Error: ticker '" << ticker << "' not found in data.txt. Exiting." << endl;
+                return 1;
+            }
+            selectedTickers.insert(ticker);
+            useFilter = true;
+        } else {
+            stringstream ss(line);
+            string token;
+            bool valid = true;
+            while (getline(ss, token, ',')) {
+                token = trim(token);
+                if (token.empty()) continue;
+                bool isNum = !token.empty() && all_of(token.begin(), token.end(), ::isdigit);
+                if (!isNum) { valid = false; break; }
+                int idx = stoi(token);
+                if (idx < 1 || idx > n) { valid = false; break; }
+                for (const string& t : categories[idx - 1].second) selectedTickers.insert(t);
+            }
+            if (!valid || selectedTickers.empty()) {
+                cout << "Invalid selection. Falling back to [All]." << endl;
+                selectedTickers.clear();
+                fallbackToAll = true;
+            } else {
+                useFilter = true;
+            }
+        }
+        if (fallbackToAll) {
+            // intentionally leave useFilter=false
+        }
+    }
+
+    unordered_map<string, StockData> filteredData;
+    if (useFilter) {
+        int missing = 0;
+        for (const string& t : selectedTickers) {
+            auto it = data.find(t);
+            if (it != data.end()) filteredData.emplace(it->first, it->second);
+            else ++missing;
+        }
+        cout << "Filtered " << selectedTickers.size() << " -> " << filteredData.size()
+             << " tickers (" << missing << " not in data.txt)." << endl;
+    } else {
+        filteredData = data;
+    }
+
+    int dataSize = 0;
+    for (const auto& [ticker, stockData] : filteredData) {
+        size_t n = stockData.close.size();
+        if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
+            stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
+        dataSize = dataSize + 1;
+    }
+    cout << "Number of Stocks: " << dataSize << endl;
+
+    DowBaseCase dowBase;
+    double initial_balance = static_cast<double>(dataSize) * dowBase.balance;
+    {
+        filesystem::create_directories("../output");
+        ofstream configFile("../output/configuration.json");
+        configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
+    }
+
     cout << "Select execution mode:\n";
     cout << "  1 - ExecuteBaseCase (single run with default parameters)\n";
     cout << "  2 - ExecuteAllSweeps (full parameter sweep)\n";
@@ -112,9 +226,9 @@ int main(){
     clock_t start = clock();
 
     if (choice == 1) {
-        ExecuteBaseCase(data, relatedMap);
+        ExecuteBaseCase(filteredData, relatedMap);
     } else if (choice == 2) {
-        ExecuteAllSweeps(data, relatedMap);
+        ExecuteAllSweeps(filteredData, relatedMap);
     } else {
         cout << "Invalid choice. Exiting.\n";
         return 1;
