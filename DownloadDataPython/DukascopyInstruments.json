@@ -1,0 +1,1073 @@
+{
+  "_source": "https://github.com/Leo4815162342/dukascopy-node — compiled 2025-05",
+  "_note": "Static catalog of Dukascopy-listed instruments. Refresh manually when Dukascopy adds/removes instruments. Used by BuildDukascopyMapping.py.",
+  "LIGHT.CMD/USD": {
+    "name": "WTI Light Crude Oil",
+    "group": "commodity",
+    "keywords": [
+      "wti",
+      "crude",
+      "oil",
+      "light",
+      "petroleum",
+      "nymex",
+      "cl"
+    ]
+  },
+  "BRENT.CMD/USD": {
+    "name": "Brent Crude Oil",
+    "group": "commodity",
+    "keywords": [
+      "brent",
+      "crude",
+      "oil",
+      "ice",
+      "north",
+      "sea",
+      "bz",
+      "lco"
+    ]
+  },
+  "GAS.CMD/USD": {
+    "name": "Natural Gas",
+    "group": "commodity",
+    "keywords": [
+      "natural",
+      "gas",
+      "ng",
+      "henry",
+      "hub",
+      "natgas"
+    ]
+  },
+  "COPPER.CMD/USD": {
+    "name": "Copper",
+    "group": "commodity",
+    "keywords": [
+      "copper",
+      "hg",
+      "comex"
+    ]
+  },
+  "COFFEE.CMD/USX": {
+    "name": "Coffee",
+    "group": "commodity",
+    "keywords": [
+      "coffee",
+      "kc",
+      "arabica",
+      "robusta",
+      "kcb"
+    ]
+  },
+  "COCOA.CMD/USD": {
+    "name": "Cocoa",
+    "group": "commodity",
+    "keywords": [
+      "cocoa",
+      "cc",
+      "cacao"
+    ]
+  },
+  "SUGAR.CMD/USD": {
+    "name": "Sugar No.11",
+    "group": "commodity",
+    "keywords": [
+      "sugar",
+      "sb",
+      "cane",
+      "raw"
+    ]
+  },
+  "COTTON.CMD/USX": {
+    "name": "Cotton No.2",
+    "group": "commodity",
+    "keywords": [
+      "cotton",
+      "ct",
+      "fiber",
+      "fibre"
+    ]
+  },
+  "USA500.IDX/USD": {
+    "name": "US S&P 500 Index",
+    "group": "index",
+    "keywords": [
+      "sp500",
+      "s&p",
+      "500",
+      "spx",
+      "us",
+      "large",
+      "cap",
+      "es"
+    ]
+  },
+  "USATECH.IDX/USD": {
+    "name": "US NASDAQ-100 Index",
+    "group": "index",
+    "keywords": [
+      "nasdaq",
+      "100",
+      "nq",
+      "tech",
+      "technology",
+      "ndx"
+    ]
+  },
+  "USA30.IDX/USD": {
+    "name": "US Dow Jones 30 Index",
+    "group": "index",
+    "keywords": [
+      "dow",
+      "jones",
+      "djia",
+      "30",
+      "ym",
+      "industrial"
+    ]
+  },
+  "VOL.IDX/USD": {
+    "name": "CBOE VIX Volatility Index",
+    "group": "index",
+    "keywords": [
+      "vix",
+      "volatility",
+      "cboe",
+      "fear",
+      "vx"
+    ]
+  },
+  "GER30.IDX/EUR": {
+    "name": "Germany DAX 30 Index",
+    "group": "index",
+    "keywords": [
+      "dax",
+      "30",
+      "germany",
+      "frankfurt",
+      "ger"
+    ]
+  },
+  "FRA40.IDX/EUR": {
+    "name": "France CAC 40 Index",
+    "group": "index",
+    "keywords": [
+      "cac",
+      "40",
+      "france",
+      "paris",
+      "fra"
+    ]
+  },
+  "UK100.IDX/GBP": {
+    "name": "UK FTSE 100 Index",
+    "group": "index",
+    "keywords": [
+      "ftse",
+      "100",
+      "uk",
+      "london",
+      "britain"
+    ]
+  },
+  "EU50.IDX/EUR": {
+    "name": "Euro STOXX 50 Index",
+    "group": "index",
+    "keywords": [
+      "stoxx",
+      "50",
+      "euro",
+      "europe",
+      "eu"
+    ]
+  },
+  "SWI20.IDX/CHF": {
+    "name": "Switzerland SMI 20 Index",
+    "group": "index",
+    "keywords": [
+      "smi",
+      "20",
+      "switzerland",
+      "swiss",
+      "swi"
+    ]
+  },
+  "SPA35.IDX/EUR": {
+    "name": "Spain IBEX 35 Index",
+    "group": "index",
+    "keywords": [
+      "ibex",
+      "35",
+      "spain",
+      "madrid",
+      "spa"
+    ]
+  },
+  "ITA40.IDX/EUR": {
+    "name": "Italy FTSE MIB 40 Index",
+    "group": "index",
+    "keywords": [
+      "ftse",
+      "mib",
+      "40",
+      "italy",
+      "milan",
+      "ita"
+    ]
+  },
+  "CHN50.IDX/USD": {
+    "name": "FTSE China 50 Index",
+    "group": "index",
+    "keywords": [
+      "china",
+      "50",
+      "ftse",
+      "chn",
+      "shanghai"
+    ]
+  },
+  "SGP30.IDX/SGD": {
+    "name": "Singapore STI 30 Index",
+    "group": "index",
+    "keywords": [
+      "sti",
+      "30",
+      "singapore",
+      "sgp"
+    ]
+  },
+  "USTBOND.TR/USD": {
+    "name": "US 30-Year T-Bond",
+    "group": "bond",
+    "keywords": [
+      "treasury",
+      "bond",
+      "30",
+      "year",
+      "ustbond",
+      "zb",
+      "ub"
+    ]
+  },
+  "SPY.US/USD": {
+    "name": "SPDR S&P 500 ETF Trust",
+    "group": "etf"
+  },
+  "QQQ.US/USD": {
+    "name": "Invesco QQQ Trust (NASDAQ-100 ETF)",
+    "group": "etf"
+  },
+  "DIA.US/USD": {
+    "name": "SPDR Dow Jones Industrial Average ETF",
+    "group": "etf"
+  },
+  "IWM.US/USD": {
+    "name": "iShares Russell 2000 ETF",
+    "group": "etf"
+  },
+  "EEM.US/USD": {
+    "name": "iShares MSCI Emerging Markets ETF",
+    "group": "etf"
+  },
+  "EFA.US/USD": {
+    "name": "iShares MSCI EAFE ETF",
+    "group": "etf"
+  },
+  "VGK.US/USD": {
+    "name": "Vanguard FTSE Europe ETF",
+    "group": "etf"
+  },
+  "EWJ.US/USD": {
+    "name": "iShares MSCI Japan ETF",
+    "group": "etf"
+  },
+  "FXI.US/USD": {
+    "name": "iShares China Large-Cap ETF",
+    "group": "etf"
+  },
+  "EWZ.US/USD": {
+    "name": "iShares MSCI Brazil ETF",
+    "group": "etf"
+  },
+  "EWW.US/USD": {
+    "name": "iShares MSCI Mexico ETF",
+    "group": "etf"
+  },
+  "XLE.US/USD": {
+    "name": "Energy Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLF.US/USD": {
+    "name": "Financial Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLK.US/USD": {
+    "name": "Technology Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLV.US/USD": {
+    "name": "Health Care Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLI.US/USD": {
+    "name": "Industrial Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLU.US/USD": {
+    "name": "Utilities Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLP.US/USD": {
+    "name": "Consumer Staples Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "XLY.US/USD": {
+    "name": "Consumer Discretionary Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "GLD.US/USD": {
+    "name": "SPDR Gold Shares",
+    "group": "etf"
+  },
+  "SLV.US/USD": {
+    "name": "iShares Silver Trust",
+    "group": "etf"
+  },
+  "GDX.US/USD": {
+    "name": "VanEck Gold Miners ETF",
+    "group": "etf"
+  },
+  "GDXJ.US/USD": {
+    "name": "VanEck Junior Gold Miners ETF",
+    "group": "etf"
+  },
+  "NEM.US/USD": {
+    "name": "Newmont Corporation",
+    "group": "equity"
+  },
+  "FCX.US/USD": {
+    "name": "Freeport-McMoRan Inc",
+    "group": "equity"
+  },
+  "VALE.US/USD": {
+    "name": "Vale S.A. ADR",
+    "group": "equity"
+  },
+  "AA.US/USD": {
+    "name": "Alcoa Corporation",
+    "group": "equity"
+  },
+  "SCCO.US/USD": {
+    "name": "Southern Copper Corporation",
+    "group": "equity"
+  },
+  "RGLD.US/USD": {
+    "name": "Royal Gold Inc",
+    "group": "equity"
+  },
+  "ALB.US/USD": {
+    "name": "Albemarle Corporation",
+    "group": "equity"
+  },
+  "AAPL.US/USD": {
+    "name": "Apple Inc",
+    "group": "equity"
+  },
+  "MSFT.US/USD": {
+    "name": "Microsoft Corporation",
+    "group": "equity"
+  },
+  "GOOGL.US/USD": {
+    "name": "Alphabet Inc Class A",
+    "group": "equity"
+  },
+  "AMZN.US/USD": {
+    "name": "Amazon.com Inc",
+    "group": "equity"
+  },
+  "TSLA.US/USD": {
+    "name": "Tesla Inc",
+    "group": "equity"
+  },
+  "NVDA.US/USD": {
+    "name": "NVIDIA Corporation",
+    "group": "equity"
+  },
+  "AMD.US/USD": {
+    "name": "Advanced Micro Devices Inc",
+    "group": "equity"
+  },
+  "AVGO.US/USD": {
+    "name": "Broadcom Inc",
+    "group": "equity"
+  },
+  "TSM.US/USD": {
+    "name": "Taiwan Semiconductor Manufacturing ADR",
+    "group": "equity"
+  },
+  "QCOM.US/USD": {
+    "name": "Qualcomm Incorporated",
+    "group": "equity"
+  },
+  "MU.US/USD": {
+    "name": "Micron Technology Inc",
+    "group": "equity"
+  },
+  "INTC.US/USD": {
+    "name": "Intel Corporation",
+    "group": "equity"
+  },
+  "CRM.US/USD": {
+    "name": "Salesforce Inc",
+    "group": "equity"
+  },
+  "NOW.US/USD": {
+    "name": "ServiceNow Inc",
+    "group": "equity"
+  },
+  "INTU.US/USD": {
+    "name": "Intuit Inc",
+    "group": "equity"
+  },
+  "ADBE.US/USD": {
+    "name": "Adobe Inc",
+    "group": "equity"
+  },
+  "PANW.US/USD": {
+    "name": "Palo Alto Networks Inc",
+    "group": "equity"
+  },
+  "SNOW.US/USD": {
+    "name": "Snowflake Inc",
+    "group": "equity"
+  },
+  "PLTR.US/USD": {
+    "name": "Palantir Technologies Inc",
+    "group": "equity"
+  },
+  "MDB.US/USD": {
+    "name": "MongoDB Inc",
+    "group": "equity"
+  },
+  "TEAM.US/USD": {
+    "name": "Atlassian Corporation",
+    "group": "equity"
+  },
+  "ZS.US/USD": {
+    "name": "Zscaler Inc",
+    "group": "equity"
+  },
+  "FTNT.US/USD": {
+    "name": "Fortinet Inc",
+    "group": "equity"
+  },
+  "CSCO.US/USD": {
+    "name": "Cisco Systems Inc",
+    "group": "equity"
+  },
+  "ANET.US/USD": {
+    "name": "Arista Networks Inc",
+    "group": "equity"
+  },
+  "DELL.US/USD": {
+    "name": "Dell Technologies Inc",
+    "group": "equity"
+  },
+  "HPE.US/USD": {
+    "name": "Hewlett Packard Enterprise Co",
+    "group": "equity"
+  },
+  "IBM.US/USD": {
+    "name": "IBM Corporation",
+    "group": "equity"
+  },
+  "ORCL.US/USD": {
+    "name": "Oracle Corporation",
+    "group": "equity"
+  },
+  "MRVL.US/USD": {
+    "name": "Marvell Technology Inc",
+    "group": "equity"
+  },
+  "LRCX.US/USD": {
+    "name": "Lam Research Corporation",
+    "group": "equity"
+  },
+  "ADI.US/USD": {
+    "name": "Analog Devices Inc",
+    "group": "equity"
+  },
+  "OKTA.US/USD": {
+    "name": "Okta Inc",
+    "group": "equity"
+  },
+  "TTD.US/USD": {
+    "name": "The Trade Desk Inc",
+    "group": "equity"
+  },
+  "F.US/USD": {
+    "name": "Ford Motor Company",
+    "group": "equity"
+  },
+  "GM.US/USD": {
+    "name": "General Motors Company",
+    "group": "equity"
+  },
+  "USD/BRL": {
+    "name": "US Dollar / Brazilian Real",
+    "group": "fx",
+    "keywords": [
+      "usd",
+      "brl",
+      "dollar",
+      "real",
+      "brazil",
+      "6l"
+    ]
+  },
+  "USD/ZAR": {
+    "name": "US Dollar / South African Rand",
+    "group": "fx",
+    "keywords": [
+      "usd",
+      "zar",
+      "dollar",
+      "rand",
+      "africa",
+      "6z"
+    ]
+  },
+  "EUR/GBP": {
+    "name": "Euro / British Pound",
+    "group": "fx",
+    "keywords": [
+      "eur",
+      "gbp",
+      "euro",
+      "pound"
+    ]
+  },
+  "EUR/JPY": {
+    "name": "Euro / Japanese Yen",
+    "group": "fx",
+    "keywords": [
+      "eur",
+      "jpy",
+      "euro",
+      "yen"
+    ]
+  },
+  "GBP/JPY": {
+    "name": "British Pound / Japanese Yen",
+    "group": "fx",
+    "keywords": [
+      "gbp",
+      "jpy",
+      "pound",
+      "yen"
+    ]
+  },
+  "AUD/JPY": {
+    "name": "Australian Dollar / Yen",
+    "group": "fx",
+    "keywords": [
+      "aud",
+      "jpy",
+      "australia",
+      "yen"
+    ]
+  },
+  "EUR/AUD": {
+    "name": "Euro / Australian Dollar",
+    "group": "fx",
+    "keywords": [
+      "eur",
+      "aud",
+      "euro",
+      "australia"
+    ]
+  },
+  "EUR/CHF": {
+    "name": "Euro / Swiss Franc",
+    "group": "fx",
+    "keywords": [
+      "eur",
+      "chf",
+      "euro",
+      "franc",
+      "swiss"
+    ]
+  },
+  "EUR/CAD": {
+    "name": "Euro / Canadian Dollar",
+    "group": "fx",
+    "keywords": [
+      "eur",
+      "cad",
+      "euro",
+      "canada"
+    ]
+  },
+  "GBP/CAD": {
+    "name": "British Pound / Canadian Dollar",
+    "group": "fx",
+    "keywords": [
+      "gbp",
+      "cad",
+      "pound",
+      "canada"
+    ]
+  },
+  "CAD/JPY": {
+    "name": "Canadian Dollar / Yen",
+    "group": "fx",
+    "keywords": [
+      "cad",
+      "jpy",
+      "canada",
+      "yen"
+    ]
+  },
+  "NZD/JPY": {
+    "name": "New Zealand Dollar / Yen",
+    "group": "fx",
+    "keywords": [
+      "nzd",
+      "jpy",
+      "zealand",
+      "yen"
+    ]
+  },
+  "CHF/JPY": {
+    "name": "Swiss Franc / Japanese Yen",
+    "group": "fx",
+    "keywords": [
+      "chf",
+      "jpy",
+      "franc",
+      "yen"
+    ]
+  },
+  "EUR/USD": {
+    "name": "Euro / US Dollar",
+    "group": "fx",
+    "keywords": [
+      "eur",
+      "usd",
+      "euro",
+      "dollar",
+      "6e"
+    ]
+  },
+  "USD/JPY": {
+    "name": "US Dollar / Japanese Yen",
+    "group": "fx",
+    "keywords": [
+      "usd",
+      "jpy",
+      "dollar",
+      "yen",
+      "japan",
+      "6j"
+    ]
+  },
+  "GBP/USD": {
+    "name": "British Pound / US Dollar",
+    "group": "fx",
+    "keywords": [
+      "gbp",
+      "usd",
+      "pound",
+      "sterling",
+      "cable",
+      "6b"
+    ]
+  },
+  "USD/CAD": {
+    "name": "US Dollar / Canadian Dollar",
+    "group": "fx",
+    "keywords": [
+      "usd",
+      "cad",
+      "dollar",
+      "canada",
+      "loonie",
+      "6c"
+    ]
+  },
+  "AUD/USD": {
+    "name": "Australian Dollar / USD",
+    "group": "fx",
+    "keywords": [
+      "aud",
+      "usd",
+      "australia",
+      "dollar",
+      "6a"
+    ]
+  },
+  "USD/CHF": {
+    "name": "US Dollar / Swiss Franc",
+    "group": "fx",
+    "keywords": [
+      "usd",
+      "chf",
+      "dollar",
+      "franc",
+      "swiss",
+      "6s"
+    ]
+  },
+  "NZD/USD": {
+    "name": "New Zealand Dollar / USD",
+    "group": "fx",
+    "keywords": [
+      "nzd",
+      "usd",
+      "kiwi",
+      "zealand",
+      "6n"
+    ]
+  },
+  "USD/MXN": {
+    "name": "US Dollar / Mexican Peso",
+    "group": "fx",
+    "keywords": [
+      "usd",
+      "mxn",
+      "dollar",
+      "peso",
+      "mexico",
+      "6m"
+    ]
+  },
+  "XAU/USD": {
+    "name": "Gold Spot",
+    "group": "metal",
+    "keywords": [
+      "gold",
+      "xau",
+      "gc",
+      "bullion"
+    ]
+  },
+  "XAG/USD": {
+    "name": "Silver Spot",
+    "group": "metal",
+    "keywords": [
+      "silver",
+      "xag",
+      "si",
+      "bullion"
+    ]
+  },
+  "BTC/USD": {
+    "name": "Bitcoin / US Dollar",
+    "group": "crypto",
+    "keywords": [
+      "bitcoin",
+      "btc",
+      "usd",
+      "crypto",
+      "btcf",
+      "mbt"
+    ]
+  },
+  "ETH/USD": {
+    "name": "Ethereum / US Dollar",
+    "group": "crypto",
+    "keywords": [
+      "ethereum",
+      "eth",
+      "usd",
+      "crypto",
+      "ether",
+      "ethf",
+      "met"
+    ]
+  },
+  "XRP/USD": {
+    "name": "Ripple / US Dollar",
+    "group": "crypto",
+    "keywords": [
+      "xrp",
+      "ripple",
+      "usd",
+      "crypto"
+    ]
+  },
+  "LTC/USD": {
+    "name": "Litecoin / US Dollar",
+    "group": "crypto",
+    "keywords": [
+      "ltc",
+      "litecoin",
+      "usd",
+      "crypto"
+    ]
+  },
+  "BCH/USD": {
+    "name": "Bitcoin Cash / US Dollar",
+    "group": "crypto",
+    "keywords": [
+      "bch",
+      "bitcoin",
+      "cash",
+      "usd",
+      "crypto"
+    ]
+  },
+  "VWO.US/USD": {
+    "name": "Vanguard FTSE Emerging Markets ETF",
+    "group": "etf"
+  },
+  "INDA.US/USD": {
+    "name": "iShares MSCI India ETF",
+    "group": "etf"
+  },
+  "KWEB.US/USD": {
+    "name": "KraneShares CSI China Internet ETF",
+    "group": "etf"
+  },
+  "MCHI.US/USD": {
+    "name": "iShares MSCI China ETF",
+    "group": "etf"
+  },
+  "XLB.US/USD": {
+    "name": "Materials Select Sector SPDR ETF",
+    "group": "etf"
+  },
+  "ITB.US/USD": {
+    "name": "iShares U.S. Home Construction ETF",
+    "group": "etf"
+  },
+  "COPX.US/USD": {
+    "name": "Global X Copper Miners ETF",
+    "group": "etf"
+  },
+  "DBB.US/USD": {
+    "name": "Invesco DB Base Metals Fund",
+    "group": "etf"
+  },
+  "LIT.US/USD": {
+    "name": "Global X Lithium & Battery Tech ETF",
+    "group": "etf"
+  },
+  "REMX.US/USD": {
+    "name": "VanEck Rare Earth/Strategic Metals ETF",
+    "group": "etf"
+  },
+  "PICK.US/USD": {
+    "name": "iShares MSCI Global Metals & Mining ETF",
+    "group": "etf"
+  },
+  "SILJ.US/USD": {
+    "name": "ETFMG Prime Junior Silver Miners ETF",
+    "group": "etf"
+  },
+  "PPLT.US/USD": {
+    "name": "abrdn Physical Platinum Shares ETF",
+    "group": "etf"
+  },
+  "PALL.US/USD": {
+    "name": "abrdn Physical Palladium Shares ETF",
+    "group": "etf"
+  },
+  "GOLD.US/USD": {
+    "name": "Barrick Gold Corporation",
+    "group": "equity"
+  },
+  "RIO.US/USD": {
+    "name": "Rio Tinto Group ADR",
+    "group": "equity"
+  },
+  "BHP.US/USD": {
+    "name": "BHP Group ADR",
+    "group": "equity"
+  },
+  "FNV.US/USD": {
+    "name": "Franco-Nevada Corporation",
+    "group": "equity"
+  },
+  "WPM.US/USD": {
+    "name": "Wheaton Precious Metals Corp",
+    "group": "equity"
+  },
+  "AEM.US/USD": {
+    "name": "Agnico Eagle Mines Limited",
+    "group": "equity"
+  },
+  "KGC.US/USD": {
+    "name": "Kinross Gold Corporation",
+    "group": "equity"
+  },
+  "HMY.US/USD": {
+    "name": "Harmony Gold Mining ADR",
+    "group": "equity"
+  },
+  "AU.US/USD": {
+    "name": "AngloGold Ashanti ADR",
+    "group": "equity"
+  },
+  "SBSW.US/USD": {
+    "name": "Sibanye Stillwater ADR",
+    "group": "equity"
+  },
+  "TECK.US/USD": {
+    "name": "Teck Resources Limited",
+    "group": "equity"
+  },
+  "CENX.US/USD": {
+    "name": "Century Aluminum Company",
+    "group": "equity"
+  },
+  "LAC.US/USD": {
+    "name": "Lithium Americas Corp",
+    "group": "equity"
+  },
+  "MP.US/USD": {
+    "name": "MP Materials Corp",
+    "group": "equity"
+  },
+  "META.US/USD": {
+    "name": "Meta Platforms Inc",
+    "group": "equity"
+  },
+  "CRWD.US/USD": {
+    "name": "CrowdStrike Holdings Inc",
+    "group": "equity"
+  },
+  "SHOP.US/USD": {
+    "name": "Shopify Inc",
+    "group": "equity"
+  },
+  "COIN.US/USD": {
+    "name": "Coinbase Global Inc",
+    "group": "equity"
+  },
+  "MSTR.US/USD": {
+    "name": "MicroStrategy Incorporated",
+    "group": "equity"
+  },
+  "NET.US/USD": {
+    "name": "Cloudflare Inc",
+    "group": "equity"
+  },
+  "DASH.US/USD": {
+    "name": "DoorDash Inc",
+    "group": "equity"
+  },
+  "DDOG.US/USD": {
+    "name": "Datadog Inc",
+    "group": "equity"
+  },
+  "MNDY.US/USD": {
+    "name": "monday.com Ltd",
+    "group": "equity"
+  },
+  "KLAC.US/USD": {
+    "name": "KLA Corporation",
+    "group": "equity"
+  },
+  "NXPI.US/USD": {
+    "name": "NXP Semiconductors N.V.",
+    "group": "equity"
+  },
+  "SMCI.US/USD": {
+    "name": "Super Micro Computer Inc",
+    "group": "equity"
+  },
+  "U.US/USD": {
+    "name": "Unity Software Inc",
+    "group": "equity"
+  },
+  "ARM.US/USD": {
+    "name": "Arm Holdings plc ADR",
+    "group": "equity"
+  },
+  "ASML.US/USD": {
+    "name": "ASML Holding N.V. ADR",
+    "group": "equity"
+  },
+  "ABNB.US/USD": {
+    "name": "Airbnb Inc",
+    "group": "equity"
+  },
+  "XPT.CMD/USD": {
+    "name": "Platinum Spot",
+    "group": "metal",
+    "keywords": [
+      "platinum",
+      "xpt",
+      "pl"
+    ]
+  },
+  "XPD.CMD/USD": {
+    "name": "Palladium Spot",
+    "group": "metal",
+    "keywords": [
+      "palladium",
+      "xpd",
+      "pa"
+    ]
+  },
+  "USSC2000.IDX/USD": {
+    "name": "US Russell 2000 Small Cap",
+    "group": "index",
+    "keywords": [
+      "russell",
+      "2000",
+      "rty",
+      "small",
+      "cap",
+      "m2k"
+    ]
+  },
+  "JPN.IDX/JPY": {
+    "name": "Japan Nikkei 225 Index",
+    "group": "index",
+    "keywords": [
+      "nikkei",
+      "225",
+      "japan",
+      "jpn",
+      "nkd",
+      "tokyo"
+    ]
+  },
+  "HKG.IDX/HKD": {
+    "name": "Hong Kong Hang Seng Index",
+    "group": "index",
+    "keywords": [
+      "hang",
+      "seng",
+      "hsi",
+      "hong",
+      "kong",
+      "hkg"
+    ]
+  },
+  "AUS.IDX/AUD": {
+    "name": "Australia ASX 200 Index",
+    "group": "index",
+    "keywords": [
+      "asx",
+      "200",
+      "australia",
+      "as51",
+      "aus"
+    ]
+  },
+  "NLD.IDX/EUR": {
+    "name": "Netherlands AEX 25 Index",
+    "group": "index",
+    "keywords": [
+      "aex",
+      "25",
+      "netherlands",
+      "amsterdam",
+      "nld"
+    ]
+  }
+}

@@ -1,0 +1,1484 @@
+{
+  "CL=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Crude Oil Jun 26",
+    "isin": null
+  },
+  "BZ=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Brent Crude Oil Last Day Financ",
+    "isin": null
+  },
+  "NG=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Natural Gas Jun 26",
+    "isin": null
+  },
+  "HO=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Heating Oil Jun 26",
+    "isin": null
+  },
+  "RB=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "RBOB Gasoline Jul 26",
+    "isin": null
+  },
+  "GC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Gold Jun 26",
+    "isin": null
+  },
+  "SI=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Silver Jul 26",
+    "isin": null
+  },
+  "PL=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Platinum Jul 26",
+    "isin": null
+  },
+  "PA=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Palladium Jun 26",
+    "isin": null
+  },
+  "HG=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Copper Jul 26",
+    "isin": null
+  },
+  "ZC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Corn Futures,Jul-2026",
+    "isin": null
+  },
+  "ZW=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Chicago SRW Wheat Futures,Jul-2",
+    "isin": null
+  },
+  "ZS=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Soybean Futures,Jul-2026",
+    "isin": null
+  },
+  "ZM=F": {
+    "quoteType": "FUTURE",
+    "longName": "Soybean Meal Futures",
+    "shortName": "Soybean Meal Futures,Jul-2026",
+    "isin": null
+  },
+  "ZL=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Soybean Oil Futures,Jul-2026",
+    "isin": null
+  },
+  "KC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Coffee Sep 26",
+    "isin": null
+  },
+  "CC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Cocoa Sep 26",
+    "isin": null
+  },
+  "SB=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Sugar #11 Jul 26",
+    "isin": null
+  },
+  "CT=F": {
+    "quoteType": "ALTSYMBOL",
+    "longName": null,
+    "shortName": "Cotton Mar 26",
+    "isin": null
+  },
+  "OJ=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Orange Juice Jul 26",
+    "isin": null
+  },
+  "LBS=F": {
+    "quoteType": "ALTSYMBOL",
+    "longName": "Random Length Lumber Futures",
+    "shortName": "Lumber May 23",
+    "isin": null
+  },
+  "ZO=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Oat Futures,Jul-2026",
+    "isin": null
+  },
+  "ZR=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Rough Rice Futures,Jul-2026",
+    "isin": null
+  },
+  "LE=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Live Cattle Futures,Jun-2026",
+    "isin": null
+  },
+  "HE=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Lean Hog Futures,Jun-2026",
+    "isin": null
+  },
+  "GF=F": {
+    "quoteType": "FUTURE",
+    "longName": "Feeder Cattle",
+    "shortName": "Feeder Cattle Futures,Aug-2026",
+    "isin": null
+  },
+  "ALI=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Aluminum Futures,Jul-2026",
+    "isin": null
+  },
+  "TIO=F": {
+    "quoteType": "ALTSYMBOL",
+    "longName": null,
+    "shortName": "Iron Ore 62% Fe, CFR China (TSI",
+    "isin": null
+  },
+  "ETH=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Ethereum May 26",
+    "isin": null
+  },
+  "DC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Class III Milk Futures,Jun-2026",
+    "isin": null
+  },
+  "CSC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Cash-Settled Cheese Futures,Jun",
+    "isin": null
+  },
+  "GNF=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Nonfat Dry Milk Futures,Jul-202",
+    "isin": null
+  },
+  "DX=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "ZN=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "10-Year T-Note Futures,Jun-2026",
+    "isin": null
+  },
+  "ITB": {
+    "quoteType": "ETF",
+    "longName": "iShares U.S. Home Construction ETF",
+    "shortName": "iShares U.S. Home Construction ",
+    "isin": null
+  },
+  "6L=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Brazilian Real Futures,Jun-2026",
+    "isin": null
+  },
+  "6E=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Euro FX Futures,Jun-2026",
+    "isin": null
+  },
+  "6B=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "British Pound Futures,Jun-2026",
+    "isin": null
+  },
+  "6M=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Mexican Peso Futures,Jun-2026",
+    "isin": null
+  },
+  "FXI": {
+    "quoteType": "ETF",
+    "longName": "iShares China Large-Cap ETF",
+    "shortName": "iShares China Large-Cap ETF",
+    "isin": null
+  },
+  "EWZ": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI Brazil ETF",
+    "shortName": "iShares MSCI Brazil ETF",
+    "isin": null
+  },
+  "EWW": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI Mexico ETF",
+    "shortName": "iShares MSCI Mexico ETF",
+    "isin": null
+  },
+  "KE=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "KC HRW Wheat Futures,Jul-2026",
+    "isin": null
+  },
+  "MWE=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "RS=F": {
+    "quoteType": "ALTSYMBOL",
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "LCO=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "CB=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Cash-settled Butter Futures,Aug",
+    "isin": null
+  },
+  "DY=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Dry Whey Futures,Jul-2026",
+    "isin": null
+  },
+  "DA=F": {
+    "quoteType": "ALTSYMBOL",
+    "longName": null,
+    "shortName": "Milk Class III Futures,Oct-2020",
+    "isin": null
+  },
+  "G=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "QM=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "E-mini Crude Oil Futures,Jun-20",
+    "isin": null
+  },
+  "QU=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "E-mini RBOB Gasoline Futures,Ju",
+    "isin": null
+  },
+  "XC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Mini-Corn Futures,Jul-2026",
+    "isin": null
+  },
+  "XW=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Mini-sized Chicago SRW Wheat Fu",
+    "isin": null
+  },
+  "XS=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "ES=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "E-Mini S&P 500 Jun 26",
+    "isin": null
+  },
+  "NQ=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Nasdaq 100 Jun 26",
+    "isin": null
+  },
+  "YM=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Mini Dow Jones Indus.-$5 Jun 26",
+    "isin": null
+  },
+  "RTY=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "E-mini Russell 2000 Index Futur",
+    "isin": null
+  },
+  "EMD=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "E-mini S&P MidCap 400 Index Fut",
+    "isin": null
+  },
+  "NKD=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Nikkei/USD Futures,Jun-2026",
+    "isin": null
+  },
+  "VX=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "HSI=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "AS51=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "AEX=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "MES=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "MICRO E-MINI S&P 500 INDEX FUTU",
+    "isin": null
+  },
+  "MNQ=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro E-mini Nasdaq-100 Index F",
+    "isin": null
+  },
+  "MYM=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro E-mini Dow Jones Industri",
+    "isin": null
+  },
+  "M2K=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro E-mini Russell 2000 Index",
+    "isin": null
+  },
+  "XLF": {
+    "quoteType": "ETF",
+    "longName": "State Street Financial Select Sector SPDR ETF",
+    "shortName": "State Street Financial Select S",
+    "isin": null
+  },
+  "XLI": {
+    "quoteType": "ETF",
+    "longName": "State Street Industrial Select Sector SPDR ETF",
+    "shortName": "State Street Industrial Select ",
+    "isin": null
+  },
+  "KWEB": {
+    "quoteType": "ETF",
+    "longName": "KraneShares CSI China Internet ETF",
+    "shortName": "KraneShares CSI China Internet ",
+    "isin": null
+  },
+  "6J=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Japanese Yen Futures,Jun-2026",
+    "isin": null
+  },
+  "6A=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Australian Dollar Futures,Jun-2",
+    "isin": null
+  },
+  "VGK": {
+    "quoteType": "ETF",
+    "longName": "Vanguard FTSE Europe ETF",
+    "shortName": "Vanguard FTSEEuropean ETF",
+    "isin": null
+  },
+  "EFA": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI EAFE ETF",
+    "shortName": "iShares MSCI EAFE ETF",
+    "isin": null
+  },
+  "SPY": {
+    "quoteType": "ETF",
+    "longName": "State Street SPDR S&P 500 ETF Trust",
+    "shortName": "State Street SPDR S&P 500 ETF T",
+    "isin": null
+  },
+  "QQQ": {
+    "quoteType": "ETF",
+    "longName": "Invesco QQQ Trust",
+    "shortName": "Invesco QQQ Trust, Series 1",
+    "isin": null
+  },
+  "DIA": {
+    "quoteType": "ETF",
+    "longName": "State Street SPDR Dow Jones Industrial Average ETF Trust",
+    "shortName": "State Street SPDR Dow Jones Ind",
+    "isin": null
+  },
+  "IWM": {
+    "quoteType": "ETF",
+    "longName": "iShares Russell 2000 ETF",
+    "shortName": "iShares Russell 2000 Index Fund",
+    "isin": null
+  },
+  "EEM": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI Emerging Markets ETF",
+    "shortName": "iShares MSCI Emerging Index Fun",
+    "isin": null
+  },
+  "VWO": {
+    "quoteType": "ETF",
+    "longName": "Vanguard Emerging Markets Stock Index Fund",
+    "shortName": "Vanguard FTSE Emerging Markets ",
+    "isin": null
+  },
+  "EWJ": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI Japan ETF",
+    "shortName": "iShares MSCI Japan Index Fund",
+    "isin": null
+  },
+  "MCHI": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI China ETF",
+    "shortName": "iShares MSCI China ETF",
+    "isin": null
+  },
+  "INDA": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI India ETF",
+    "shortName": "Ishares MSCI India ETF",
+    "isin": null
+  },
+  "XLE": {
+    "quoteType": "ETF",
+    "longName": "State Street Energy Select Sector SPDR ETF",
+    "shortName": "State Street Energy Select Sect",
+    "isin": null
+  },
+  "XLK": {
+    "quoteType": "ETF",
+    "longName": "State Street Technology Select Sector SPDR ETF",
+    "shortName": "State Street Technology Select ",
+    "isin": null
+  },
+  "XLV": {
+    "quoteType": "ETF",
+    "longName": "State Street Health Care Select Sector SPDR ETF",
+    "shortName": "State Street Health Care Select",
+    "isin": null
+  },
+  "XLU": {
+    "quoteType": "ETF",
+    "longName": "State Street Utilities Select Sector SPDR ETF",
+    "shortName": "State Street Utilities Select S",
+    "isin": null
+  },
+  "XLP": {
+    "quoteType": "ETF",
+    "longName": "State Street Consumer Staples Select Sector SPDR ETF",
+    "shortName": "State Street Consumer Staples S",
+    "isin": null
+  },
+  "XLB": {
+    "quoteType": "ETF",
+    "longName": "State Street Materials Select Sector SPDR ETF",
+    "shortName": "State Street Materials Select S",
+    "isin": null
+  },
+  "XLY": {
+    "quoteType": "ETF",
+    "longName": "State Street Consumer Discretionary Select Sector SPDR ETF",
+    "shortName": "State Street Consumer Discretio",
+    "isin": null
+  },
+  "ZB=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "U.S. Treasury Bond Futures,Jun-",
+    "isin": null
+  },
+  "ZF=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "5-Year T-Note Futures,Jun-2026",
+    "isin": null
+  },
+  "ZT=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "2-Year T-Note Futures,Jun-2026",
+    "isin": null
+  },
+  "GE=F": {
+    "quoteType": "ALTSYMBOL",
+    "longName": null,
+    "shortName": "Eurodollar Futures,Jun-2023",
+    "isin": null
+  },
+  "ZQ=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "30 Day Federal Funds Futures,Ma",
+    "isin": null
+  },
+  "SR3=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Three-Month SOFR Futures,Jun-20",
+    "isin": null
+  },
+  "UB=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Ultra U.S. Treasury Bond Future",
+    "isin": null
+  },
+  "TN=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Ultra 10-Year U.S. Treasury Not",
+    "isin": null
+  },
+  "6C=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Canadian Dollar Futures,Jun-202",
+    "isin": null
+  },
+  "6S=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Swiss Franc Futures,Jun-2026",
+    "isin": null
+  },
+  "6N=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "New Zealand Dollar Futures,Jun-",
+    "isin": null
+  },
+  "6Z=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "South African Rand Futures,Jun-",
+    "isin": null
+  },
+  "M6E=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro EUR/USD Futures,Jun-2026",
+    "isin": null
+  },
+  "M6J=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "M6B=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro GBP/USD Futures,Jun-2026",
+    "isin": null
+  },
+  "M6C=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "M6A=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro AUD/USD Futures,Jun-2026",
+    "isin": null
+  },
+  "M6S=F": {
+    "quoteType": null,
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "MGC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro Gold Futures,Jun-2026",
+    "isin": null
+  },
+  "SIL=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro Silver Futures,Jul-2026",
+    "isin": null
+  },
+  "NEM": {
+    "quoteType": "EQUITY",
+    "longName": "Newmont Corporation",
+    "shortName": "Newmont Corporation",
+    "isin": null
+  },
+  "GLD": {
+    "quoteType": "ETF",
+    "longName": "SPDR Gold Shares",
+    "shortName": "SPDR Gold Shares",
+    "isin": null
+  },
+  "SLV": {
+    "quoteType": "ETF",
+    "longName": "iShares Silver Trust",
+    "shortName": "iShares Silver Trust",
+    "isin": null
+  },
+  "PLTR": {
+    "quoteType": "EQUITY",
+    "longName": "Palantir Technologies Inc.",
+    "shortName": "Palantir Technologies Inc.",
+    "isin": null
+  },
+  "FCX": {
+    "quoteType": "EQUITY",
+    "longName": "Freeport-McMoRan Inc.",
+    "shortName": "Freeport-McMoRan, Inc.",
+    "isin": null
+  },
+  "COPX": {
+    "quoteType": "ETF",
+    "longName": "Global X Copper Miners ETF",
+    "shortName": "Global X Copper Miners ETF",
+    "isin": null
+  },
+  "TSLA": {
+    "quoteType": "EQUITY",
+    "longName": "Tesla, Inc.",
+    "shortName": "Tesla, Inc.",
+    "isin": null
+  },
+  "F": {
+    "quoteType": "EQUITY",
+    "longName": "Ford Motor Company",
+    "shortName": "Ford Motor Company",
+    "isin": null
+  },
+  "GM": {
+    "quoteType": "EQUITY",
+    "longName": "General Motors Company",
+    "shortName": "General Motors Company",
+    "isin": null
+  },
+  "AA": {
+    "quoteType": "EQUITY",
+    "longName": "Alcoa Corporation",
+    "shortName": "Alcoa Corporation",
+    "isin": null
+  },
+  "CENX": {
+    "quoteType": "EQUITY",
+    "longName": "Century Aluminum Company",
+    "shortName": "Century Aluminum Company",
+    "isin": null
+  },
+  "GDX": {
+    "quoteType": "ETF",
+    "longName": "VanEck Gold Miners ETF",
+    "shortName": "VanEck Gold Miners ETF",
+    "isin": null
+  },
+  "GDXJ": {
+    "quoteType": "ETF",
+    "longName": "VanEck Junior Gold Miners ETF",
+    "shortName": "VanEck Junior Gold Miners ETF",
+    "isin": null
+  },
+  "SILJ": {
+    "quoteType": "ETF",
+    "longName": "Amplify Junior Silver Miners ETF",
+    "shortName": "Amplify Junior Silver Miners ET",
+    "isin": null
+  },
+  "PPLT": {
+    "quoteType": "ETF",
+    "longName": "abrdn Physical Platinum Shares ETF",
+    "shortName": "abrdn Physical Platinum Shares ",
+    "isin": null
+  },
+  "PALL": {
+    "quoteType": "ETF",
+    "longName": "abrdn Physical Palladium Shares ETF",
+    "shortName": "abrdn Physical Palladium Shares",
+    "isin": null
+  },
+  "LIT": {
+    "quoteType": "ETF",
+    "longName": "Global X Lithium & Battery Tech ETF",
+    "shortName": "Global X Lithium & Battery Tech",
+    "isin": null
+  },
+  "REMX": {
+    "quoteType": "ETF",
+    "longName": "VanEck Rare Earth and Strategic Metals ETF",
+    "shortName": "VanEck Rare Earth and Strategic",
+    "isin": null
+  },
+  "PICK": {
+    "quoteType": "ETF",
+    "longName": "iShares MSCI Global Metals & Mining Producers ETF",
+    "shortName": "iShares MSCI Global Select Meta",
+    "isin": null
+  },
+  "DBB": {
+    "quoteType": "ETF",
+    "longName": "Invesco DB Base Metals Fund",
+    "shortName": "Invesco DB Base Metals Fund",
+    "isin": null
+  },
+  "GOLD": {
+    "quoteType": "EQUITY",
+    "longName": "Gold.com, Inc.",
+    "shortName": "Gold.com, Inc.",
+    "isin": null
+  },
+  "RIO": {
+    "quoteType": "EQUITY",
+    "longName": "Rio Tinto Group",
+    "shortName": "Rio Tinto Plc",
+    "isin": null
+  },
+  "BHP": {
+    "quoteType": "EQUITY",
+    "longName": "BHP Group Limited",
+    "shortName": "BHP Group Limited",
+    "isin": null
+  },
+  "VALE": {
+    "quoteType": "EQUITY",
+    "longName": "Vale S.A.",
+    "shortName": "VALE S.A.",
+    "isin": null
+  },
+  "SCCO": {
+    "quoteType": "EQUITY",
+    "longName": "Southern Copper Corporation",
+    "shortName": "Southern Copper Corporation",
+    "isin": null
+  },
+  "TECK": {
+    "quoteType": "EQUITY",
+    "longName": "Teck Resources Limited",
+    "shortName": "Teck Resources Ltd",
+    "isin": null
+  },
+  "AEM": {
+    "quoteType": "EQUITY",
+    "longName": "Agnico Eagle Mines Limited",
+    "shortName": "Agnico Eagle Mines Limited",
+    "isin": null
+  },
+  "WPM": {
+    "quoteType": "EQUITY",
+    "longName": "Wheaton Precious Metals Corp.",
+    "shortName": "Wheaton Precious Metals Corp",
+    "isin": null
+  },
+  "FNV": {
+    "quoteType": "EQUITY",
+    "longName": "Franco-Nevada Corporation",
+    "shortName": "Franco-Nevada Corporation",
+    "isin": null
+  },
+  "RGLD": {
+    "quoteType": "EQUITY",
+    "longName": "Royal Gold, Inc.",
+    "shortName": "Royal Gold, Inc.",
+    "isin": null
+  },
+  "HMY": {
+    "quoteType": "EQUITY",
+    "longName": "Harmony Gold Mining Company Limited",
+    "shortName": "Harmony Gold Mining Company Lim",
+    "isin": null
+  },
+  "AU": {
+    "quoteType": "EQUITY",
+    "longName": "AngloGold Ashanti plc",
+    "shortName": "AngloGold Ashanti PLC",
+    "isin": null
+  },
+  "KGC": {
+    "quoteType": "EQUITY",
+    "longName": "Kinross Gold Corporation",
+    "shortName": "Kinross Gold Corporation",
+    "isin": null
+  },
+  "SBSW": {
+    "quoteType": "EQUITY",
+    "longName": "Sibanye Stillwater Limited",
+    "shortName": "D/B/A Sibanye-Stillwater Limite",
+    "isin": null
+  },
+  "MP": {
+    "quoteType": "EQUITY",
+    "longName": "MP Materials Corp.",
+    "shortName": "MP Materials Corp.",
+    "isin": null
+  },
+  "ALB": {
+    "quoteType": "EQUITY",
+    "longName": "Albemarle Corporation",
+    "shortName": "Albemarle Corporation",
+    "isin": null
+  },
+  "LAC": {
+    "quoteType": "EQUITY",
+    "longName": "Lithium Americas Corp.",
+    "shortName": "Lithium Americas Corp.",
+    "isin": null
+  },
+  "LTHM": {
+    "quoteType": "NONE",
+    "longName": null,
+    "shortName": null,
+    "isin": null
+  },
+  "BTC=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Bitcoin Futures,May-2026",
+    "isin": null
+  },
+  "MBT=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro Bitcoin Futures,May-2026",
+    "isin": null
+  },
+  "MET=F": {
+    "quoteType": "FUTURE",
+    "longName": null,
+    "shortName": "Micro Ether Futures,May-2026",
+    "isin": null
+  },
+  "BTC-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Bitcoin USD",
+    "shortName": "Bitcoin USD",
+    "isin": null
+  },
+  "ETH-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Ethereum USD",
+    "shortName": "Ethereum USD",
+    "isin": null
+  },
+  "SOL-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Solana USD",
+    "shortName": "Solana USD",
+    "isin": null
+  },
+  "ADA-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Cardano USD",
+    "shortName": "Cardano USD",
+    "isin": null
+  },
+  "XRP-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "XRP USD",
+    "shortName": "XRP USD",
+    "isin": null
+  },
+  "DOT-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Polkadot USD",
+    "shortName": "Polkadot USD",
+    "isin": null
+  },
+  "DOGE-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Dogecoin USD",
+    "shortName": "Dogecoin USD",
+    "isin": null
+  },
+  "AVAX-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Avalanche USD",
+    "shortName": "Avalanche USD",
+    "isin": null
+  },
+  "LINK-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Chainlink USD",
+    "shortName": "Chainlink USD",
+    "isin": null
+  },
+  "SHIB-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Shiba Inu USD",
+    "shortName": "Shiba Inu USD",
+    "isin": null
+  },
+  "MATIC-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Polygon USD",
+    "shortName": "Polygon USD",
+    "isin": null
+  },
+  "LTC-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Litecoin USD",
+    "shortName": "Litecoin USD",
+    "isin": null
+  },
+  "UNI-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "UNICORN Token USD",
+    "shortName": "UNICORN Token USD",
+    "isin": null
+  },
+  "BCH-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Bitcoin Cash USD",
+    "shortName": "Bitcoin Cash USD",
+    "isin": null
+  },
+  "ATOM-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Cosmos USD",
+    "shortName": "Cosmos USD",
+    "isin": null
+  },
+  "ETC-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Ethereum Classic USD",
+    "shortName": "Ethereum Classic USD",
+    "isin": null
+  },
+  "XLM-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Stellar USD",
+    "shortName": "Stellar USD",
+    "isin": null
+  },
+  "NEAR-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "NEAR Protocol USD",
+    "shortName": "NEAR Protocol USD",
+    "isin": null
+  },
+  "ICP-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Internet Computer USD",
+    "shortName": "Internet Computer USD",
+    "isin": null
+  },
+  "FIL-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Filecoin USD",
+    "shortName": "Filecoin USD",
+    "isin": null
+  },
+  "LDO-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Lido DAO USD",
+    "shortName": "Lido DAO USD",
+    "isin": null
+  },
+  "APT-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Apricot Finance USD",
+    "shortName": "Apricot Finance USD",
+    "isin": null
+  },
+  "TIA-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Celestia USD",
+    "shortName": "Celestia USD",
+    "isin": null
+  },
+  "HBAR-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Hedera USD",
+    "shortName": "Hedera USD",
+    "isin": null
+  },
+  "OP-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Optimism USD",
+    "shortName": "Optimism USD",
+    "isin": null
+  },
+  "STX-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Stox USD",
+    "shortName": "Stox USD",
+    "isin": null
+  },
+  "GRT-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": null,
+    "shortName": "Golden Ratio Token USD",
+    "isin": null
+  },
+  "RNDR-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Render USD",
+    "shortName": "Render USD",
+    "isin": null
+  },
+  "INJ-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Injective USD",
+    "shortName": "Injective USD",
+    "isin": null
+  },
+  "KAS-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Kaspa USD",
+    "shortName": "Kaspa USD",
+    "isin": null
+  },
+  "THETA-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Theta Network USD",
+    "shortName": "Theta Network USD",
+    "isin": null
+  },
+  "FET-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Artificial Superintelligence Alliance USD",
+    "shortName": "Artificial Superintelligence Alliance USD",
+    "isin": null
+  },
+  "EGLD-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "MultiversX USD",
+    "shortName": "MultiversX USD",
+    "isin": null
+  },
+  "SEI-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Sei USD",
+    "shortName": "Sei USD",
+    "isin": null
+  },
+  "ORDI-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "ORDI USD",
+    "shortName": "ORDI USD",
+    "isin": null
+  },
+  "ALGO-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Algorand USD",
+    "shortName": "Algorand USD",
+    "isin": null
+  },
+  "AAVE-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Aave USD",
+    "shortName": "Aave USD",
+    "isin": null
+  },
+  "MKR-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Maker USD",
+    "shortName": "Maker USD",
+    "isin": null
+  },
+  "QNT-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Quant USD",
+    "shortName": "Quant USD",
+    "isin": null
+  },
+  "FLOW-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Flow USD",
+    "shortName": "Flow USD",
+    "isin": null
+  },
+  "BEAM-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Beam USD",
+    "shortName": "Beam USD",
+    "isin": null
+  },
+  "AXS-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Axie Infinity USD",
+    "shortName": "Axie Infinity USD",
+    "isin": null
+  },
+  "SAND-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "The Sandbox USD",
+    "shortName": "The Sandbox USD",
+    "isin": null
+  },
+  "MANA-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "Decentraland USD",
+    "shortName": "Decentraland USD",
+    "isin": null
+  },
+  "VET-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": "VeChain USD",
+    "shortName": "VeChain USD",
+    "isin": null
+  },
+  "GALA-USD": {
+    "quoteType": "CRYPTOCURRENCY",
+    "longName": null,
+    "shortName": "Gala USD",
+    "isin": null
+  },
+  "COIN": {
+    "quoteType": "EQUITY",
+    "longName": "Coinbase Global, Inc.",
+    "shortName": "Coinbase Global, Inc.",
+    "isin": null
+  },
+  "MSTR": {
+    "quoteType": "EQUITY",
+    "longName": "Strategy Inc",
+    "shortName": "Strategy Inc",
+    "isin": null
+  },
+  "AAPL": {
+    "quoteType": "EQUITY",
+    "longName": "Apple Inc.",
+    "shortName": "Apple Inc.",
+    "isin": null
+  },
+  "MSFT": {
+    "quoteType": "EQUITY",
+    "longName": "Microsoft Corporation",
+    "shortName": "Microsoft Corporation",
+    "isin": null
+  },
+  "GOOGL": {
+    "quoteType": "EQUITY",
+    "longName": "Alphabet Inc.",
+    "shortName": "Alphabet Inc.",
+    "isin": null
+  },
+  "AMZN": {
+    "quoteType": "EQUITY",
+    "longName": "Amazon.com, Inc.",
+    "shortName": "Amazon.com, Inc.",
+    "isin": null
+  },
+  "META": {
+    "quoteType": "EQUITY",
+    "longName": "Meta Platforms, Inc.",
+    "shortName": "Meta Platforms, Inc.",
+    "isin": null
+  },
+  "NVDA": {
+    "quoteType": "EQUITY",
+    "longName": "NVIDIA Corporation",
+    "shortName": "NVIDIA Corporation",
+    "isin": null
+  },
+  "AMD": {
+    "quoteType": "EQUITY",
+    "longName": "Advanced Micro Devices, Inc.",
+    "shortName": "Advanced Micro Devices, Inc.",
+    "isin": null
+  },
+  "AVGO": {
+    "quoteType": "EQUITY",
+    "longName": "Broadcom Inc.",
+    "shortName": "Broadcom Inc.",
+    "isin": null
+  },
+  "TSM": {
+    "quoteType": "EQUITY",
+    "longName": "Taiwan Semiconductor Manufacturing Company Limited",
+    "shortName": "Taiwan Semiconductor Manufactur",
+    "isin": null
+  },
+  "ASML": {
+    "quoteType": "EQUITY",
+    "longName": "ASML Holding N.V.",
+    "shortName": "ASML Holding N.V. - New York Re",
+    "isin": null
+  },
+  "QCOM": {
+    "quoteType": "EQUITY",
+    "longName": "QUALCOMM Incorporated",
+    "shortName": "QUALCOMM Incorporated",
+    "isin": null
+  },
+  "MU": {
+    "quoteType": "EQUITY",
+    "longName": "Micron Technology, Inc.",
+    "shortName": "Micron Technology, Inc.",
+    "isin": null
+  },
+  "INTC": {
+    "quoteType": "EQUITY",
+    "longName": "Intel Corporation",
+    "shortName": "Intel Corporation",
+    "isin": null
+  },
+  "CRM": {
+    "quoteType": "EQUITY",
+    "longName": "Salesforce, Inc.",
+    "shortName": "Salesforce, Inc.",
+    "isin": null
+  },
+  "NOW": {
+    "quoteType": "EQUITY",
+    "longName": "ServiceNow, Inc.",
+    "shortName": "ServiceNow, Inc.",
+    "isin": null
+  },
+  "INTU": {
+    "quoteType": "EQUITY",
+    "longName": "Intuit Inc.",
+    "shortName": "Intuit Inc.",
+    "isin": null
+  },
+  "ADBE": {
+    "quoteType": "EQUITY",
+    "longName": "Adobe Inc.",
+    "shortName": "Adobe Inc.",
+    "isin": null
+  },
+  "PANW": {
+    "quoteType": "EQUITY",
+    "longName": "Palo Alto Networks, Inc.",
+    "shortName": "Palo Alto Networks, Inc.",
+    "isin": null
+  },
+  "SNOW": {
+    "quoteType": "EQUITY",
+    "longName": "Snowflake Inc.",
+    "shortName": "Snowflake Inc.",
+    "isin": null
+  },
+  "SHOP": {
+    "quoteType": "EQUITY",
+    "longName": "Shopify Inc.",
+    "shortName": "Shopify Inc.",
+    "isin": null
+  },
+  "MDB": {
+    "quoteType": "EQUITY",
+    "longName": "MongoDB, Inc.",
+    "shortName": "MongoDB, Inc.",
+    "isin": null
+  },
+  "TEAM": {
+    "quoteType": "EQUITY",
+    "longName": "Atlassian Corporation",
+    "shortName": "Atlassian Corporation",
+    "isin": null
+  },
+  "DDOG": {
+    "quoteType": "EQUITY",
+    "longName": "Datadog, Inc.",
+    "shortName": "Datadog, Inc.",
+    "isin": null
+  },
+  "ZS": {
+    "quoteType": "EQUITY",
+    "longName": "Zscaler, Inc.",
+    "shortName": "Zscaler, Inc.",
+    "isin": null
+  },
+  "CRWD": {
+    "quoteType": "EQUITY",
+    "longName": "CrowdStrike Holdings, Inc.",
+    "shortName": "CrowdStrike Holdings, Inc.",
+    "isin": null
+  },
+  "FTNT": {
+    "quoteType": "EQUITY",
+    "longName": "Fortinet, Inc.",
+    "shortName": "Fortinet, Inc.",
+    "isin": null
+  },
+  "CSCO": {
+    "quoteType": "EQUITY",
+    "longName": "Cisco Systems, Inc.",
+    "shortName": "Cisco Systems, Inc.",
+    "isin": null
+  },
+  "ANET": {
+    "quoteType": "EQUITY",
+    "longName": "Arista Networks, Inc.",
+    "shortName": "Arista Networks, Inc.",
+    "isin": null
+  },
+  "DELL": {
+    "quoteType": "EQUITY",
+    "longName": "Dell Technologies Inc.",
+    "shortName": "Dell Technologies Inc.",
+    "isin": null
+  },
+  "HPE": {
+    "quoteType": "EQUITY",
+    "longName": "Hewlett Packard Enterprise Company",
+    "shortName": "Hewlett Packard Enterprise Comp",
+    "isin": null
+  },
+  "SMCI": {
+    "quoteType": "EQUITY",
+    "longName": "Super Micro Computer, Inc.",
+    "shortName": "Super Micro Computer, Inc.",
+    "isin": null
+  },
+  "IBM": {
+    "quoteType": "EQUITY",
+    "longName": "International Business Machines Corporation",
+    "shortName": "International Business Machines",
+    "isin": null
+  },
+  "ORCL": {
+    "quoteType": "EQUITY",
+    "longName": "Oracle Corporation",
+    "shortName": "Oracle Corporation",
+    "isin": null
+  },
+  "U": {
+    "quoteType": "EQUITY",
+    "longName": "Unity Software Inc.",
+    "shortName": "Unity Software Inc.",
+    "isin": null
+  },
+  "DASH": {
+    "quoteType": "EQUITY",
+    "longName": "DoorDash, Inc.",
+    "shortName": "DoorDash, Inc.",
+    "isin": null
+  },
+  "ABNB": {
+    "quoteType": "EQUITY",
+    "longName": "Airbnb, Inc.",
+    "shortName": "Airbnb, Inc.",
+    "isin": null
+  },
+  "ARM": {
+    "quoteType": "EQUITY",
+    "longName": "Arm Holdings plc",
+    "shortName": "Arm Holdings plc",
+    "isin": null
+  },
+  "MRVL": {
+    "quoteType": "EQUITY",
+    "longName": "Marvell Technology, Inc.",
+    "shortName": "Marvell Technology, Inc.",
+    "isin": null
+  },
+  "LRCX": {
+    "quoteType": "EQUITY",
+    "longName": "Lam Research Corporation",
+    "shortName": "Lam Research Corporation",
+    "isin": null
+  },
+  "KLAC": {
+    "quoteType": "EQUITY",
+    "longName": "KLA Corporation",
+    "shortName": "KLA Corporation",
+    "isin": null
+  },
+  "ADI": {
+    "quoteType": "EQUITY",
+    "longName": "Analog Devices, Inc.",
+    "shortName": "Analog Devices, Inc.",
+    "isin": null
+  },
+  "NXPI": {
+    "quoteType": "EQUITY",
+    "longName": "NXP Semiconductors N.V.",
+    "shortName": "NXP Semiconductors N.V.",
+    "isin": null
+  },
+  "NET": {
+    "quoteType": "EQUITY",
+    "longName": "Cloudflare, Inc.",
+    "shortName": "Cloudflare, Inc.",
+    "isin": null
+  },
+  "OKTA": {
+    "quoteType": "EQUITY",
+    "longName": "Okta, Inc.",
+    "shortName": "Okta, Inc.",
+    "isin": null
+  },
+  "MNDY": {
+    "quoteType": "EQUITY",
+    "longName": "monday.com Ltd.",
+    "shortName": "monday.com Ltd.",
+    "isin": null
+  },
+  "TTD": {
+    "quoteType": "EQUITY",
+    "longName": "The Trade Desk, Inc.",
+    "shortName": "The Trade Desk, Inc.",
+    "isin": null
+  }
+}
