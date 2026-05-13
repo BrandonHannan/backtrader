@@ -101,6 +101,8 @@ class Position{
 
         double getExitPrice(const StockDataInstance &currentData, const StockDataInstance &futureData) const;
 
+        double getExitPrice(const StockDataInstance &currentData, const StockDataInstance &futureData, const vector<StockDataInstance> &minuteData) const;
+
         json toJson() const;
 
         Position& operator=(const Position &obj);

@@ -10,9 +10,9 @@ def format_array(data):
 dukas_tickers = []
 data = dict()
 
-start_date = datetime(2026, 1, 1)
-end_date = datetime(2026, 2, 1)
-interval = dukascopy_python.INTERVAL_MIN_15
+start_date = datetime(2000, 1, 1)
+end_date = datetime(2026, 4, 1)
+interval = dukascopy_python.INTERVAL_DAY_1
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TICKERS = os.path.join(HERE, "DukascopyTickers.json")
@@ -43,7 +43,7 @@ for ticker in dukas_tickers:
             print(f"Error downloading {ticker}: {e}")
             data[ticker] = None
 
-file = open("MinuteData.txt", "w")
+file = open("DailyData.txt", "w")
 for stock_name, stock_data in data.items():
     if stock_data is None:
         continue
@@ -60,7 +60,8 @@ for stock_name, stock_data in data.items():
     file.write("Volume:\n")
     file.write(f"{format_array(stock_data['volume'])}\n")
     file.write("Date:\n")
-    file.write(f"{format_array(stock_data['timestamp'])}\n\n")
+    formatted_dates = stock_data['timestamp'].dt.strftime('%Y-%m-%d')
+    file.write(f"{format_array(formatted_dates)}\n\n")
 
 file.close()
 

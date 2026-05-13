@@ -196,6 +196,69 @@ double Position::getExitPrice(const StockDataInstance &currentData, const StockD
     return exitPrice;
 }
 
+double Position::getExitPrice(const StockDataInstance &currentData, const StockDataInstance &futureData, const vector<StockDataInstance> &minuteData) const {
+    double currentClose = currentData.close;
+    double currentOpen = currentData.open;
+    double currentHigh = currentData.high;
+    double currentLow = currentData.low;
+
+    double stopLossPrice = this->getStopLossPrice();
+    double exitPrice = currentClose;
+
+    if (this->positionType.getPositiontype() == "LONG"){
+        for (const StockDataInstance &minuteInstance : minuteData){
+            if (minuteInstance.low <= stopLossPrice){
+                if (minuteInstance.open <= stopLossPrice){
+                    exitPrice = minuteInstance.open;
+                }
+                else{
+                    exitPrice = stopLossPrice;
+                }
+                return exitPrice;
+            }
+        }
+
+        if (currentLow <= stopLossPrice){
+            if (currentOpen <= stopLossPrice){
+                exitPrice = currentOpen;
+            }
+            else{
+                exitPrice = stopLossPrice;
+            }
+        }
+        else{
+            exitPrice = futureData.open;
+        }
+    }
+    else if (this->positionType.getPositiontype() == "SHORT"){
+        for (const StockDataInstance &minuteInstance : minuteData){
+            if (minuteInstance.high >= stopLossPrice){
+                if (minuteInstance.open >= stopLossPrice){
+                    exitPrice = minuteInstance.open;
+                }
+                else{
+                    exitPrice = stopLossPrice;
+                }
+                return exitPrice;
+            }
+        }
+
+        if (currentHigh >= stopLossPrice){
+            if (currentOpen >= stopLossPrice){
+                exitPrice = currentOpen;
+            }
+            else{
+                exitPrice = stopLossPrice;
+            }
+        }
+        else{
+            exitPrice = futureData.open;
+        }
+    }
+
+    return exitPrice;
+}
+
 json Position::toJson() const {
     double pnl = 0.0;
     if (positionType.getPositiontype() == "LONG") {

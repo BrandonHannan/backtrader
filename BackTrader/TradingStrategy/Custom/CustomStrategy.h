@@ -14,6 +14,8 @@ class CustomStrategy: public BaseStrategy {
         void setMacroFeatures(const MacroFeatures* m) { macroFeatures = m; }
 
         void ExecuteStrategy(const string &stockName, const StockData &data) override;
+
+        void ExecuteStrategy(const string &stockName, const StockData &data, const StockData &minuteData) override;
 };
 
 #endif

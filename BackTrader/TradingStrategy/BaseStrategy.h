@@ -31,6 +31,8 @@ class BaseStrategy {
 
         virtual void ExecuteStrategy(const string &stockName, const StockData &data) = 0;
 
+        virtual void ExecuteStrategy(const string &stockName, const StockData &data, const StockData &minuteData) = 0;
+
         double getBalance();
 
         void addToBalance(double val);
