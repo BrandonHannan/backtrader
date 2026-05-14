@@ -197,14 +197,21 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
             if (shouldSell || i == size - 2){
                 double exitPrice = -1;
-                vector<StockDataInstance> minuteDataForCurrentDate;
                 int initialMinuteIndex = binarySearchInitialMinuteDate(minuteData.date, currentDate);
                 int finalMinuteIndex = binarySearchLastMinuteDate(minuteData.date, futureInstance.date);
                 if (initialMinuteIndex == -1 || finalMinuteIndex == -1 || initialMinuteIndex > finalMinuteIndex) {
                     exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance);
                 }
                 else{
-                    exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance, vector<StockDataInstance>(minuteDataForCurrentDate.begin() + initialMinuteIndex, minuteDataForCurrentDate.begin() + finalMinuteIndex + 1));
+                    vector<StockDataInstance> minuteSlice;
+                    minuteSlice.reserve(finalMinuteIndex - initialMinuteIndex + 1);
+                    for (int idx = initialMinuteIndex; idx <= finalMinuteIndex; idx++) {
+                        minuteSlice.emplace_back(idx,
+                            minuteData.open[idx], minuteData.close[idx],
+                            minuteData.high[idx], minuteData.low[idx],
+                            minuteData.volume[idx], minuteData.date[idx]);
+                    }
+                    exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance, minuteSlice);
                 }
 
                 bool isStopLoss = false;

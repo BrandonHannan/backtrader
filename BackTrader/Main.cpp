@@ -253,8 +253,8 @@ int main(){
                 string ticker;
                 getline(cin, ticker);
                 ticker = trim(ticker);
-                if (dailyData.find(ticker) == dailyData.end()) {
-                    cout << "Error: ticker '" << ticker << "' not found in DailyData.txt. Exiting." << endl;
+                if (data.find(ticker) == data.end()) {
+                    cout << "Error: ticker '" << ticker << "' not found in data.txt. Exiting." << endl;
                     return 1;
                 }
                 selectedTickers.insert(ticker);
@@ -333,14 +333,14 @@ int main(){
         if (useFilter) {
             int missing = 0;
             for (const string& t : selectedTickers) {
-                auto it = dailyData.find(t);
-                if (it != dailyData.end()) filteredDailyData.emplace(it->first, it->second);
+                auto it = data.find(t);
+                if (it != data.end()) filteredDailyData.emplace(it->first, it->second);
                 else ++missing;
             }
             cout << "Filtered " << selectedTickers.size() << " -> " << filteredDailyData.size()
-                << " tickers (" << missing << " not in dailyData.txt)." << endl;
+                << " tickers (" << missing << " not in data.txt)." << endl;
         } else {
-            filteredDailyData = dailyData;
+            filteredDailyData = data;
         }
 
         int dataSize = 0;
