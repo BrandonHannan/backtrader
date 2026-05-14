@@ -160,7 +160,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         return;
     }
 
-    for (int i = dateIndex; i<(size - 1); i++){
+    for (int i = max(dateIndex, 1); i<(size - 1); i++){
         double previousOpen = data.open[i - 1];
         double previousClose = data.close[i - 1];
         double previousLow = data.low[i - 1];
@@ -312,69 +312,4 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
     context->clear();
     sizer->clear();
 
-}
-
-int binarySearchDate(const vector<string> &dates, const string &targetDate) {
-    int left = 0;
-    int right = dates.size() - 1;
-
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
-
-        if (dates[mid] == targetDate) {
-            return mid;
-        } else if (dates[mid] < targetDate) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-
-    return -1; // Not found
-}
-
-// Finds the FIRST occurrence of the target date
-int binarySearchInitialMinuteDate(const vector<string> &minuteDates, const string &targetDailyDate) {
-    int left = 0;
-    int right = minuteDates.size() - 1;
-    int firstIndex = -1;
-
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
-        string currentDailyDate = minuteDates[mid].substr(0, 10);
-
-        if (currentDailyDate == targetDailyDate) {
-            firstIndex = mid; // Record match, but keep searching LEFT for earlier ones
-            right = mid - 1;
-        } else if (currentDailyDate < targetDailyDate) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-
-    return firstIndex;
-}
-
-// Finds the LAST occurrence of the target date
-int binarySearchLastMinuteDate(const vector<string> &minuteDates, const string &targetDailyDate) {
-    int left = 0;
-    int right = minuteDates.size() - 1;
-    int lastIndex = -1;
-
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
-        string currentDailyDate = minuteDates[mid].substr(0, 10);
-
-        if (currentDailyDate == targetDailyDate) {
-            lastIndex = mid; // Record match, but keep searching RIGHT for later ones
-            left = mid + 1;
-        } else if (currentDailyDate < targetDailyDate) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-
-    return lastIndex;
 }
