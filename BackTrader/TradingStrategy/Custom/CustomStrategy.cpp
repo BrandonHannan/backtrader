@@ -197,8 +197,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
             if (shouldSell || i == size - 2){
                 double exitPrice = -1;
-                int initialMinuteIndex = binarySearchInitialMinuteDate(minuteData.date, currentDate);
-                int finalMinuteIndex = binarySearchLastMinuteDate(minuteData.date, futureInstance.date);
+                int initialMinuteIndex = binarySearchInitialMinuteDate(minuteData.date, previousDate);
+                int finalMinuteIndex = binarySearchLastMinuteDate(minuteData.date, currentDate);
                 if (initialMinuteIndex == -1 || finalMinuteIndex == -1 || initialMinuteIndex > finalMinuteIndex) {
                     exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance);
                 }
