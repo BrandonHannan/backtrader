@@ -67,6 +67,4 @@ class BaseStrategy {
 };
 
 int binarySearchDate(const vector<string> &dates, const string &targetDate);
-int binarySearchInitialMinuteDate(const vector<string> &minuteDates, const string &targetDailyDate);
-int binarySearchLastMinuteDate(const vector<string> &minuteDates, const string &targetDailyDate);
 #endif
