@@ -1,85 +1,99 @@
 from datetime import datetime
 import dukascopy_python
-import pandas as pd
 import os
 import json
+import concurrent.futures
+import threading
 
 def format_array(data):
     return " ".join(map(str, data))
 
-dukas_tickers = []
-data = dict()
+# Initialize the lock for thread-safe file writing
+file_lock = threading.Lock()
 
-start_date = datetime(2000, 1, 1)
-end_date = datetime(2026, 4, 1)
-interval = dukascopy_python.INTERVAL_MIN_15
+def fetch_and_write(ticker, start, end, interval, file_handle):
+    """Worker function to download data and write it directly to the file."""
+    try:
+        df = dukascopy_python.fetch(
+            ticker,
+            interval,
+            dukascopy_python.OFFER_SIDE_BID,
+            start,
+            end
+        )
+        
+        if df.empty:
+            return ticker, False, "No data found", 0
+            
+        df = df.reset_index()
+        
+        # Pre-format the massive strings OUTSIDE the lock to keep the lock fast
+        formatted_dates = df['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+        output_block = (
+            f"Stock: {ticker}\n"
+            f"Open:\n{format_array(df['open'])}\n"
+            f"Close:\n{format_array(df['close'])}\n"
+            f"High:\n{format_array(df['high'])}\n"
+            f"Low:\n{format_array(df['low'])}\n"
+            f"Volume:\n{format_array(df['volume'])}\n"
+            f"Date:\n{format_array(formatted_dates)}\n\n"
+        )
+        
+        # Acquire the lock to ensure only one thread writes to the file at a time
+        with file_lock:
+            file_handle.write(output_block)
+            file_handle.flush() # Force write to disk immediately
+            
+        return ticker, True, None, len(df)
+        
+    except Exception as e:
+        return ticker, False, str(e), 0
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-TICKERS = os.path.join(HERE, "DukascopyTickers.json")
-
-with open(TICKERS, "r") as f:
-    tickers = json.load(f)
-
-    for info in tickers.values():
-        if info["dukascopy"] is not None:
-            dukas_tickers.append(info["dukascopy"])
-
-for ticker in dukas_tickers:
-        try:
-            df = dukascopy_python.fetch(
-                    ticker,
-                    interval,
-                    dukascopy_python.OFFER_SIDE_BID,
-                    start_date,
-                    end_date
-                )
-            if df.empty:
-                print(f"Warning: No data found for {ticker}")
-                data[ticker] = None
-            else:
-                data[ticker] = df
-                print(f"  Downloaded {ticker} ({len(df)} rows)")
-        except Exception as e:
-            print(f"Error downloading {ticker}: {e}")
-            data[ticker] = None
-
-file = open("MinuteData.txt", "w")
-for stock_name, stock_data in data.items():
-    if stock_data is None:
-        continue
-    stock_data = stock_data.reset_index()
-    file.write(f"Stock: {stock_name}\n")
-    file.write(f"Open:\n")
-    file.write(f"{format_array(stock_data['open'])}\n")
-    file.write("Close:\n")
-    file.write(f"{format_array(stock_data['close'])}\n")
-    file.write("High:\n")
-    file.write(f"{format_array(stock_data['high'])}\n")
-    file.write("Low:\n")
-    file.write(f"{format_array(stock_data['low'])}\n")
-    file.write("Volume:\n")
-    file.write(f"{format_array(stock_data['volume'])}\n")
-    file.write("Date:\n")
-    formatted_dates = stock_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S')
-    file.write(f"{format_array(formatted_dates)}\n\n")
-
-file.close()
-
-# for stock_name, stock_data in data.items():
-#     if stock_data is None:
-#         continue
-#     stock_data = stock_data.reset_index()
-#     print("Stock: ", stock_name)
-#     print("Open:")
-#     print(stock_data["open"][0:20])
-#     print("Close:")
-#     print(stock_data["close"][0:20])
-#     print("High:")
-#     print(stock_data["high"][0:20])
-#     print("Low:")
-#     print(stock_data["low"][0:20])
-#     print("Volume:")
-#     print(stock_data["volume"][0:20])
-#     print("timestamp:")
-#     print(stock_data["timestamp"][0:20])
+if __name__ == "__main__":
+    dukas_tickers = []
     
+    start_date = datetime(2000, 1, 1)
+    end_date = datetime(2026, 4, 1)
+    interval = dukascopy_python.INTERVAL_MIN_15
+    
+    HERE = os.path.dirname(os.path.abspath(__file__))
+    TICKERS = os.path.join(HERE, "DukascopyTickers.json")
+    
+    with open(TICKERS, "r") as f:
+        tickers = json.load(f)
+    
+        for info in tickers.values():
+            if info["dukascopy"] is not None:
+                dukas_tickers.append(info["dukascopy"])
+    
+    total_tickers = len(dukas_tickers)
+    completed_count = 0
+    
+    print(f"Starting downloads for {total_tickers} tickers...")
+    
+    with open("MinuteData.txt", "w") as file_handle:
+        # Using 10 worker threads. You can increase max_workers (e.g., 20 or 30) 
+        # but don't set it too high or the Dukascopy server might rate-limit/block you.
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            
+            # Submit all ticker tasks to the thread pool
+            future_to_ticker = {
+                executor.submit(fetch_and_write, ticker, start_date, end_date, interval, file_handle): ticker 
+                for ticker in dukas_tickers
+            }
+            
+            # Process results as they finish, out of order
+            for future in concurrent.futures.as_completed(future_to_ticker):
+                completed_count += 1
+                try:
+                    ticker, success, msg, row_count = future.result()
+                    if success:
+                        progress = (completed_count / total_tickers) * 100
+                        print(f"  Downloaded {ticker} ({row_count} rows) | Progress: {progress:.2f}%")
+                    else:
+                        print(f"Warning/Error for {ticker}: {msg} | Progress: {(completed_count / total_tickers) * 100:.2f}%")
+                except Exception as exc:
+                    ticker = future_to_ticker[future]
+                    print(f"{ticker} generated an exception: {exc}")
+
+    print("All downloads complete and saved to MinuteData.txt")
