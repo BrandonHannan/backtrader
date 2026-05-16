@@ -156,7 +156,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
     int dateIndex = binarySearchDate(data.date, initialMinuteDate);
 
     if (dateIndex == -1) {
-        // Handle the case where the date is not found
+        cerr << "[Warning] " << stockName << ": minute start date " << initialMinuteDate
+             << " not in daily data - skipping ticker\n";
         return;
     }
 
@@ -197,12 +198,22 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
             if (shouldSell || i == size - 2){
                 double exitPrice = -1;
-                int initialMinuteIndex = binarySearchInitialMinuteDate(minuteData.date, previousDate);
-                int finalMinuteIndex = binarySearchLastMinuteDate(minuteData.date, currentDate);
-                if (initialMinuteIndex == -1 || finalMinuteIndex == -1 || initialMinuteIndex > finalMinuteIndex) {
+                // Dukascopy daily bars are UTC-calendar-day indexed (verified empirically:
+                // see DownloadDataPython/verify_minute_convention.py and verification_report.txt
+                // - Hypothesis A matched 100% of OHLC across LIGHT.CMD/USD, XAU/USD, COFFEE.CMD/USX).
+                // Slice = minute bars whose timestamp is within [currentDate T00:00:00, currentDate T23:59:59].
+                const string sessionStart = currentDate + "T00:00:00";
+                const string sessionEnd   = currentDate + "T23:59:59";
+                auto startIt = std::lower_bound(minuteData.date.begin(), minuteData.date.end(), sessionStart);
+                auto endIt   = std::upper_bound(minuteData.date.begin(), minuteData.date.end(), sessionEnd);
+                if (startIt == minuteData.date.end() || startIt >= endIt) {
+                    cerr << "[Warning] " << stockName << " " << currentDate
+                         << ": no minute bars in session window - falling back to daily exit price\n";
                     exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance);
                 }
                 else{
+                    int initialMinuteIndex = static_cast<int>(std::distance(minuteData.date.begin(), startIt));
+                    int finalMinuteIndex   = static_cast<int>(std::distance(minuteData.date.begin(), endIt)) - 1;
                     vector<StockDataInstance> minuteSlice;
                     minuteSlice.reserve(finalMinuteIndex - initialMinuteIndex + 1);
                     for (int idx = initialMinuteIndex; idx <= finalMinuteIndex; idx++) {
