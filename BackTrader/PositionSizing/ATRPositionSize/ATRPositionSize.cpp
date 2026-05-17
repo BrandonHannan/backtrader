@@ -1,37 +1,50 @@
 #include "ATRPositionSize.h"
+#include <cmath>
 
 ATRPositionSize::ATRPositionSize(double riskAmount, int ATRPeriod, double ATRMultiplier): BasePositionSize(riskAmount),
 ATRPeriod(ATRPeriod), ATRMultiplier(ATRMultiplier), atr(ATRPeriod) {}
 
 PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, PositionType position, const StockDataInstance &data) const {
-    if (atr.getATR() <= 0 || position.isNull()){
+    if (atr.getATR() <= 0 || position.isNull() || data.contractSize <= 0.0){
         return PositionPriceInfo(0.0, 0.0);
     }
 
     double dollarRisk = balance * this->riskAmount;
     double stopLossPrice = 0.0;
-    double riskPerShare = 0.0;
+    double riskPerContract = 0.0;
+    double notionalPerContract = data.open * data.contractSize;
+    if (notionalPerContract <= 0.0){
+        return PositionPriceInfo(0.0, 0.0);
+    }
+    double maxContractsByBalance = balance / notionalPerContract;
+
     if (position.getPositiontype() == "LONG"){
         stopLossPrice = data.open - (atr.getATR() * this->ATRMultiplier);
-        riskPerShare = data.open - stopLossPrice;
-        if (riskPerShare <= 0){
+        riskPerContract = (data.open - stopLossPrice) * data.contractSize;
+        if (riskPerContract <= 0){
             // Avoid division by 0 or negative risk
             return PositionPriceInfo(0.0, 0.0);
         }
-        double result = dollarRisk/riskPerShare;
-        double maxSharesByBalance = balance / data.open;
-        if (result > maxSharesByBalance) { result = maxSharesByBalance; }
+        double result = dollarRisk / riskPerContract;
+        if (result > maxContractsByBalance) { result = maxContractsByBalance; }
+        result = std::floor(result); // futures trade in whole contracts
+        if (result <= 0){
+            return PositionPriceInfo(0.0, 0.0);
+        }
         return PositionPriceInfo(result, stopLossPrice);
     }
     else if (position.getPositiontype() == "SHORT"){
         stopLossPrice = data.open + (atr.getATR() * this->ATRMultiplier);
-        riskPerShare = stopLossPrice - data.open;
-        if (riskPerShare <= 0){
+        riskPerContract = (stopLossPrice - data.open) * data.contractSize;
+        if (riskPerContract <= 0){
             return PositionPriceInfo(0.0, 0.0);
         }
-        double result = dollarRisk/riskPerShare;
-        double maxSharesByBalance = balance / data.open;
-        if (result > maxSharesByBalance) { result = maxSharesByBalance; }
+        double result = dollarRisk / riskPerContract;
+        if (result > maxContractsByBalance) { result = maxContractsByBalance; }
+        result = std::floor(result); // futures trade in whole contracts
+        if (result <= 0){
+            return PositionPriceInfo(0.0, 0.0);
+        }
         return PositionPriceInfo(result, stopLossPrice);
     }
     else{
@@ -42,7 +55,7 @@ PositionPriceInfo ATRPositionSize::calculatePositionSize(double balance, Positio
 Position ATRPositionSize::purchasePosition(double balance, const string stockName, const PositionType position, const StockDataInstance &data) const {
     PositionPriceInfo positionPriceInfo = this->calculatePositionSize(balance, position, data);
     if (position.getPositiontype() == "LONG" || position.getPositiontype() == "SHORT"){
-        Position newPosition(stockName, position.getPositiontype(), "", data.date, "", data.open, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice);
+        Position newPosition(stockName, position.getPositiontype(), "", data.date, "", data.open, -1, positionPriceInfo.numShares, positionPriceInfo.stopLossPrice, data.contractSize);
         return newPosition;
     }
     else{

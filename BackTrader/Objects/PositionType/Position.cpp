@@ -1,10 +1,10 @@
 #include "Position.h"
 
-Position::Position(): isClosed(true), entryContextData(json::object()), exitContextData(json::object()) {}
+Position::Position(): contractSize(0.0), isClosed(true), entryContextData(json::object()), exitContextData(json::object()) {}
 
-Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice):
+Position::Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice, double cSize):
                 stockName(stockName), positionType(pType), tradeType(tType), purchaseDate(pDate), sellDate(sDate), purchasePrice(pPrice),
-                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), originalStopLossPrice(sLPrice), isClosed(false),
+                sellPrice(sPrice), numShares(nShares), stopLossPrice(sLPrice), contractSize(cSize), originalStopLossPrice(sLPrice), isClosed(false),
                 entryContextData(json::object()), exitContextData(json::object()) {}
 
 // Helper function to determine the number of days between the purhcase date and the sell date
@@ -105,6 +105,14 @@ double Position::getNumShares() const {
 
 void Position::setNumShares(double nShares){
     this->numShares = nShares;
+}
+
+double Position::getContractSize() const {
+    return this->contractSize;
+}
+
+void Position::setContractSize(double cSize){
+    this->contractSize = cSize;
 }
 
 string Position::getStats() const {
@@ -262,9 +270,9 @@ double Position::getExitPrice(const StockDataInstance &currentData, const StockD
 json Position::toJson() const {
     double pnl = 0.0;
     if (positionType.getPositiontype() == "LONG") {
-        pnl = (sellPrice - purchasePrice) * numShares;
+        pnl = (sellPrice - purchasePrice) * numShares * contractSize;
     } else if (positionType.getPositiontype() == "SHORT") {
-        pnl = (purchasePrice - sellPrice) * numShares;
+        pnl = (purchasePrice - sellPrice) * numShares * contractSize;
     }
 
     return {
@@ -276,6 +284,7 @@ json Position::toJson() const {
         {"purchasePrice",    purchasePrice},
         {"sellPrice",        sellPrice},
         {"numShares",        numShares},
+        {"contractSize",     contractSize},
         {"originalStopLoss", originalStopLossPrice},
         {"pnl",              pnl},
         {"entryContext",     entryContextData},
@@ -289,6 +298,7 @@ Position& Position::operator=(const Position &obj){
         this->setTradeType(obj.tradeType);
         this->setPositionType(obj.positionType);
         this->setNumShares(obj.numShares);
+        this->setContractSize(obj.contractSize);
         this->setPurchaseDate(obj.purchaseDate);
         this->setSellDate(obj.sellDate);
         this->setPurchasePrice(obj.purchasePrice);

@@ -12,19 +12,31 @@ unordered_map<string, StockData> ReadData(const string &fileName){
     string line;
     string currentStockTicker;
     string currentDataType;
-    
+
     // Temporary storage for the current stock's data
     vector<double> temp_open, temp_close, temp_high, temp_low, temp_volume;
     vector<string> temp_date;
+    double temp_contractSize = 0.0;
+
+    auto flush_current = [&]() {
+        if (currentStockTicker.empty()) return;
+        if (temp_contractSize <= 0.0) {
+            cerr << "[Error] " << currentStockTicker
+                 << ": missing/invalid ContractSize - dropping ticker" << endl;
+        }
+        else {
+            result[currentStockTicker] = StockData(
+                temp_open, temp_close, temp_high, temp_low, temp_volume,
+                temp_date, temp_contractSize);
+        }
+    };
 
     while (getline(file, line)) {
         // Check for a new stock entry
         if (line.rfind("Stock: ", 0) == 0) {
             // If we were already processing a stock, save its data before starting the new one
-            if (!currentStockTicker.empty()) {
-                result[currentStockTicker] = StockData(temp_open, temp_close, temp_high, temp_low, temp_volume, temp_date);
-            }
-            
+            flush_current();
+
             // Clear temporary vectors for the new stock
             temp_open.clear();
             temp_close.clear();
@@ -32,11 +44,14 @@ unordered_map<string, StockData> ReadData(const string &fileName){
             temp_low.clear();
             temp_volume.clear();
             temp_date.clear();
+            temp_contractSize = 0.0;
+            currentDataType.clear();
 
             // Extract the new stock ticker
             currentStockTicker = line.substr(7);
         }
-        // Identify the data type header (Open, Close, etc.)
+        // Identify the data type header (ContractSize, Open, Close, etc.)
+        else if (line == "ContractSize:") { currentDataType = "ContractSize"; }
         else if (line == "Open:") { currentDataType = "Open"; }
         else if (line == "Close:") { currentDataType = "Close"; }
         else if (line == "High:") { currentDataType = "High"; }
@@ -52,6 +67,12 @@ unordered_map<string, StockData> ReadData(const string &fileName){
                     temp_date.push_back(dateValue);
                 }
             }
+            else if (currentDataType == "ContractSize") {
+                double cs;
+                if (iss >> cs) {
+                    temp_contractSize = cs;
+                }
+            }
             else {
                 double numericValue;
                 while (iss >> numericValue) {
@@ -64,11 +85,9 @@ unordered_map<string, StockData> ReadData(const string &fileName){
             }
         }
     }
-    
+
     // After the loop, save the very last stock's data
-    if (!currentStockTicker.empty()) {
-        result[currentStockTicker] = StockData(temp_open, temp_close, temp_high, temp_low, temp_volume, temp_date);
-    }
+    flush_current();
     file.close();
     return result;
 }

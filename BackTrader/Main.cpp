@@ -28,6 +28,7 @@ int main(){
 
     // Dukas Data
     unordered_map<string, StockData> dailyData = ReadData("../DailyData.txt");
+    unordered_map<string, StockData> fifteenMinuteData = ReadData("../15MinuteData.txt");
     unordered_map<string, StockData> minuteData = ReadData("../MinuteData.txt");
 
     // Load cross-asset related-stocks mapping written by DownloadData.py.
@@ -135,17 +136,19 @@ int main(){
     }
 
     cout << "Select execution mode:\n";
-    cout << "  1 - ExecuteBaseCase (single run with default parameters)\n";
-    cout << "  2 - ExecuteAllSweeps (full parameter sweep)\n";
-    cout << "  3 - ExecuteBaseCase (single run with default parameters with minute data)\n";
-    cout << "  4 - ExecuteAllSweeps (full parameter sweep with minute data)\n";
+    cout << "  1 - ExecuteBaseCase (single run with default parameters with minute data)\n";
+    cout << "  2 - ExecuteAllSweeps (full parameter sweep with minute data)\n";
+    cout << "  3 - ExecuteBaseCase (single run with default parameters with daily data)\n";
+    cout << "  4 - ExecuteAllSweeps (full parameter sweep with daily data)\n";
+    cout << "  5 - ExecuteBaseCase (single run with default parameters with 15 minute interval data)\n";
+    cout << "  6 - ExecuteAllSweeps (full parameter sweep with 15 minute interval data)\n";
     cout << "Enter choice: ";
     int choice;
     cin >> choice;
 
     bool useMinuteData = (choice == 3 || choice == 4);
 
-    if (choice < 1 || choice > 4) {
+    if (choice < 1 || choice > 6) {
         cout << "Invalid choice. Exiting.\n";
         return 1;
     }

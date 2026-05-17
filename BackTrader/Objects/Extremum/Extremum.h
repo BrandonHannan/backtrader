@@ -6,7 +6,7 @@
 // Structure to represent a turning point (peak or trough)
 struct Extremum {
     int index = -1;
-    StockDataInstance data = StockDataInstance(-1, 0, 0, 0, 0, 0, "");
+    StockDataInstance data = StockDataInstance(-1, 0, 0, 0, 0, 0, "", 0.0);
     bool isTrough = false; 
 };
 

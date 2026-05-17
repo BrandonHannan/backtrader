@@ -13,9 +13,10 @@ struct StockData{
     vector<double> low;
     vector<double> volume;
     vector<string> date;
-    StockData() = default; 
-    StockData(vector<double> o, vector<double> c, vector<double> h, vector<double> l, vector<double> v, 
-    vector<string> d): open(o), close(c), high(h), low(l), volume(v), date(d) {}
+    double contractSize = 0.0; // 0 = not set; DataReader populates from the ContractSize: section
+    StockData() = default;
+    StockData(vector<double> o, vector<double> c, vector<double> h, vector<double> l, vector<double> v,
+    vector<string> d, double cs): open(o), close(c), high(h), low(l), volume(v), date(d), contractSize(cs) {}
 };
 
 struct StockDataInstance{
@@ -26,9 +27,10 @@ struct StockDataInstance{
     double low;
     double volume;
     string date;
+    double contractSize;
 
-    StockDataInstance(int index, double open, double close, double high, double low, double volume, string date):
-    index(index), open(open), close(close), high(high), low(low), volume(volume), date(date) {}
+    StockDataInstance(int index, double open, double close, double high, double low, double volume, string date, double contractSize):
+    index(index), open(open), close(close), high(high), low(low), volume(volume), date(date), contractSize(contractSize) {}
 };
 
 #endif

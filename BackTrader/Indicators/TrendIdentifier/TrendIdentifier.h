@@ -18,7 +18,7 @@ class TrendIdentifier: public Indicator {
         Trend currentTrend;
         
         int currentDay = 0;
-        StockDataInstance lastData = StockDataInstance(-1, 0, 0, 0, 0, 0, "");
+        StockDataInstance lastData = StockDataInstance(-1, 0, 0, 0, 0, 0, "", 0.0);
         enum class Direction { UNKNOWN, UP, DOWN } dir = Direction::UNKNOWN;
     public:
         TrendIdentifier(int lookBackPeriod, TrendMode mode = TrendMode::FIVE_POINT);

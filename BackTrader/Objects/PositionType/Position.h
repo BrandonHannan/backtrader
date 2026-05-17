@@ -23,19 +23,20 @@ class Position{
         double sellPrice;
         double numShares;
         double stopLossPrice;
+        double contractSize;
         string stats;
         json entryContextData;
         json exitContextData;
 
         double originalStopLossPrice;
-        
+
         bool isClosed;
 
         int LengthOfTradeBetweenDates(const string &purchaseDate, const string &sellDate) const;
-    
+
     public:
         Position();
-        Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice);
+        Position(string stockName, string pType, string tType, string pDate, string sDate, double pPrice, double sPrice, double nShares, double sLPrice, double contractSize);
 
         string getStockName() const;
 
@@ -76,6 +77,10 @@ class Position{
         double getNumShares() const;
 
         void setNumShares(double numShares);
+
+        double getContractSize() const;
+
+        void setContractSize(double contractSize);
 
         string getStats() const;
 

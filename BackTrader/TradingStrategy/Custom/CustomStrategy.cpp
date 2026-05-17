@@ -35,9 +35,9 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
         double currentBalance = this->getBalance();
 
-        StockDataInstance previousInstance(i - 1, previousOpen, previousClose, previousHigh, previousLow, previousVolume, previousDate);
-        StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate);
-        StockDataInstance futureInstance(i + 1, futureOpen, futureClose, futureHigh, futureLow, futureVolume, futureDate);
+        StockDataInstance previousInstance(i - 1, previousOpen, previousClose, previousHigh, previousLow, previousVolume, previousDate, data.contractSize);
+        StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate, data.contractSize);
+        StockDataInstance futureInstance(i + 1, futureOpen, futureClose, futureHigh, futureLow, futureVolume, futureDate, data.contractSize);
 
         Position &currentPosition = this->getPosition();
 
@@ -71,10 +71,10 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
                 this->appendClosedPosition(currentPosition);
                 if (currentPosition.getPositionType().getPositiontype() == "LONG"){
-                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));
+                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice() * currentPosition.getContractSize()));
                 }
                 else if (currentPosition.getPositionType().getPositiontype() == "SHORT"){
-                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice()))));
+                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()));
                 }
                 
                 Position emptyPosition = Position();
@@ -105,7 +105,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     }
                     newPosition.setEntryContextData(entryCtx);
 
-                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
+                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice() * newPosition.getContractSize()));
                     
                     this->setPosition(newPosition);
                 }
@@ -131,10 +131,10 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
         this->appendClosedPosition(lastPosition);
         if (lastPosition.getPositionType().getPositiontype() == "LONG"){
-            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice()));
+            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice() * lastPosition.getContractSize()));
         }
         else if (lastPosition.getPositionType().getPositiontype() == "SHORT"){
-            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice()))));
+            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice())) * lastPosition.getContractSize()));
         }
         
         Position emptyPosition = Position();
@@ -187,9 +187,9 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
         double currentBalance = this->getBalance();
 
-        StockDataInstance previousInstance(i - 1, previousOpen, previousClose, previousHigh, previousLow, previousVolume, previousDate);
-        StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate);
-        StockDataInstance futureInstance(i + 1, futureOpen, futureClose, futureHigh, futureLow, futureVolume, futureDate);
+        StockDataInstance previousInstance(i - 1, previousOpen, previousClose, previousHigh, previousLow, previousVolume, previousDate, data.contractSize);
+        StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate, data.contractSize);
+        StockDataInstance futureInstance(i + 1, futureOpen, futureClose, futureHigh, futureLow, futureVolume, futureDate, data.contractSize);
 
         Position &currentPosition = this->getPosition();
 
@@ -220,7 +220,8 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                         minuteSlice.emplace_back(idx,
                             minuteData.open[idx], minuteData.close[idx],
                             minuteData.high[idx], minuteData.low[idx],
-                            minuteData.volume[idx], minuteData.date[idx]);
+                            minuteData.volume[idx], minuteData.date[idx],
+                            data.contractSize);
                     }
                     exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance, minuteSlice);
                 }
@@ -249,10 +250,10 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
                 this->appendClosedPosition(currentPosition);
                 if (currentPosition.getPositionType().getPositiontype() == "LONG"){
-                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice()));
+                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice() * currentPosition.getContractSize()));
                 }
                 else if (currentPosition.getPositionType().getPositiontype() == "SHORT"){
-                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice()))));
+                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()));
                 }
 
                 Position emptyPosition = Position();
@@ -283,7 +284,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     }
                     newPosition.setEntryContextData(entryCtx);
 
-                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice()));
+                    this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice() * newPosition.getContractSize()));
 
                     this->setPosition(newPosition);
                 }
@@ -309,10 +310,10 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
         this->appendClosedPosition(lastPosition);
         if (lastPosition.getPositionType().getPositiontype() == "LONG"){
-            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice()));
+            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice() * lastPosition.getContractSize()));
         }
         else if (lastPosition.getPositionType().getPositiontype() == "SHORT"){
-            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice()))));
+            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice())) * lastPosition.getContractSize()));
         }
 
         Position emptyPosition = Position();

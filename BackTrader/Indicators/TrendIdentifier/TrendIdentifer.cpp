@@ -125,6 +125,6 @@ void TrendIdentifier::clear(){
     this->extrema.clear();
     this->currentTrend = Trend();
     this->currentDay = 0;
-    this->lastData = StockDataInstance(-1, 0, 0, 0, 0, 0, "");
+    this->lastData = StockDataInstance(-1, 0, 0, 0, 0, 0, "", 0.0);
     this->dir = Direction::UNKNOWN;
 }

@@ -102,8 +102,8 @@ double MacroFeatures::currentATR_overSMA(const StockData& s, int endIdx,
     atrValues.reserve(atrSmaLookback);
 
     for (int i = startIdx; i <= endIdx; ++i) {
-        StockDataInstance current(i, s.open[i], s.close[i], s.high[i], s.low[i], s.volume[i], s.date[i]);
-        StockDataInstance previous(i - 1, s.open[i - 1], s.close[i - 1], s.high[i - 1], s.low[i - 1], s.volume[i - 1], s.date[i - 1]);
+        StockDataInstance current(i, s.open[i], s.close[i], s.high[i], s.low[i], s.volume[i], s.date[i], s.contractSize);
+        StockDataInstance previous(i - 1, s.open[i - 1], s.close[i - 1], s.high[i - 1], s.low[i - 1], s.volume[i - 1], s.date[i - 1], s.contractSize);
         atr.processNewData(current, previous);
         if (atr.isReady()) {
             atrValues.push_back(atr.getATR());
