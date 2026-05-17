@@ -91,3 +91,55 @@ unordered_map<string, StockData> ReadData(const string &fileName){
     file.close();
     return result;
 }
+
+unordered_map<string, StockData> ReadDukascopyData(const string &bidFile, const string &askFile) {
+    unordered_map<string, StockData> base = ReadData(bidFile);
+    unordered_map<string, StockData> ask  = ReadData(askFile);
+
+    if (base.empty()) {
+        cerr << "[Error] ReadDukascopyData: bid file produced no tickers (" << bidFile << ")" << endl;
+        return {};
+    }
+    if (ask.empty()) {
+        cerr << "[Error] ReadDukascopyData: ask file produced no tickers (" << askFile << ")" << endl;
+        return {};
+    }
+
+    for (auto it = base.begin(); it != base.end(); ) {
+        const string &ticker = it->first;
+        StockData &bid = it->second;
+        auto askIt = ask.find(ticker);
+
+        if (askIt == ask.end()) {
+            cerr << "[Warning] " << ticker << ": present in bid file but missing from ask file - dropping" << endl;
+            it = base.erase(it);
+            continue;
+        }
+
+        const StockData &askData = askIt->second;
+        if (askData.date.size() != bid.date.size() || askData.open.size() != bid.open.size()) {
+            cerr << "[Warning] " << ticker << ": bid/ask array sizes differ (bid="
+                 << bid.date.size() << ", ask=" << askData.date.size() << ") - dropping" << endl;
+            it = base.erase(it);
+            continue;
+        }
+
+        bool datesAlign = true;
+        for (size_t k = 0; k < bid.date.size(); ++k) {
+            if (bid.date[k] != askData.date[k]) { datesAlign = false; break; }
+        }
+        if (!datesAlign) {
+            cerr << "[Warning] " << ticker << ": bid/ask date arrays do not align - dropping" << endl;
+            it = base.erase(it);
+            continue;
+        }
+
+        bid.askOpen  = askData.open;
+        bid.askClose = askData.close;
+        bid.askHigh  = askData.high;
+        bid.askLow   = askData.low;
+        ++it;
+    }
+
+    return base;
+}

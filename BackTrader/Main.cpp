@@ -20,16 +20,7 @@
 
 
 int main(){
-    // Use this For MacOS
-    // unordered_map<string, StockData> data = ReadData("../data.txt");
-    // Use this For Windows
-    //unordered_map<string, StockData> data = ReadData("C:\\Users\\BrandonHannan\\source\\repos\\backtrader\\data.txt");
-    unordered_map<string, StockData> data = ReadData("../data.txt");
-
-    // Dukas Data
-    unordered_map<string, StockData> dailyData = ReadData("../DailyData.txt");
-    unordered_map<string, StockData> fifteenMinuteData = ReadData("../15MinuteData.txt");
-    unordered_map<string, StockData> minuteData = ReadData("../MinuteData.txt");
+    // Data is loaded after the user picks a source + interval below.
 
     // Load cross-asset related-stocks mapping written by DownloadData.py.
     MacroFeatures::RelatedMap relatedMap;
@@ -135,34 +126,78 @@ int main(){
         }
     }
 
-    cout << "Select execution mode:\n";
-    cout << "  1 - ExecuteBaseCase (single run with default parameters with minute data)\n";
-    cout << "  2 - ExecuteAllSweeps (full parameter sweep with minute data)\n";
-    cout << "  3 - ExecuteBaseCase (single run with default parameters with daily data)\n";
-    cout << "  4 - ExecuteAllSweeps (full parameter sweep with daily data)\n";
-    cout << "  5 - ExecuteBaseCase (single run with default parameters with 15 minute interval data)\n";
-    cout << "  6 - ExecuteAllSweeps (full parameter sweep with 15 minute interval data)\n";
+    // Step 1 - data source precursor
+    cout << "Select data source:\n";
+    cout << "  1 - yfinance  (daily only)\n";
+    cout << "  2 - Dukascopy (Bid/Ask, all intervals)\n";
+    cout << "Enter choice: ";
+    int sourceChoice;
+    cin >> sourceChoice;
+    if (sourceChoice != 1 && sourceChoice != 2) {
+        cout << "Invalid data source. Exiting.\n";
+        return 1;
+    }
+    const bool useDukas = (sourceChoice == 2);
+
+    // Step 2 - execution-mode menu (ascending interval order)
+    cout << "\nSelect execution mode:\n";
+    if (!useDukas) {
+        cout << "  1 - ExecuteBaseCase  (daily,     yfinance)\n";
+        cout << "  2 - ExecuteAllSweeps (daily,     yfinance)\n";
+    } else {
+        cout << "  1 - ExecuteBaseCase  (1-minute,  Dukascopy)\n";
+        cout << "  2 - ExecuteAllSweeps (1-minute,  Dukascopy)\n";
+        cout << "  3 - ExecuteBaseCase  (15-minute, Dukascopy)\n";
+        cout << "  4 - ExecuteAllSweeps (15-minute, Dukascopy)\n";
+        cout << "  5 - ExecuteBaseCase  (daily,     Dukascopy)\n";
+        cout << "  6 - ExecuteAllSweeps (daily,     Dukascopy)\n";
+    }
     cout << "Enter choice: ";
     int choice;
     cin >> choice;
-
-    bool useMinuteData = (choice == 3 || choice == 4);
-
-    if (choice < 1 || choice > 6) {
+    const int maxChoice = useDukas ? 6 : 2;
+    if (choice < 1 || choice > maxChoice) {
         cout << "Invalid choice. Exiting.\n";
         return 1;
     }
 
+    // Step 3 - load the dataset selected above
+    unordered_map<string, StockData> data;
+    if (!useDukas) {
+        data = ReadData("../data.txt");
+    } else {
+        string bidPath;
+        string askPath;
+        if (choice == 1 || choice == 2) {
+            bidPath = "../OfferBid_SellPriceDataMinuteData.txt";
+            askPath = "../OfferAsk_BuyPriceDataMinuteData.txt";
+        } else if (choice == 3 || choice == 4) {
+            bidPath = "../OfferBid_SellPriceData15MinuteData.txt";
+            askPath = "../OfferAsk_BuyPriceData15MinuteData.txt";
+        } else {
+            bidPath = "../OfferBid_SellPriceDataDailyData.txt";
+            askPath = "../OfferAsk_BuyPriceDataDailyData.txt";
+        }
+        data = ReadDukascopyData(bidPath, askPath);
+    }
+
+    if (data.empty()) {
+        cout << "No data loaded. Exiting.\n";
+        return 1;
+    }
+
+    // Step 4 - category filter against the loaded source
+    const auto &categories = useDukas ? categoriesDukas : categoriesYfinance;
     unordered_set<string> selectedTickers;
     bool useFilter = false;
 
-    if (useMinuteData && !categoriesDukas.empty()) {
-        cout << "Using Dukas minute data. ";
-        const int n = static_cast<int>(categoriesDukas.size());
+    if (!categories.empty()) {
+        cout << "Using " << (useDukas ? "Dukascopy" : "yfinance") << " data. ";
+        const int n = static_cast<int>(categories.size());
         cout << "\nSelect tickers to run the strategy on:\n";
         for (int i = 0; i < n; ++i) {
-            cout << "  " << (i + 1) << ". " << categoriesDukas[i].first
-                 << " (" << categoriesDukas[i].second.size() << " tickers)\n";
+            cout << "  " << (i + 1) << ". " << categories[i].first
+                 << " (" << categories[i].second.size() << " tickers)\n";
         }
         cout << "  " << (n + 1) << ". [All] - every loaded ticker\n";
         cout << "  " << (n + 2) << ". [Specific ticker] - enter a single ticker symbol\n";
@@ -179,10 +214,8 @@ int main(){
         };
         line = trim(line);
 
-        bool fallbackToAll = false;
-
         if (line.empty()) {
-            fallbackToAll = true;
+            // fall back to [All]
         } else if (line == to_string(n + 1)) {
             // [All] -> no filter
         } else if (line == to_string(n + 2)) {
@@ -190,8 +223,8 @@ int main(){
             string ticker;
             getline(cin, ticker);
             ticker = trim(ticker);
-            if (dailyData.find(ticker) == dailyData.end()) {
-                cout << "Error: ticker '" << ticker << "' not found in DailyData.txt. Exiting." << endl;
+            if (data.find(ticker) == data.end()) {
+                cout << "Error: ticker '" << ticker << "' not found in loaded data. Exiting." << endl;
                 return 1;
             }
             selectedTickers.insert(ticker);
@@ -207,176 +240,58 @@ int main(){
                 if (!isNum) { valid = false; break; }
                 int idx = stoi(token);
                 if (idx < 1 || idx > n) { valid = false; break; }
-                for (const string& t : categoriesDukas[idx - 1].second) selectedTickers.insert(t);
+                for (const string& t : categories[idx - 1].second) selectedTickers.insert(t);
             }
             if (!valid || selectedTickers.empty()) {
                 cout << "Invalid selection. Falling back to [All]." << endl;
                 selectedTickers.clear();
-                fallbackToAll = true;
             } else {
                 useFilter = true;
             }
         }
-        if (fallbackToAll) {
-            // intentionally leave useFilter=false
-        }
-    }
-    else {
-        if (!categoriesYfinance.empty()) {
-            cout << "Using daily data. ";
-            const int n = static_cast<int>(categoriesYfinance.size());
-            cout << "\nSelect tickers to run the strategy on:\n";
-            for (int i = 0; i < n; ++i) {
-                cout << "  " << (i + 1) << ". " << categoriesYfinance[i].first
-                    << " (" << categoriesYfinance[i].second.size() << " tickers)\n";
-            }
-            cout << "  " << (n + 1) << ". [All] - every loaded ticker\n";
-            cout << "  " << (n + 2) << ". [Specific ticker] - enter a single ticker symbol\n";
-            cout << "Enter selection (comma-separated numbers for multiple categories, e.g. 1,3): ";
-
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            string line;
-            getline(cin, line);
-
-            auto trim = [](string s) {
-                size_t a = s.find_first_not_of(" \t\r\n");
-                size_t b = s.find_last_not_of(" \t\r\n");
-                return (a == string::npos) ? string() : s.substr(a, b - a + 1);
-            };
-            line = trim(line);
-
-            bool fallbackToAll = false;
-
-            if (line.empty()) {
-                fallbackToAll = true;
-            } else if (line == to_string(n + 1)) {
-                // [All] -> no filter
-            } else if (line == to_string(n + 2)) {
-                cout << "Enter ticker symbol: ";
-                string ticker;
-                getline(cin, ticker);
-                ticker = trim(ticker);
-                if (data.find(ticker) == data.end()) {
-                    cout << "Error: ticker '" << ticker << "' not found in data.txt. Exiting." << endl;
-                    return 1;
-                }
-                selectedTickers.insert(ticker);
-                useFilter = true;
-            } else {
-                stringstream ss(line);
-                string token;
-                bool valid = true;
-                while (getline(ss, token, ',')) {
-                    token = trim(token);
-                    if (token.empty()) continue;
-                    bool isNum = !token.empty() && all_of(token.begin(), token.end(), ::isdigit);
-                    if (!isNum) { valid = false; break; }
-                    int idx = stoi(token);
-                    if (idx < 1 || idx > n) { valid = false; break; }
-                    for (const string& t : categoriesYfinance[idx - 1].second) selectedTickers.insert(t);
-                }
-                if (!valid || selectedTickers.empty()) {
-                    cout << "Invalid selection. Falling back to [All]." << endl;
-                    selectedTickers.clear();
-                    fallbackToAll = true;
-                } else {
-                    useFilter = true;
-                }
-            }
-            if (fallbackToAll) {
-                // intentionally leave useFilter=false
-            }
-        } else {
-            cout << "No category filter available.\n";
-        }
+    } else {
+        cout << "No category filter available.\n";
     }
 
-    unordered_map<string, StockData> filteredDailyData;
-    unordered_map<string, StockData> filteredMinuteData;
-
-    if (useMinuteData){
-        if (useFilter) {
-            int missing = 0;
-            for (const string& t : selectedTickers) {
-                auto it = dailyData.find(t);
-                auto it2 = minuteData.find(t);
-                if (it2 != minuteData.end()) filteredMinuteData.emplace(it2->first, it2->second);
-                else {
-                    ++missing;
-                    continue;
-                }
-                if (it != dailyData.end()) filteredDailyData.emplace(it->first, it->second);
-                else ++missing;
-            }
-            cout << "Filtered " << selectedTickers.size() << " -> " << filteredDailyData.size()
-                << " tickers (" << missing << " not in dailyData.txt)." << endl;
-        } else {
-            filteredDailyData = dailyData;
-            filteredMinuteData = minuteData;
+    // Step 5 - apply filter
+    unordered_map<string, StockData> filteredData;
+    if (useFilter) {
+        int missing = 0;
+        for (const string& t : selectedTickers) {
+            auto it = data.find(t);
+            if (it != data.end()) filteredData.emplace(it->first, it->second);
+            else ++missing;
         }
-
-        int dataSize = 0;
-        for (const auto& [ticker, stockData] : filteredDailyData) {
-            size_t n = stockData.close.size();
-            if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
-                stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
-            dataSize = dataSize + 1;
-        }
-        cout << "Number of Stocks: " << dataSize << endl;
-
-        DowBaseCase dowBase;
-        double initial_balance = static_cast<double>(dataSize) * dowBase.balance;
-        {
-            filesystem::create_directories("../output");
-            ofstream configFile("../output/configuration.json");
-            configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
-        }
+        cout << "Filtered " << selectedTickers.size() << " -> " << filteredData.size()
+             << " tickers (" << missing << " not in loaded data)." << endl;
+    } else {
+        filteredData = data;
     }
-    else {
-        if (useFilter) {
-            int missing = 0;
-            for (const string& t : selectedTickers) {
-                auto it = data.find(t);
-                if (it != data.end()) filteredDailyData.emplace(it->first, it->second);
-                else ++missing;
-            }
-            cout << "Filtered " << selectedTickers.size() << " -> " << filteredDailyData.size()
-                << " tickers (" << missing << " not in data.txt)." << endl;
-        } else {
-            filteredDailyData = data;
-        }
 
-        int dataSize = 0;
-        for (const auto& [ticker, stockData] : filteredDailyData) {
-            size_t n = stockData.close.size();
-            if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
-                stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
-            dataSize = dataSize + 1;
-        }
-        cout << "Number of Stocks: " << dataSize << endl;
+    int dataSize = 0;
+    for (const auto& [ticker, stockData] : filteredData) {
+        size_t n = stockData.close.size();
+        if (n == 0 || stockData.open.size() != n || stockData.high.size() != n ||
+            stockData.low.size() != n || stockData.volume.size() != n || stockData.date.size() != n) continue;
+        dataSize = dataSize + 1;
+    }
+    cout << "Number of Stocks: " << dataSize << endl;
 
-        DowBaseCase dowBase;
-        double initial_balance = static_cast<double>(dataSize) * dowBase.balance;
-        {
-            filesystem::create_directories("../output");
-            ofstream configFile("../output/configuration.json");
-            configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
-        }
+    DowBaseCase dowBase;
+    double initial_balance = static_cast<double>(dataSize) * dowBase.balance;
+    {
+        filesystem::create_directories("../output");
+        ofstream configFile("../output/configuration.json");
+        configFile << "{\n  \"initial_balance\": " << initial_balance << "\n}\n";
     }
 
     clock_t start = clock();
 
-    if (choice == 1) {
-        ExecuteBaseCase(filteredDailyData, relatedMap);
-    } else if (choice == 2) {
-        ExecuteAllSweeps(filteredDailyData, relatedMap);
-    } else if (choice == 3) {
-        ExecuteBaseCase(filteredDailyData, filteredMinuteData, relatedMap);
-    } else if (choice == 4) {
-        ExecuteAllSweeps(filteredDailyData, filteredMinuteData, relatedMap);
+    // Step 6 - dispatch: odd choice = BaseCase, even = AllSweeps
+    if (choice % 2 == 1) {
+        ExecuteBaseCase(filteredData, relatedMap);
     } else {
-        cout << "Invalid choice. Exiting.\n";
-        return 1;
+        ExecuteAllSweeps(filteredData, relatedMap);
     }
 
     clock_t end = clock();

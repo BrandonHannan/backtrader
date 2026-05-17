@@ -39,19 +39,34 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate, data.contractSize);
         StockDataInstance futureInstance(i + 1, futureOpen, futureClose, futureHigh, futureLow, futureVolume, futureDate, data.contractSize);
 
+        // For Dukascopy bid/ask data: pre-build an Ask-sided StockDataInstance whenever the operation
+        // would hit the Ask side of the book (LONG entry, SHORT exit / stop-loss / trailing). LONG exit
+        // and SHORT entry hit the Bid (= canonical fields), so they reuse the existing instances.
+        const bool useAsk = data.hasAskData();
+        auto makeAskInstance = [&](int k, double vol, const string &dt) {
+            return StockDataInstance(k, data.askOpen[k], data.askClose[k], data.askHigh[k], data.askLow[k], vol, dt, data.contractSize);
+        };
+
         Position &currentPosition = this->getPosition();
 
         if (!currentPosition.getIsClosed()){
             bool shouldSell = context->shouldSellTrade(currentPosition, currentInstance);
 
             if (shouldSell || i == size - 2){
-                double exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance);
+                StockDataInstance exitCurrent = currentInstance;
+                StockDataInstance exitFuture = futureInstance;
+                if (useAsk && currentPosition.getPositionType().getPositiontype() == "SHORT") {
+                    exitCurrent = makeAskInstance(i,     currentVolume, currentDate);
+                    exitFuture  = makeAskInstance(i + 1, futureVolume,  futureDate);
+                }
+                double exitPrice = currentPosition.getExitPrice(exitCurrent, exitFuture);
 
                 bool isStopLoss = false;
                 if (currentPosition.getPositionType().getPositiontype() == "LONG") {
                     if (currentLow <= currentPosition.getStopLossPrice()) isStopLoss = true;
                 } else {
-                    if (currentHigh >= currentPosition.getStopLossPrice()) isStopLoss = true;
+                    const double shortCheckHigh = useAsk ? data.askHigh[i] : currentHigh;
+                    if (shortCheckHigh >= currentPosition.getStopLossPrice()) isStopLoss = true;
                 }
 
                 if (isStopLoss) {
@@ -76,13 +91,17 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 else if (currentPosition.getPositionType().getPositiontype() == "SHORT"){
                     this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()));
                 }
-                
+
                 Position emptyPosition = Position();
                 this->setPosition(emptyPosition);
                 context->onPositionSold();
             }
             else{
-                sizer->updateStopLossPrice(currentPosition, currentInstance);
+                StockDataInstance trailInstance = currentInstance;
+                if (useAsk && currentPosition.getPositionType().getPositiontype() == "SHORT") {
+                    trailInstance = makeAskInstance(i, currentVolume, currentDate);
+                }
+                sizer->updateStopLossPrice(currentPosition, trailInstance);
             }
         }
 
@@ -94,8 +113,12 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 if (trade.isValid){
                     sizer->processNewData(currentInstance, previousInstance);
                     hasSizerUpdated = true;
-                    // Execute trade
-                    Position newPosition = sizer->purchasePosition(currentBalance, stockName, trade.positionType, futureInstance);
+
+                    StockDataInstance entryFuture = futureInstance;
+                    if (useAsk && trade.positionType.getPositiontype() == "LONG") {
+                        entryFuture = makeAskInstance(i + 1, futureVolume, futureDate);
+                    }
+                    Position newPosition = sizer->purchasePosition(currentBalance, stockName, trade.positionType, entryFuture);
                     newPosition.setTradeType(trade.tradeType);
                     string positionStats = context->getStats();
                     newPosition.setStats(positionStats);
@@ -106,7 +129,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     newPosition.setEntryContextData(entryCtx);
 
                     this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice() * newPosition.getContractSize()));
-                    
+
                     this->setPosition(newPosition);
                 }
             }
