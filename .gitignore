@@ -4,8 +4,10 @@
 /output/Returns.txt
 /output/strategy_lookback_optimization_results.csv
 /strategy_lookback_optimization_results.csv
-data.txt
 /TradeTypeStatisticsPython/Analysis.txt
+data.txt
 MinuteData.txt
+OfferBid_SellPriceDataMinuteData.txt
+OfferAsk_BuyPriceDataMinuteData.txt
 DailyData.txt
 verification_report.txt
