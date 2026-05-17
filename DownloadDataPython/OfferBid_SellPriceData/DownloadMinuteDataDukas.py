@@ -104,4 +104,4 @@ if __name__ == "__main__":
                     ticker = future_to_ticker[future]
                     print(f"{ticker} generated an exception: {exc}")
 
-    print("All downloads complete and saved to MinuteData.txt")
+    print("All downloads complete and saved to OfferBid_SellPriceDataMinuteData.txt")
