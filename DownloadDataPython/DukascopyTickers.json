@@ -1,16 +1,19 @@
 {
   "CL=F": {
     "dukascopy": "LIGHT.CMD/USD",
+    "contractSize": 100.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[CL]"
   },
   "BZ=F": {
     "dukascopy": "BRENT.CMD/USD",
+    "contractSize": 100.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[BZ]"
   },
   "NG=F": {
     "dukascopy": "GAS.CMD/USD",
+    "contractSize": 100,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[NG]"
   },
@@ -26,26 +29,31 @@
   },
   "GC=F": {
     "dukascopy": "XAU/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[GC] — Gold quoted as XAU/USD in JForex tick API"
   },
   "SI=F": {
     "dukascopy": "XAG/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[SI] — Silver quoted as XAG/USD in JForex tick API"
   },
   "PL=F": {
     "dukascopy": "XPT.CMD/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[PL] — Corrected to XPT.CMD/USD for API compatibility"
   },
   "PA=F": {
     "dukascopy": "XPD.CMD/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[PA] — Corrected to XPD.CMD/USD for API compatibility"
   },
   "HG=F": {
     "dukascopy": "COPPER.CMD/USD",
+    "contractSize": 100,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[HG]"
   },
@@ -76,21 +84,25 @@
   },
   "KC=F": {
     "dukascopy": "COFFEE.CMD/USX",
+    "contractSize": 1,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[KC] — Priced in US cents (USX), not USD"
   },
   "CC=F": {
     "dukascopy": "COCOA.CMD/USD",
+    "contractSize": 1,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[CC]"
   },
   "SB=F": {
     "dukascopy": "SUGAR.CMD/USD",
+    "contractSize": 1,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[SB] — Probe confirmed SUGAR.CMD/USD (not USX) in JForex tick API"
   },
   "CT=F": {
     "dukascopy": "COTTON.CMD/USX",
+    "contractSize": 1,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[CT] — Priced in US cents (USX), not USD"
   },
@@ -141,6 +153,7 @@
   },
   "ETH=F": {
     "dukascopy": "ETH/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "CME Ether futures aliased to Dukascopy ETH/USD spot"
   },
@@ -171,6 +184,7 @@
   },
   "ITB": {
     "dukascopy": "ITB.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
@@ -181,31 +195,37 @@
   },
   "6E=F": {
     "dukascopy": "EUR/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "matched_by: override"
   },
   "6B=F": {
     "dukascopy": "GBP/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "matched_by: override"
   },
   "6M=F": {
     "dukascopy": "USD/MXN",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "MXN futures map to USD/MXN (inverted)"
   },
   "FXI": {
     "dukascopy": "FXI.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "EWZ": {
     "dukascopy": "EWZ.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "EWW": {
     "dukascopy": "EWW.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
@@ -226,6 +246,7 @@
   },
   "LCO=F": {
     "dukascopy": "BRENT.CMD/USD",
+    "contractSize": 100.0,
     "category": "Commodity Futures — Core",
     "note": "ICE Brent contract code; same underlying as BZ=F"
   },
@@ -251,6 +272,7 @@
   },
   "QM=F": {
     "dukascopy": "LIGHT.CMD/USD",
+    "contractSize": 100.0,
     "category": "Commodity Futures — Core",
     "note": "E-mini WTI crude; same underlying as CL=F"
   },
@@ -276,21 +298,25 @@
   },
   "ES=F": {
     "dukascopy": "USA500.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "NQ=F": {
     "dukascopy": "USATECH.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "YM=F": {
     "dukascopy": "USA30.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "RTY=F": {
     "dukascopy": "USSC2000.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
@@ -301,166 +327,199 @@
   },
   "NKD=F": {
     "dukascopy": "JPN.IDX/JPY",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "VX=F": {
     "dukascopy": "VOL.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "HSI=F": {
     "dukascopy": "HKG.IDX/HKD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "AS51=F": {
     "dukascopy": "AUS.IDX/AUD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "AEX=F": {
     "dukascopy": "NLD.IDX/EUR",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "matched_by: override"
   },
   "MES=F": {
     "dukascopy": "USA500.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "Micro E-mini S&P 500; same underlying as ES=F"
   },
   "MNQ=F": {
     "dukascopy": "USATECH.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "Micro E-mini NASDAQ-100; same underlying as NQ=F"
   },
   "MYM=F": {
     "dukascopy": "USA30.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "Micro E-mini Dow; same underlying as YM=F"
   },
   "M2K=F": {
     "dukascopy": "USSC2000.IDX/USD",
+    "contractSize": 1.0,
     "category": "Equity Index Futures",
     "note": "Micro E-mini Russell 2000; same underlying as RTY=F"
   },
   "XLF": {
     "dukascopy": "XLF.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLI": {
     "dukascopy": "XLI.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "KWEB": {
     "dukascopy": "KWEB.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "6J=F": {
     "dukascopy": "USD/JPY",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "JPY futures map to USD/JPY (inverted)"
   },
   "6A=F": {
     "dukascopy": "AUD/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "matched_by: override"
   },
   "VGK": {
     "dukascopy": "VGK.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "EFA": {
     "dukascopy": "EFA.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "SPY": {
     "dukascopy": "SPY.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "QQQ": {
     "dukascopy": "QQQ.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "DIA": {
     "dukascopy": "DIA.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "IWM": {
     "dukascopy": "IWM.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "EEM": {
     "dukascopy": "EEM.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "VWO": {
     "dukascopy": "VWO.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "EWJ": {
     "dukascopy": "EWJ.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "MCHI": {
     "dukascopy": "MCHI.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "INDA": {
     "dukascopy": "INDA.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLE": {
     "dukascopy": "XLE.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLK": {
     "dukascopy": "XLK.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLV": {
     "dukascopy": "XLV.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLU": {
     "dukascopy": "XLU.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLP": {
     "dukascopy": "XLP.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLB": {
     "dukascopy": "XLB.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "XLY": {
     "dukascopy": "XLY.US/USD",
+    "contractSize": 1.0,
     "category": "Equity Index ETFs",
     "note": null
   },
   "ZB=F": {
     "dukascopy": "USTBOND.TR/USD",
+    "contractSize": 1,
     "category": "Bond / Interest Rate Futures",
     "note": "matched_by: override"
   },
@@ -491,6 +550,7 @@
   },
   "UB=F": {
     "dukascopy": "USTBOND.TR/USD",
+    "contractSize": 1,
     "category": "Bond / Interest Rate Futures",
     "note": "Ultra T-Bond futures; closest is USTBOND.TR/USD but tenor differs"
   },
@@ -501,16 +561,19 @@
   },
   "6C=F": {
     "dukascopy": "USD/CAD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "CAD futures map to USD/CAD (inverted)"
   },
   "6S=F": {
     "dukascopy": "USD/CHF",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "CHF futures map to USD/CHF (inverted)"
   },
   "6N=F": {
     "dukascopy": "NZD/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "matched_by: override"
   },
@@ -521,36 +584,43 @@
   },
   "M6E=F": {
     "dukascopy": "EUR/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "E-micro EUR/USD; same underlying as 6E=F"
   },
   "M6J=F": {
     "dukascopy": "USD/JPY",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "E-micro JPY/USD -> USD/JPY (inverted)"
   },
   "M6B=F": {
     "dukascopy": "GBP/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "E-micro GBP/USD; same underlying as 6B=F"
   },
   "M6C=F": {
     "dukascopy": "USD/CAD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "E-micro CAD/USD -> USD/CAD (inverted)"
   },
   "M6A=F": {
     "dukascopy": "AUD/USD",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "E-micro AUD/USD; same underlying as 6A=F"
   },
   "M6S=F": {
     "dukascopy": "USD/CHF",
+    "contractSize": null,
     "category": "Currency Futures",
     "note": "E-micro CHF/USD -> USD/CHF (inverted)"
   },
   "MGC=F": {
     "dukascopy": "XAU/USD",
+    "contractSize": 1.0,
     "category": "Metals Futures",
     "note": "E-micro Gold; same underlying as GC=F"
   },
@@ -561,186 +631,223 @@
   },
   "NEM": {
     "dukascopy": "NEM.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "GLD": {
     "dukascopy": "GLD.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "SLV": {
     "dukascopy": "SLV.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "PLTR": {
     "dukascopy": "PLTR.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "FCX": {
     "dukascopy": "FCX.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "COPX": {
     "dukascopy": "COPX.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "TSLA": {
     "dukascopy": "TSLA.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "F": {
     "dukascopy": "F.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "GM": {
     "dukascopy": "GM.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "AA": {
     "dukascopy": "AA.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "CENX": {
     "dukascopy": "CENX.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "GDX": {
     "dukascopy": "GDX.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "GDXJ": {
     "dukascopy": "GDXJ.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "SILJ": {
     "dukascopy": "SILJ.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "PPLT": {
     "dukascopy": "PPLT.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "PALL": {
     "dukascopy": "PALL.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "LIT": {
     "dukascopy": "LIT.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "REMX": {
     "dukascopy": "REMX.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "PICK": {
     "dukascopy": "PICK.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "DBB": {
     "dukascopy": "DBB.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "GOLD": {
     "dukascopy": "GOLD.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "RIO": {
     "dukascopy": "RIO.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "BHP": {
     "dukascopy": "BHP.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "VALE": {
     "dukascopy": "VALE.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "SCCO": {
     "dukascopy": "SCCO.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "TECK": {
     "dukascopy": "TECK.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "AEM": {
     "dukascopy": "AEM.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "WPM": {
     "dukascopy": "WPM.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "FNV": {
     "dukascopy": "FNV.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "RGLD": {
     "dukascopy": "RGLD.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "HMY": {
     "dukascopy": "HMY.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "AU": {
     "dukascopy": "AU.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "KGC": {
     "dukascopy": "KGC.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "SBSW": {
     "dukascopy": "SBSW.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "MP": {
     "dukascopy": "MP.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "ALB": {
     "dukascopy": "ALB.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
   "LAC": {
     "dukascopy": "LAC.US/USD",
+    "contractSize": 1.0,
     "category": "Metals ETFs & Mining",
     "note": null
   },
@@ -751,26 +858,31 @@
   },
   "BTC=F": {
     "dukascopy": "BTC/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "CME Bitcoin futures aliased to Dukascopy BTC/USD spot"
   },
   "MBT=F": {
     "dukascopy": "BTC/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "Micro Bitcoin futures aliased to Dukascopy BTC/USD spot"
   },
   "MET=F": {
     "dukascopy": "ETH/USD",
+    "contractSize": 1.0,
     "category": "Commodity Futures — Core",
     "note": "Micro Ether futures aliased to Dukascopy ETH/USD spot"
   },
   "BTC-USD": {
     "dukascopy": "BTC/USD",
+    "contractSize": 1.0,
     "category": "Crypto Futures & Spot",
     "note": "matched_by: override"
   },
   "ETH-USD": {
     "dukascopy": "ETH/USD",
+    "contractSize": 1.0,
     "category": "Crypto Futures & Spot",
     "note": "matched_by: override"
   },
@@ -786,6 +898,7 @@
   },
   "XRP-USD": {
     "dukascopy": "XRP/USD",
+    "contractSize": 1.0,
     "category": "Crypto Futures & Spot",
     "note": "matched_by: override"
   },
@@ -821,6 +934,7 @@
   },
   "LTC-USD": {
     "dukascopy": "LTC/USD",
+    "contractSize": 1.0,
     "category": "Crypto Futures & Spot",
     "note": "matched_by: override"
   },
@@ -831,6 +945,7 @@
   },
   "BCH-USD": {
     "dukascopy": "BCH/USD",
+    "contractSize": 1.0,
     "category": "Crypto Futures & Spot",
     "note": "matched_by: override"
   },
@@ -996,241 +1111,289 @@
   },
   "COIN": {
     "dukascopy": "COIN.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "MSTR": {
     "dukascopy": "MSTR.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "AAPL": {
     "dukascopy": "AAPL.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "MSFT": {
     "dukascopy": "MSFT.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "GOOGL": {
     "dukascopy": "GOOGL.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "AMZN": {
     "dukascopy": "AMZN.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "META": {
     "dukascopy": "META.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "NVDA": {
     "dukascopy": "NVDA.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "AMD": {
     "dukascopy": "AMD.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "AVGO": {
     "dukascopy": "AVGO.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "TSM": {
     "dukascopy": "TSM.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ASML": {
     "dukascopy": "ASML.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "QCOM": {
     "dukascopy": "QCOM.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "MU": {
     "dukascopy": "MU.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "INTC": {
     "dukascopy": "INTC.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "CRM": {
     "dukascopy": "CRM.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "NOW": {
     "dukascopy": "NOW.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "INTU": {
     "dukascopy": "INTU.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ADBE": {
     "dukascopy": "ADBE.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "PANW": {
     "dukascopy": "PANW.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "SNOW": {
     "dukascopy": "SNOW.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "SHOP": {
     "dukascopy": "SHOP.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "MDB": {
     "dukascopy": "MDB.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "TEAM": {
     "dukascopy": "TEAM.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "DDOG": {
     "dukascopy": "DDOG.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ZS": {
     "dukascopy": "ZS.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "CRWD": {
     "dukascopy": "CRWD.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "FTNT": {
     "dukascopy": "FTNT.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "CSCO": {
     "dukascopy": "CSCO.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ANET": {
     "dukascopy": "ANET.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "DELL": {
     "dukascopy": "DELL.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "HPE": {
     "dukascopy": "HPE.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "SMCI": {
     "dukascopy": "SMCI.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "IBM": {
     "dukascopy": "IBM.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ORCL": {
     "dukascopy": "ORCL.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "U": {
     "dukascopy": "U.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "DASH": {
     "dukascopy": "DASH.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ABNB": {
     "dukascopy": "ABNB.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ARM": {
     "dukascopy": "ARM.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "MRVL": {
     "dukascopy": "MRVL.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "LRCX": {
     "dukascopy": "LRCX.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "KLAC": {
     "dukascopy": "KLAC.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "ADI": {
     "dukascopy": "ADI.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "NXPI": {
     "dukascopy": "NXPI.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "NET": {
     "dukascopy": "NET.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "OKTA": {
     "dukascopy": "OKTA.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "MNDY": {
     "dukascopy": "MNDY.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   },
   "TTD": {
     "dukascopy": "TTD.US/USD",
+    "contractSize": 1.0,
     "category": "Tech Stocks",
     "note": null
   }
