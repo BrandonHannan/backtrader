@@ -80,6 +80,23 @@ if __name__ == "__main__":
     HERE = os.path.dirname(os.path.abspath(__file__))
     MD_PATH = os.path.join(HERE, "Possible Stocks.md")
     REL_PATH = os.path.join(HERE, "RelatedStocks.md")
+    TICKERS_PATH = os.path.join(HERE, "DukascopyTickers.json")
+
+    # Build per-ticker contract-size and friction lookups from the shared spec file.
+    contract_sizes = {}
+    friction_costs = {}
+    try:
+        with open(TICKERS_PATH, encoding="utf-8") as _f:
+            _specs = json.load(_f)
+        for _sym, _info in _specs.items():
+            cs = _info.get("contractSize")
+            if cs is not None:
+                contract_sizes[_sym] = float(cs)
+            fr = _info.get("frictionPerRoundTrip")
+            if fr is not None:
+                friction_costs[_sym] = float(fr)
+    except OSError as e:
+        print(f"Warning: cannot read {TICKERS_PATH}: {e}. All tickers will use contractSize=1.0, frictionPerRoundTrip=0.0.")
 
     categories = parse_ticker_index(MD_PATH)
     related_raw = parse_related_stocks_raw(REL_PATH)
@@ -125,7 +142,14 @@ if __name__ == "__main__":
     for stock_name, stock_data in data.items():
         if stock_data is None:
             continue
+        cs = contract_sizes.get(stock_name)
+        if cs is None:
+            print(f"Warning: no contractSize for {stock_name} in DukascopyTickers.json — defaulting to 1.0")
+            cs = 1.0
+        fr = friction_costs.get(stock_name, 0.0)
         file.write(f"Stock: {stock_name}\n")
+        file.write(f"ContractSize:\n{cs}\n")
+        file.write(f"FrictionPerRoundTrip:\n{fr}\n")
         file.write(f"Open:\n")
         file.write(f"{format_array(stock_data['Open'])}\n")
         file.write("Close:\n")

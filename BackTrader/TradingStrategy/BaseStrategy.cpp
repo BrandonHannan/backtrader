@@ -65,10 +65,10 @@ vector<double> BaseStrategy::getAllReturns(){
         double pPrice = this->closedPositions[i].getPurchasePrice();
         double sPrice = this->closedPositions[i].getSellPrice();
         if (this->closedPositions[i].getPositionType().getPositiontype() == "LONG") {
-            results.push_back(sPrice - pPrice);
+            results.push_back((sPrice - pPrice) * this->closedPositions[i].getNumShares() * this->closedPositions[i].getContractSize());
         } else {
             // For SHORT trades, selling lower than the purchase price is a profit
-            results.push_back(pPrice - sPrice); 
+            results.push_back((pPrice - sPrice) * this->closedPositions[i].getNumShares() * this->closedPositions[i].getContractSize());
         }
     }
     return results;
@@ -77,23 +77,28 @@ vector<double> BaseStrategy::getAllReturns(){
 map<int, vector<double>> BaseStrategy::getYearlyReturns(){
     int n = this->closedPositions.size();
     map<int, vector<double>> returns;
+
+    auto addToYear = [&](int year, double amount) {
+        returns[year].push_back(amount);
+    };
+
     for (int i = 0; i < n; i++){
-        int year = stoi(this->closedPositions[i].getSellDate().substr(0, 4));
-        double profit = 0;
-        if (this->closedPositions[i].getPositionType().getPositiontype() == "LONG"){
-            profit = (this->closedPositions[i].getSellPrice() - this->closedPositions[i].getPurchasePrice()) *
-                        this->closedPositions[i].getNumShares();
+        const Position &pos = this->closedPositions[i];
+        const string &pDate = pos.getPurchaseDate();
+        const string &sDate = pos.getSellDate();
+        if (pDate.size() < 10 || sDate.size() < 10) continue;
+
+        int exitYear  = stoi(sDate.substr(0, 4));
+
+        double totalProfit = 0;
+        if (pos.getPositionType().getPositiontype() == "LONG"){
+            totalProfit = (pos.getSellPrice() - pos.getPurchasePrice()) * pos.getNumShares() * pos.getContractSize();
         }
-        else if (this->closedPositions[i].getPositionType().getPositiontype() == "SHORT"){
-            profit = (this->closedPositions[i].getPurchasePrice() - this->closedPositions[i].getSellPrice()) *
-                        this->closedPositions[i].getNumShares();
+        else if (pos.getPositionType().getPositiontype() == "SHORT"){
+            totalProfit = (pos.getPurchasePrice() - pos.getSellPrice()) * pos.getNumShares() * pos.getContractSize();
         }
-        if (returns.find(year) == returns.end()){
-            returns[year] = {profit};
-        }
-        else{
-            returns[year].push_back(profit);
-        }
+
+        addToYear(exitYear, totalProfit);
     }
     return returns;
 }

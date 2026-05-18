@@ -2,18 +2,21 @@
   "CL=F": {
     "dukascopy": "LIGHT.CMD/USD",
     "contractSize": 100.0,
+    "frictionPerRoundTrip": 5.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[CL]"
   },
   "BZ=F": {
     "dukascopy": "BRENT.CMD/USD",
     "contractSize": 100.0,
+    "frictionPerRoundTrip": 5.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[BZ]"
   },
   "NG=F": {
     "dukascopy": "GAS.CMD/USD",
     "contractSize": 100,
+    "frictionPerRoundTrip": 4.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[NG]"
   },
@@ -30,30 +33,35 @@
   "GC=F": {
     "dukascopy": "XAU/USD",
     "contractSize": 1.0,
+    "frictionPerRoundTrip": 0.50,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[GC] — Gold quoted as XAU/USD in JForex tick API"
   },
   "SI=F": {
     "dukascopy": "XAG/USD",
     "contractSize": 1.0,
+    "frictionPerRoundTrip": 0.02,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[SI] — Silver quoted as XAG/USD in JForex tick API"
   },
   "PL=F": {
     "dukascopy": "XPT.CMD/USD",
     "contractSize": 1.0,
+    "frictionPerRoundTrip": 0.50,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[PL] — Corrected to XPT.CMD/USD for API compatibility"
   },
   "PA=F": {
     "dukascopy": "XPD.CMD/USD",
     "contractSize": 1.0,
+    "frictionPerRoundTrip": 1.00,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[PA] — Corrected to XPD.CMD/USD for API compatibility"
   },
   "HG=F": {
     "dukascopy": "COPPER.CMD/USD",
     "contractSize": 100,
+    "frictionPerRoundTrip": 4.0,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[HG]"
   },
@@ -85,24 +93,28 @@
   "KC=F": {
     "dukascopy": "COFFEE.CMD/USX",
     "contractSize": 1,
+    "frictionPerRoundTrip": 1.00,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[KC] — Priced in US cents (USX), not USD"
   },
   "CC=F": {
     "dukascopy": "COCOA.CMD/USD",
     "contractSize": 1,
+    "frictionPerRoundTrip": 1.50,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[CC]"
   },
   "SB=F": {
     "dukascopy": "SUGAR.CMD/USD",
     "contractSize": 1,
+    "frictionPerRoundTrip": 0.50,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[SB] — Probe confirmed SUGAR.CMD/USD (not USX) in JForex tick API"
   },
   "CT=F": {
     "dukascopy": "COTTON.CMD/USX",
     "contractSize": 1,
+    "frictionPerRoundTrip": 0.80,
     "category": "Commodity Futures — Core",
     "note": "matched_by: commodity_root[CT] — Priced in US cents (USX), not USD"
   },
@@ -154,6 +166,7 @@
   "ETH=F": {
     "dukascopy": "ETH/USD",
     "contractSize": 1.0,
+    "frictionPerRoundTrip": 2.00,
     "category": "Commodity Futures — Core",
     "note": "CME Ether futures aliased to Dukascopy ETH/USD spot"
   },

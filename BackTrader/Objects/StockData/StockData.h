@@ -21,10 +21,11 @@ struct StockData{
     vector<double> askClose;
     vector<double> askHigh;
     vector<double> askLow;
-    double contractSize = 0.0; // 0 = not set; DataReader populates from the ContractSize: section
+    double contractSize = 0.0;         // 0 = not set; DataReader populates from ContractSize: section
+    double frictionPerRoundTrip = 0.0; // round-trip cost in dollars per contract (commission + spread estimate)
     StockData() = default;
     StockData(vector<double> o, vector<double> c, vector<double> h, vector<double> l, vector<double> v,
-    vector<string> d, double cs): open(o), close(c), high(h), low(l), volume(v), date(d), contractSize(cs) {}
+    vector<string> d, double cs, double fr = 0.0): open(o), close(c), high(h), low(l), volume(v), date(d), contractSize(cs), frictionPerRoundTrip(fr) {}
 
     bool hasAskData() const { return !askOpen.empty(); }
 };

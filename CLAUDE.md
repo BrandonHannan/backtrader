@@ -171,12 +171,29 @@ CustomStrategy strategy(balance, move(sizer), move(context));
 
 ## Critical Notes
 
+### Ticker-isolated execution model (M5)
+
+Each ticker runs as an **independent** paper account using `DowBaseCase.balance` (default `$1,000`). The balance is reset between tickers via `setBalance(initialBalance)` in `StrategyRunner`. This means:
+
+- Risk-per-trade is always `riskAmount × DowBaseCase.balance`, independent of how many tickers are active simultaneously.
+- `Total P&L:` printed after the sweep is the **sum of independent $1,000 paper runs**, not a single unified portfolio.
+- To convert to a realistic portfolio deployment, scale by `realCapital / (numTickers × DowBaseCase.balance)`.
+- **Balance scaling for high-contractSize instruments:** With `contractSize=100` (crude oil, natural gas, copper), the sizer requires at least `(ATR × contractSize / riskAmount)` in balance to produce 1 contract. At `ATR=$2`, `contractSize=100`, `riskAmount=0.02`: minimum balance = `$2 × 100 / 0.02 = $10,000`. Tickers that cannot produce ≥1 contract are silently skipped. Increase `DowBaseCase.balance` in [BackTrader/StrategyRunner/DowATRStrategy/DowATRBaseCase.h](BackTrader/StrategyRunner/DowATRStrategy/DowATRBaseCase.h) accordingly.
+
+### Friction model (C2)
+
+Round-trip costs (commission + spread) are deducted at every position close in `CustomStrategy.cpp`. Values are read from `FrictionPerRoundTrip:` sections in `data.txt` / Dukascopy data files, sourced from `DownloadDataPython/DukascopyTickers.json`. Tickers without an explicit value default to **$0.0** (no friction). Tune the `frictionPerRoundTrip` field in `DukascopyTickers.json` before interpreting sweep results.
+
 ### Makefile typo
 - [BackTrader/Makefile:5](BackTrader/Makefile#L5): `-I./inlcude` is misspelled (should be `-I./include`). This works because the nlohmann headers are included via relative paths from source files, but the flag itself is wrong.
 
 ### Data file format (`data.txt`)
 ```
 Stock: TICKER
+ContractSize:
+100.0
+FrictionPerRoundTrip:
+5.0
 Open:
 val1 val2 val3 ...
 Close:

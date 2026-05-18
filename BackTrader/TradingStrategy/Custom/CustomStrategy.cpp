@@ -85,11 +85,12 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 currentPosition.setStats(positionStats);
 
                 this->appendClosedPosition(currentPosition);
+                double friction = currentPosition.getNumShares() * data.frictionPerRoundTrip;
                 if (currentPosition.getPositionType().getPositiontype() == "LONG"){
-                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice() * currentPosition.getContractSize()));
+                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice() * currentPosition.getContractSize()) - friction);
                 }
                 else if (currentPosition.getPositionType().getPositiontype() == "SHORT"){
-                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()));
+                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()) - friction);
                 }
 
                 Position emptyPosition = Position();
@@ -142,7 +143,9 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
     if (!this->getPosition().getIsClosed()){
         Position &lastPosition = this->getPosition();
-        lastPosition.setSellPrice(data.close.back());
+        // Use the last bar's open to match the next-bar-open fill convention used throughout
+        // the loop. data.close.back() would be a different convention from every other exit.
+        lastPosition.setSellPrice(data.open.back());
         lastPosition.setSellDate(data.date.back());
         lastPosition.setIsClosed(true);
         lastPosition.setExitContextData(context->getContextData());
@@ -153,13 +156,14 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         lastPosition.setStats(positionStats);
 
         this->appendClosedPosition(lastPosition);
+        double frictionLast = lastPosition.getNumShares() * data.frictionPerRoundTrip;
         if (lastPosition.getPositionType().getPositiontype() == "LONG"){
-            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice() * lastPosition.getContractSize()));
+            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice() * lastPosition.getContractSize()) - frictionLast);
         }
         else if (lastPosition.getPositionType().getPositiontype() == "SHORT"){
-            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice())) * lastPosition.getContractSize()));
+            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice())) * lastPosition.getContractSize()) - frictionLast);
         }
-        
+
         Position emptyPosition = Position();
         this->setPosition(emptyPosition);
         context->onPositionSold();
@@ -272,11 +276,12 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 currentPosition.setStats(positionStats);
 
                 this->appendClosedPosition(currentPosition);
+                double frictionMin = currentPosition.getNumShares() * data.frictionPerRoundTrip;
                 if (currentPosition.getPositionType().getPositiontype() == "LONG"){
-                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice() * currentPosition.getContractSize()));
+                    this->addToBalance((currentPosition.getNumShares() * currentPosition.getSellPrice() * currentPosition.getContractSize()) - frictionMin);
                 }
                 else if (currentPosition.getPositionType().getPositiontype() == "SHORT"){
-                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()));
+                    this->addToBalance((currentPosition.getNumShares() * (currentPosition.getPurchasePrice() + (currentPosition.getPurchasePrice() - currentPosition.getSellPrice())) * currentPosition.getContractSize()) - frictionMin);
                 }
 
                 Position emptyPosition = Position();
@@ -321,7 +326,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
     if (!this->getPosition().getIsClosed()){
         Position &lastPosition = this->getPosition();
-        lastPosition.setSellPrice(data.close.back());
+        lastPosition.setSellPrice(data.open.back());
         lastPosition.setSellDate(data.date.back());
         lastPosition.setIsClosed(true);
         lastPosition.setExitContextData(context->getContextData());
@@ -332,11 +337,12 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         lastPosition.setStats(positionStats);
 
         this->appendClosedPosition(lastPosition);
+        double frictionLastMin = lastPosition.getNumShares() * data.frictionPerRoundTrip;
         if (lastPosition.getPositionType().getPositiontype() == "LONG"){
-            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice() * lastPosition.getContractSize()));
+            this->addToBalance((lastPosition.getNumShares() * lastPosition.getSellPrice() * lastPosition.getContractSize()) - frictionLastMin);
         }
         else if (lastPosition.getPositionType().getPositiontype() == "SHORT"){
-            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice())) * lastPosition.getContractSize()));
+            this->addToBalance((lastPosition.getNumShares() * (lastPosition.getPurchasePrice() + (lastPosition.getPurchasePrice() - lastPosition.getSellPrice())) * lastPosition.getContractSize()) - frictionLastMin);
         }
 
         Position emptyPosition = Position();

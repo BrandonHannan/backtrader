@@ -11,7 +11,7 @@ def format_array(data):
 # Initialize the lock for thread-safe file writing
 file_lock = threading.Lock()
 
-def fetch_and_write(ticker, contract_size, start, end, interval, file_handle):
+def fetch_and_write(ticker, contract_size, friction, start, end, interval, file_handle):
     """Worker function to download data and write it directly to the file."""
     try:
         df = dukascopy_python.fetch(
@@ -32,6 +32,7 @@ def fetch_and_write(ticker, contract_size, start, end, interval, file_handle):
         output_block = (
             f"Stock: {ticker}\n"
             f"ContractSize:\n{contract_size}\n"
+            f"FrictionPerRoundTrip:\n{friction}\n"
             f"Open:\n{format_array(df['open'])}\n"
             f"Close:\n{format_array(df['close'])}\n"
             f"High:\n{format_array(df['high'])}\n"
@@ -72,7 +73,8 @@ if __name__ == "__main__":
             if duk in seen:
                 continue
             seen.add(duk)
-            dukas_tickers.append((duk, cs))
+            fr = info.get("frictionPerRoundTrip", 0.0)
+            dukas_tickers.append((duk, cs, fr))
 
     total_tickers = len(dukas_tickers)
     completed_count = 0
@@ -86,8 +88,8 @@ if __name__ == "__main__":
 
             # Submit all ticker tasks to the thread pool
             future_to_ticker = {
-                executor.submit(fetch_and_write, ticker, cs, start_date, end_date, interval, file_handle): ticker
-                for ticker, cs in dukas_tickers
+                executor.submit(fetch_and_write, ticker, cs, fr, start_date, end_date, interval, file_handle): ticker
+                for ticker, cs, fr in dukas_tickers
             }
 
             # Process results as they finish, out of order

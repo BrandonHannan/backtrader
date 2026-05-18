@@ -17,18 +17,28 @@ unordered_map<string, StockData> ReadData(const string &fileName){
     vector<double> temp_open, temp_close, temp_high, temp_low, temp_volume;
     vector<string> temp_date;
     double temp_contractSize = 0.0;
+    double temp_frictionPerRoundTrip = 0.0;
 
     auto flush_current = [&]() {
         if (currentStockTicker.empty()) return;
         if (temp_contractSize <= 0.0) {
             cerr << "[Error] " << currentStockTicker
                  << ": missing/invalid ContractSize - dropping ticker" << endl;
+            return;
         }
-        else {
-            result[currentStockTicker] = StockData(
-                temp_open, temp_close, temp_high, temp_low, temp_volume,
-                temp_date, temp_contractSize);
+        size_t n = temp_open.size();
+        if (temp_close.size() != n || temp_high.size() != n || temp_low.size() != n ||
+            temp_volume.size() != n || temp_date.size() != n) {
+            cerr << "[Error] " << currentStockTicker
+                 << ": OHLCV+date vector lengths do not match (open=" << n
+                 << " close=" << temp_close.size() << " high=" << temp_high.size()
+                 << " low=" << temp_low.size() << " vol=" << temp_volume.size()
+                 << " date=" << temp_date.size() << ") - dropping ticker" << endl;
+            return;
         }
+        result[currentStockTicker] = StockData(
+            temp_open, temp_close, temp_high, temp_low, temp_volume,
+            temp_date, temp_contractSize, temp_frictionPerRoundTrip);
     };
 
     while (getline(file, line)) {
@@ -45,6 +55,7 @@ unordered_map<string, StockData> ReadData(const string &fileName){
             temp_volume.clear();
             temp_date.clear();
             temp_contractSize = 0.0;
+            temp_frictionPerRoundTrip = 0.0;
             currentDataType.clear();
 
             // Extract the new stock ticker
@@ -52,6 +63,7 @@ unordered_map<string, StockData> ReadData(const string &fileName){
         }
         // Identify the data type header (ContractSize, Open, Close, etc.)
         else if (line == "ContractSize:") { currentDataType = "ContractSize"; }
+        else if (line == "FrictionPerRoundTrip:") { currentDataType = "FrictionPerRoundTrip"; }
         else if (line == "Open:") { currentDataType = "Open"; }
         else if (line == "Close:") { currentDataType = "Close"; }
         else if (line == "High:") { currentDataType = "High"; }
@@ -69,9 +81,11 @@ unordered_map<string, StockData> ReadData(const string &fileName){
             }
             else if (currentDataType == "ContractSize") {
                 double cs;
-                if (iss >> cs) {
-                    temp_contractSize = cs;
-                }
+                if (iss >> cs) { temp_contractSize = cs; }
+            }
+            else if (currentDataType == "FrictionPerRoundTrip") {
+                double fr;
+                if (iss >> fr) { temp_frictionPerRoundTrip = fr; }
             }
             else {
                 double numericValue;
