@@ -18,6 +18,15 @@
 #include <limits>
 #include <utility>
 
+static std::pair<std::string, std::string> dukasPathsFor(int intervalId) {
+    switch (intervalId) {
+        case 1: return {"../OfferBid_SellPriceDataMinuteData.txt",   "../OfferAsk_BuyPriceDataMinuteData.txt"};
+        case 2: return {"../OfferBid_SellPriceData15MinuteData.txt", "../OfferAsk_BuyPriceData15MinuteData.txt"};
+        case 3: return {"../OfferBid_SellPriceDataHourlyData.txt",   "../OfferAsk_BuyPriceDataHourlyData.txt"};
+        case 4: return {"../OfferBid_SellPriceDataDailyData.txt",    "../OfferAsk_BuyPriceDataDailyData.txt"};
+    }
+    return {"", ""};
+}
 
 int main(){
     // Data is loaded after the user picks a source + interval below.
@@ -79,31 +88,9 @@ int main(){
 
     // CustomStrategy strategy = CustomStrategy(balance, move(sizer), move(context));
 
-    // Load category definitions written by DownloadData.py and prompt the user
-    // to scope the run down to a subset of tickers. Filtering happens here so
-    // executors and MacroFeatures see a single consistent trading universe.
-    vector<pair<string, vector<string>>> categoriesYfinance;
-    {
-        ifstream catFile("../output/categoriesYfinance.json");
-        if (catFile.is_open()) {
-            try {
-                nlohmann::json catJson;
-                catFile >> catJson;
-                for (auto it = catJson.begin(); it != catJson.end(); ++it) {
-                    vector<string> tickers;
-                    for (const auto& t : it.value()) tickers.push_back(t.get<string>());
-                    categoriesYfinance.emplace_back(it.key(), move(tickers));
-                }
-            } catch (const exception& e) {
-                cout << "Warning: failed to parse ../output/categoriesYfinance.json: " << e.what()
-                     << ". Skipping category filter." << endl;
-                categoriesYfinance.clear();
-            }
-        } else {
-            cout << "Note: ../output/categoriesYfinance.json not found; skipping category filter." << endl;
-        }
-    }
-
+    // Load Dukascopy category definitions written by DownloadData.py. Filtering
+    // happens after data load so executors and MacroFeatures see a single
+    // consistent trading universe.
     vector<pair<string, vector<string>>> categoriesDukas;
     {
         ifstream catFile("../output/categories.json");
@@ -126,73 +113,95 @@ int main(){
         }
     }
 
-    // Step 1 - data source precursor
-    cout << "Select data source:\n";
-    cout << "  1 - yfinance  (daily only)\n";
-    cout << "  2 - Dukascopy (Bid/Ask, all intervals)\n";
+    // Step 1 - run mode
+    cout << "Select run mode:\n";
+    cout << "  1 - Single-interval Dukascopy run\n";
+    cout << "  2 - Dual-interval Dukascopy run (entry timeframe + higher-resolution exit timeframe)\n";
     cout << "Enter choice: ";
-    int sourceChoice;
-    cin >> sourceChoice;
-    if (sourceChoice != 1 && sourceChoice != 2) {
-        cout << "Invalid data source. Exiting.\n";
-        return 1;
-    }
-    const bool useDukas = (sourceChoice == 2);
-
-    // Step 2 - execution-mode menu (ascending interval order)
-    cout << "\nSelect execution mode:\n";
-    if (!useDukas) {
-        cout << "  1 - ExecuteBaseCase  (daily,     yfinance)\n";
-        cout << "  2 - ExecuteAllSweeps (daily,     yfinance)\n";
-    } else {
-        cout << "  1 - ExecuteBaseCase  (1-minute,  Dukascopy)\n";
-        cout << "  2 - ExecuteAllSweeps (1-minute,  Dukascopy)\n";
-        cout << "  3 - ExecuteBaseCase  (15-minute, Dukascopy)\n";
-        cout << "  4 - ExecuteAllSweeps (15-minute, Dukascopy)\n";
-        cout << "  5 - ExecuteBaseCase  (daily,     Dukascopy)\n";
-        cout << "  6 - ExecuteAllSweeps (daily,     Dukascopy)\n";
-    }
-    cout << "Enter choice: ";
-    int choice;
-    cin >> choice;
-    const int maxChoice = useDukas ? 6 : 2;
-    if (choice < 1 || choice > maxChoice) {
-        cout << "Invalid choice. Exiting.\n";
+    int mode;
+    cin >> mode;
+    if (mode != 1 && mode != 2) {
+        cout << "Invalid run mode. Exiting.\n";
         return 1;
     }
 
-    // Step 3 - load the dataset selected above
-    unordered_map<string, StockData> data;
-    if (!useDukas) {
-        data = ReadData("../data.txt");
-    } else {
-        string bidPath;
-        string askPath;
-        if (choice == 1 || choice == 2) {
-            bidPath = "../OfferBid_SellPriceDataMinuteData.txt";
-            askPath = "../OfferAsk_BuyPriceDataMinuteData.txt";
-        } else if (choice == 3 || choice == 4) {
-            bidPath = "../OfferBid_SellPriceData15MinuteData.txt";
-            askPath = "../OfferAsk_BuyPriceData15MinuteData.txt";
-        } else {
-            bidPath = "../OfferBid_SellPriceDataDailyData.txt";
-            askPath = "../OfferAsk_BuyPriceDataDailyData.txt";
+    // Step 2 - interval / pairing selection
+    int entryInterval = 0;
+    int exitInterval = 0;
+    if (mode == 1) {
+        cout << "\nSelect interval:\n";
+        cout << "  1 - 1-minute\n";
+        cout << "  2 - 15-minute\n";
+        cout << "  3 - Hourly\n";
+        cout << "  4 - Daily\n";
+        cout << "Enter choice: ";
+        cin >> entryInterval;
+        if (entryInterval < 1 || entryInterval > 4) {
+            cout << "Invalid interval. Exiting.\n";
+            return 1;
         }
+    } else {
+        cout << "\nSelect interval pairing (entry / exit):\n";
+        cout << "  1 - 15-minute / 1-minute\n";
+        cout << "  2 - Hourly    / 1-minute\n";
+        cout << "  3 - Daily     / 1-minute\n";
+        cout << "  4 - Hourly    / 15-minute\n";
+        cout << "  5 - Daily     / 15-minute\n";
+        cout << "  6 - Daily     / Hourly\n";
+        cout << "Enter choice: ";
+        int pairing;
+        cin >> pairing;
+        switch (pairing) {
+            case 1: entryInterval = 2; exitInterval = 1; break;
+            case 2: entryInterval = 3; exitInterval = 1; break;
+            case 3: entryInterval = 4; exitInterval = 1; break;
+            case 4: entryInterval = 3; exitInterval = 2; break;
+            case 5: entryInterval = 4; exitInterval = 2; break;
+            case 6: entryInterval = 4; exitInterval = 3; break;
+            default:
+                cout << "Invalid pairing. Exiting.\n";
+                return 1;
+        }
+    }
+
+    // Step 3 - execution
+    cout << "\nSelect execution:\n";
+    cout << "  1 - Base case\n";
+    cout << "  2 - All sweeps\n";
+    cout << "Enter choice: ";
+    int exec;
+    cin >> exec;
+    if (exec != 1 && exec != 2) {
+        cout << "Invalid execution choice. Exiting.\n";
+        return 1;
+    }
+
+    // Step 4 - load data
+    unordered_map<string, StockData> data;
+    unordered_map<string, StockData> minuteData;
+    {
+        auto [bidPath, askPath] = dukasPathsFor(entryInterval);
         data = ReadDukascopyData(bidPath, askPath);
     }
-
     if (data.empty()) {
         cout << "No data loaded. Exiting.\n";
         return 1;
     }
+    if (mode == 2) {
+        auto [bidPath, askPath] = dukasPathsFor(exitInterval);
+        minuteData = ReadDukascopyData(bidPath, askPath);
+        if (minuteData.empty()) {
+            cout << "No exit-timeframe data loaded. Exiting.\n";
+            return 1;
+        }
+    }
 
-    // Step 4 - category filter against the loaded source
-    const auto &categories = useDukas ? categoriesDukas : categoriesYfinance;
+    // Step 5 - category filter (applied to both maps in dual mode)
     unordered_set<string> selectedTickers;
     bool useFilter = false;
 
-    if (!categories.empty()) {
-        cout << "Using " << (useDukas ? "Dukascopy" : "yfinance") << " data. ";
+    if (!categoriesDukas.empty()) {
+        const auto &categories = categoriesDukas;
         const int n = static_cast<int>(categories.size());
         cout << "\nSelect tickers to run the strategy on:\n";
         for (int i = 0; i < n; ++i) {
@@ -253,19 +262,28 @@ int main(){
         cout << "No category filter available.\n";
     }
 
-    // Step 5 - apply filter
-    unordered_map<string, StockData> filteredData;
-    if (useFilter) {
-        int missing = 0;
-        for (const string& t : selectedTickers) {
-            auto it = data.find(t);
-            if (it != data.end()) filteredData.emplace(it->first, it->second);
-            else ++missing;
+    auto applyFilter = [&](const unordered_map<string, StockData>& src,
+                           const string& label) {
+        unordered_map<string, StockData> out;
+        if (useFilter) {
+            int missing = 0;
+            for (const string& t : selectedTickers) {
+                auto it = src.find(t);
+                if (it != src.end()) out.emplace(it->first, it->second);
+                else ++missing;
+            }
+            cout << "Filtered " << label << ": " << selectedTickers.size() << " -> " << out.size()
+                 << " tickers (" << missing << " not in loaded data)." << endl;
+        } else {
+            out = src;
         }
-        cout << "Filtered " << selectedTickers.size() << " -> " << filteredData.size()
-             << " tickers (" << missing << " not in loaded data)." << endl;
-    } else {
-        filteredData = data;
+        return out;
+    };
+
+    unordered_map<string, StockData> filteredData = applyFilter(data, "entry");
+    unordered_map<string, StockData> filteredMinuteData;
+    if (mode == 2) {
+        filteredMinuteData = applyFilter(minuteData, "exit");
     }
 
     int dataSize = 0;
@@ -287,11 +305,19 @@ int main(){
 
     clock_t start = clock();
 
-    // Step 6 - dispatch: odd choice = BaseCase, even = AllSweeps
-    if (choice % 2 == 1) {
-        ExecuteBaseCase(filteredData, relatedMap);
+    // Step 6 - dispatch
+    if (mode == 1) {
+        if (exec == 1) {
+            ExecuteBaseCase(filteredData, relatedMap);
+        } else {
+            ExecuteAllSweeps(filteredData, relatedMap);
+        }
     } else {
-        ExecuteAllSweeps(filteredData, relatedMap);
+        if (exec == 1) {
+            ExecuteBaseCase(filteredData, filteredMinuteData, relatedMap);
+        } else {
+            ExecuteAllSweeps(filteredData, filteredMinuteData, relatedMap);
+        }
     }
 
     clock_t end = clock();
