@@ -218,12 +218,26 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         StockDataInstance currentInstance(i, currentOpen, currentClose, currentHigh, currentLow, currentVolume, currentDate, data.contractSize);
         StockDataInstance futureInstance(i + 1, futureOpen, futureClose, futureHigh, futureLow, futureVolume, futureDate, data.contractSize);
 
+        // For Dukascopy bid/ask data: pre-build an Ask-sided StockDataInstance whenever the operation
+        // would hit the Ask side of the book (LONG entry, SHORT exit / stop-loss / trailing). LONG exit
+        // and SHORT entry hit the Bid (= canonical fields), so they reuse the existing instances.
+        const bool useAsk = data.hasAskData();
+        auto makeAskInstance = [&](int k, double vol, const string &dt) {
+            return StockDataInstance(k, data.askOpen[k], data.askClose[k], data.askHigh[k], data.askLow[k], vol, dt, data.contractSize);
+        };
+
         Position &currentPosition = this->getPosition();
 
         if (!currentPosition.getIsClosed()){
             bool shouldSell = context->shouldSellTrade(currentPosition, currentInstance);
 
             if (shouldSell || i == size - 2){
+                StockDataInstance exitCurrent = currentInstance;
+                StockDataInstance exitFuture = futureInstance;
+                if (useAsk && currentPosition.getPositionType().getPositiontype() == "SHORT") {
+                    exitCurrent = makeAskInstance(i,     currentVolume, currentDate);
+                    exitFuture  = makeAskInstance(i + 1, futureVolume,  futureDate);
+                }
                 double exitPrice = -1;
                 // Dukascopy daily bars are UTC-calendar-day indexed (verified empirically:
                 // see DownloadDataPython/verify_minute_convention.py and verification_report.txt
@@ -236,7 +250,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                 if (startIt == minuteData.date.end() || startIt >= endIt) {
                     cerr << "[Warning] " << stockName << " " << currentDate
                          << ": no minute bars in session window - falling back to daily exit price\n";
-                    exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance);
+                    exitPrice = currentPosition.getExitPrice(exitCurrent, exitFuture);
                 }
                 else{
                     int initialMinuteIndex = static_cast<int>(std::distance(minuteData.date.begin(), startIt));
@@ -250,7 +264,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                             minuteData.volume[idx], minuteData.date[idx],
                             data.contractSize);
                     }
-                    exitPrice = currentPosition.getExitPrice(currentInstance, futureInstance, minuteSlice);
+                    exitPrice = currentPosition.getExitPrice(exitCurrent, exitFuture, minuteSlice);
                 }
 
                 bool isStopLoss = false;
