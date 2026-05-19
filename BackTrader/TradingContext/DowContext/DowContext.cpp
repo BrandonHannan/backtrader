@@ -36,33 +36,33 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
 
         this->trend.processNextDay(previousData);
         this->trend.processNextDay(currentData);
-        this->doubleTrend.processNextDay(previousData);
-        this->doubleTrend.processNextDay(currentData);
+        // this->doubleTrend.processNextDay(previousData);
+        // this->doubleTrend.processNextDay(currentData);
 
-        this->rsi.processNextDay(previousClose);
-        this->rsi.processNextDay(currentClose);
-        this->doubleRsi.processNextDay(previousClose);
-        this->doubleRsi.processNextDay(currentClose);
+        // this->rsi.processNextDay(previousClose);
+        // this->rsi.processNextDay(currentClose);
+        // this->doubleRsi.processNextDay(previousClose);
+        // this->doubleRsi.processNextDay(currentClose);
 
-        this->sMACD.processNextDay(previousClose);
-        this->sMACD.processNextDay(currentClose);
+        // this->sMACD.processNextDay(previousClose);
+        // this->sMACD.processNextDay(currentClose);
 
         this->atr.processNewData(currentData, previousData);
         this->doubleAtr.processNewData(currentData, previousData);
 
         Trend currentTrend = this->trend.getCurrentTrend();
-        Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
+        // Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
 
         Trendline currentTrendLine = this->trendLine.getActiveTrend();
-        Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
+        // Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
 
         if (currentTrend.type != TrendType::NONE || currentTrendLine.isActive){
             this->trendLine.update(currentTrend);
         }
 
-        if (currentDoubleTrend.type != TrendType::NONE || currentDoubleTrendLine.isActive){
-            this->doubleTrendLine.update(currentDoubleTrend);
-        }
+        // if (currentDoubleTrend.type != TrendType::NONE || currentDoubleTrendLine.isActive){
+        //     this->doubleTrendLine.update(currentDoubleTrend);
+        // }
         this->firstUpdate = false;
     }
     else{
@@ -70,29 +70,29 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         volumeStatistics.addDataPoint(currentVolume);
 
         this->trend.processNextDay(currentData);
-        this->doubleTrend.processNextDay(currentData);
+        // this->doubleTrend.processNextDay(currentData);
 
-        this->rsi.processNextDay(currentClose);
-        this->doubleRsi.processNextDay(currentClose);
+        // this->rsi.processNextDay(currentClose);
+        // this->doubleRsi.processNextDay(currentClose);
 
-        this->sMACD.processNextDay(currentClose);
+        // this->sMACD.processNextDay(currentClose);
 
         this->atr.processNewData(currentData, previousData);
         this->doubleAtr.processNewData(currentData, previousData);
 
         Trend currentTrend = this->trend.getCurrentTrend();
-        Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
+        // Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
 
         Trendline currentTrendLine = this->trendLine.getActiveTrend();
-        Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
+        // Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
 
         if (currentTrend.type != TrendType::NONE || currentTrendLine.isActive){
             this->trendLine.update(currentTrend);
         }
 
-        if (currentDoubleTrend.type != TrendType::NONE || currentDoubleTrendLine.isActive){
-            this->doubleTrendLine.update(currentDoubleTrend);
-        }
+        // if (currentDoubleTrend.type != TrendType::NONE || currentDoubleTrendLine.isActive){
+        //     this->doubleTrendLine.update(currentDoubleTrend);
+        // }
     }
     return;
 }
@@ -103,8 +103,6 @@ Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData) const
     double macd = this->sMACD.getMACD();
     double signal = this->sMACD.getSignal();
 
-    Trendline currentTrendLine = this->trendLine.getActiveTrend();
-    Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
     if (currentTrend.type == TrendType::NONE){
         return Trade();
     }
@@ -120,13 +118,7 @@ Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData) const
 }
 
 Trade DowContext::shouldExecuteTrade(const StockDataInstance &currentData, const MacroFeatures &macroFeatures, const string& primary) const {
-    Trend currentTrend = this->trend.getCurrentTrend();
-    Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
     double maxPrice = this->priceStatistics.getMax();
-    double macd = this->sMACD.getMACD();
-    double signal = this->sMACD.getSignal();
-
-    Trendline currentTrendLine = this->trendLine.getActiveTrend();
 
     if (currentData.close > maxPrice){
         return Trade("LONG", "LONG BREAKTHROUGH");
@@ -167,7 +159,6 @@ bool DowContext::shouldSellTrade(const Position &currentPosition, const StockDat
 
     // Sell Current Position if current price violates current trend line
     Trendline currentTrendLine = this->trendLine.getActiveTrend();
-    Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
 
     if (currentTrendLine.isActive && !currentTrendLine.isPointValidWithinTrendLine(currentData)){
         shouldSell = true;
@@ -177,16 +168,7 @@ bool DowContext::shouldSellTrade(const Position &currentPosition, const StockDat
 }
 
 bool DowContext::isValid() const {
-
-    // Return true only once the double trend has been established
-    // if (this->doubleTrend.isReady()){
-    //     return true;
-    // }
-
-    if (this->trend.isReady() && this->trendLine.isReady() && priceStatistics.isReady() && volumeStatistics.isReady()){
-        // if (this->sMACD.isReady()){
-        //     return true;
-        // }
+    if (priceStatistics.isReady() && volumeStatistics.isReady()){
         return true;
     }
     return false;

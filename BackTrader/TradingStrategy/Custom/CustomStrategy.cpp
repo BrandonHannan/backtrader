@@ -77,7 +77,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
 
                 currentPosition.setSellPrice(exitPrice);
                 currentPosition.setIsClosed(true);
-                currentPosition.setExitContextData(context->getContextData());
+                //currentPosition.setExitContextData(context->getContextData());
 
                 string positionStats = currentPosition.getBasePositionInfo();
                 string totalStats = combineSideBySide(currentPosition.getStats(), context->getStats());
@@ -123,11 +123,11 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
                     newPosition.setTradeType(trade.tradeType);
                     string positionStats = context->getStats();
                     newPosition.setStats(positionStats);
-                    nlohmann::json entryCtx = context->getContextData();
-                    if (this->macroFeatures != nullptr) {
-                        entryCtx["macroContext"] = this->macroFeatures->compute(stockName, currentDate);
-                    }
-                    newPosition.setEntryContextData(entryCtx);
+                    // nlohmann::json entryCtx = context->getContextData();
+                    // if (this->macroFeatures != nullptr) {
+                    //     entryCtx["macroContext"] = this->macroFeatures->compute(stockName, currentDate);
+                    // }
+                    // newPosition.setEntryContextData(entryCtx);
 
                     this->addToBalance(-1 * (newPosition.getNumShares() * newPosition.getPurchasePrice() * newPosition.getContractSize()));
 
@@ -148,7 +148,7 @@ void CustomStrategy::ExecuteStrategy(const string &stockName, const StockData &d
         lastPosition.setSellPrice(data.open.back());
         lastPosition.setSellDate(data.date.back());
         lastPosition.setIsClosed(true);
-        lastPosition.setExitContextData(context->getContextData());
+        //lastPosition.setExitContextData(context->getContextData());
 
         string positionStats = lastPosition.getBasePositionInfo();
         string totalStats = combineSideBySide(lastPosition.getStats(), context->getStats());

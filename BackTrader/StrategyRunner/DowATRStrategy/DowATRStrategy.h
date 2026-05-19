@@ -372,8 +372,8 @@ void ExecuteBaseCase(unordered_map<string, StockData> &data,
     for (const Position& pos : positions) {
         bool isLong = pos.getPositionType().getPositiontype() == "LONG";
         double pnl = isLong
-            ? (pos.getSellPrice() - pos.getPurchasePrice()) * pos.getNumShares()
-            : (pos.getPurchasePrice() - pos.getSellPrice()) * pos.getNumShares();
+            ? (pos.getSellPrice() - pos.getPurchasePrice()) * pos.getNumShares() * pos.getContractSize()
+            : (pos.getPurchasePrice() - pos.getSellPrice()) * pos.getNumShares() * pos.getContractSize();
 
         totalPnL += pnl;
         if (pnl > 0) { winningTrades++; totalWin += pnl; }
