@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <limits>
 #include <utility>
+#include <clocale>
 
 static std::pair<std::string, std::string> dukasPathsFor(int intervalId) {
     switch (intervalId) {
@@ -29,6 +30,9 @@ static std::pair<std::string, std::string> dukasPathsFor(int intervalId) {
 }
 
 int main(){
+    // Force '.' as the decimal separator regardless of OS locale so strtod in DataReader is deterministic.
+    std::setlocale(LC_NUMERIC, "C");
+
     // Data is loaded after the user picks a source + interval below.
 
     // Load cross-asset related-stocks mapping written by DownloadData.py.

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 using namespace std;
 
@@ -25,7 +26,7 @@ struct StockData{
     double frictionPerRoundTrip = 0.0; // round-trip cost in dollars per contract (commission + spread estimate)
     StockData() = default;
     StockData(vector<double> o, vector<double> c, vector<double> h, vector<double> l, vector<double> v,
-    vector<string> d, double cs, double fr = 0.0): open(o), close(c), high(h), low(l), volume(v), date(d), contractSize(cs), frictionPerRoundTrip(fr) {}
+    vector<string> d, double cs, double fr = 0.0): open(std::move(o)), close(std::move(c)), high(std::move(h)), low(std::move(l)), volume(std::move(v)), date(std::move(d)), contractSize(cs), frictionPerRoundTrip(fr) {}
 
     bool hasAskData() const { return !askOpen.empty(); }
 };

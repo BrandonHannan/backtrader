@@ -187,6 +187,9 @@ Round-trip costs (commission + spread) are deducted at every position close in `
 ### Makefile typo
 - [BackTrader/Makefile:5](BackTrader/Makefile#L5): `-I./inlcude` is misspelled (should be `-I./include`). This works because the nlohmann headers are included via relative paths from source files, but the flag itself is wrong.
 
+### Data cache sidecar
+[BackTrader/DataReader/DataCache.cpp](BackTrader/DataReader/DataCache.cpp) writes a binary `<source>.cache` next to each Dukascopy text file on first parse and reads from it on subsequent runs. Invalidation is by source `file_size + last_write_time` — if either changes, the cache is rebuilt. To force a re-parse manually, delete the `.cache` file. The C++ engine never errors on a missing or corrupt cache; it falls back to text parsing and rewrites the cache.
+
 ### Data file format (`data.txt`)
 ```
 Stock: TICKER

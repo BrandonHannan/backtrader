@@ -1,8 +1,50 @@
 #include "DataReader.h"
+#include "DataCache.h"
+#include "../StrategyRunner/ThreadPool.h"
+#include <cstdlib>
+#include <cstring>
+#include <future>
+#include <memory>
+#include <utility>
+
+namespace {
+
+// Parse all whitespace-separated doubles in [p, end) into `out` using strtod.
+// strtod is locale-aware; the engine sets LC_NUMERIC="C" once in main so the
+// decimal separator is always '.'.
+inline void parseDoublesInto(const char* p, const char* end, vector<double>& out) {
+    char* tail;
+    while (p < end) {
+        while (p < end && (*p == ' ' || *p == '\t')) ++p;
+        if (p >= end) break;
+        double v = strtod(p, &tail);
+        if (tail == p) break;
+        out.push_back(v);
+        p = tail;
+    }
+}
+
+// Parse all whitespace-separated tokens in [p, end) into `out` as strings.
+inline void parseTokensInto(const char* p, const char* end, vector<string>& out) {
+    while (p < end) {
+        while (p < end && (*p == ' ' || *p == '\t')) ++p;
+        if (p >= end) break;
+        const char* start = p;
+        while (p < end && *p != ' ' && *p != '\t') ++p;
+        out.emplace_back(start, p - start);
+    }
+}
+
+} // namespace
 
 unordered_map<string, StockData> ReadData(const string &fileName){
     unordered_map<string, StockData> result;
     ifstream file;
+
+    // Large I/O buffer reduces syscalls on multi-GB files. Must be set before open().
+    auto ioBuffer = std::make_unique<char[]>(8 * 1024 * 1024);
+    file.rdbuf()->pubsetbuf(ioBuffer.get(), 8 * 1024 * 1024);
+
     file.open(fileName);
     if (!file.is_open()){
         cerr << "Error Opening File: " << fileName << endl;
@@ -10,14 +52,21 @@ unordered_map<string, StockData> ReadData(const string &fileName){
     }
 
     string line;
+    line.reserve(16 * 1024 * 1024); // OHLCV lines in minute files can span several MB
     string currentStockTicker;
-    string currentDataType;
 
     // Temporary storage for the current stock's data
     vector<double> temp_open, temp_close, temp_high, temp_low, temp_volume;
     vector<string> temp_date;
     double temp_contractSize = 0.0;
     double temp_frictionPerRoundTrip = 0.0;
+
+    // Hoisted dispatch: which vector does the current data section append into?
+    // Exactly one of these is non-null while inside an OHLCV/Date section.
+    vector<double>* active_double_vec = nullptr;
+    vector<string>* active_string_vec = nullptr;
+    enum class ScalarTarget { None, ContractSize, FrictionPerRoundTrip };
+    ScalarTarget active_scalar = ScalarTarget::None;
 
     auto flush_current = [&]() {
         if (currentStockTicker.empty()) return;
@@ -37,17 +86,18 @@ unordered_map<string, StockData> ReadData(const string &fileName){
             return;
         }
         result[currentStockTicker] = StockData(
-            temp_open, temp_close, temp_high, temp_low, temp_volume,
-            temp_date, temp_contractSize, temp_frictionPerRoundTrip);
+            std::move(temp_open), std::move(temp_close), std::move(temp_high),
+            std::move(temp_low), std::move(temp_volume), std::move(temp_date),
+            temp_contractSize, temp_frictionPerRoundTrip);
     };
 
     while (getline(file, line)) {
-        // Check for a new stock entry
+        // Trim a trailing \r left behind by CRLF line endings on Windows-authored files.
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+
         if (line.rfind("Stock: ", 0) == 0) {
-            // If we were already processing a stock, save its data before starting the new one
             flush_current();
 
-            // Clear temporary vectors for the new stock
             temp_open.clear();
             temp_close.clear();
             temp_high.clear();
@@ -56,59 +106,68 @@ unordered_map<string, StockData> ReadData(const string &fileName){
             temp_date.clear();
             temp_contractSize = 0.0;
             temp_frictionPerRoundTrip = 0.0;
-            currentDataType.clear();
+            active_double_vec = nullptr;
+            active_string_vec = nullptr;
+            active_scalar = ScalarTarget::None;
 
-            // Extract the new stock ticker
             currentStockTicker = line.substr(7);
+            continue;
         }
-        // Identify the data type header (ContractSize, Open, Close, etc.)
-        else if (line == "ContractSize:") { currentDataType = "ContractSize"; }
-        else if (line == "FrictionPerRoundTrip:") { currentDataType = "FrictionPerRoundTrip"; }
-        else if (line == "Open:") { currentDataType = "Open"; }
-        else if (line == "Close:") { currentDataType = "Close"; }
-        else if (line == "High:") { currentDataType = "High"; }
-        else if (line == "Low:") { currentDataType = "Low"; }
-        else if (line == "Volume:") { currentDataType = "Volume"; }
-        else if (line == "Date:") { currentDataType = "Date"; }
-        // Otherwise, it's a data line
-        else if (!line.empty() && !currentDataType.empty()) {
-            istringstream iss(line);
-            if (currentDataType == "Date") {
-                string dateValue;
-                while (iss >> dateValue) {
-                    temp_date.push_back(dateValue);
-                }
-            }
-            else if (currentDataType == "ContractSize") {
-                double cs;
-                if (iss >> cs) { temp_contractSize = cs; }
-            }
-            else if (currentDataType == "FrictionPerRoundTrip") {
-                double fr;
-                if (iss >> fr) { temp_frictionPerRoundTrip = fr; }
-            }
-            else {
-                double numericValue;
-                while (iss >> numericValue) {
-                    if (currentDataType == "Open") temp_open.push_back(numericValue);
-                    else if (currentDataType == "Close") temp_close.push_back(numericValue);
-                    else if (currentDataType == "High") temp_high.push_back(numericValue);
-                    else if (currentDataType == "Low") temp_low.push_back(numericValue);
-                    else if (currentDataType == "Volume") temp_volume.push_back(numericValue);
-                }
-            }
+
+        // Section headers — resolve target once per header, not per token.
+        if (line == "ContractSize:") {
+            active_double_vec = nullptr; active_string_vec = nullptr;
+            active_scalar = ScalarTarget::ContractSize;
+            continue;
+        }
+        if (line == "FrictionPerRoundTrip:") {
+            active_double_vec = nullptr; active_string_vec = nullptr;
+            active_scalar = ScalarTarget::FrictionPerRoundTrip;
+            continue;
+        }
+        if (line == "Open:")   { active_double_vec = &temp_open;   active_string_vec = nullptr; active_scalar = ScalarTarget::None; continue; }
+        if (line == "Close:")  { active_double_vec = &temp_close;  active_string_vec = nullptr; active_scalar = ScalarTarget::None; continue; }
+        if (line == "High:")   { active_double_vec = &temp_high;   active_string_vec = nullptr; active_scalar = ScalarTarget::None; continue; }
+        if (line == "Low:")    { active_double_vec = &temp_low;    active_string_vec = nullptr; active_scalar = ScalarTarget::None; continue; }
+        if (line == "Volume:") { active_double_vec = &temp_volume; active_string_vec = nullptr; active_scalar = ScalarTarget::None; continue; }
+        if (line == "Date:")   { active_double_vec = nullptr; active_string_vec = &temp_date; active_scalar = ScalarTarget::None; continue; }
+
+        if (line.empty()) continue;
+
+        const char* p   = line.data();
+        const char* end = p + line.size();
+
+        if (active_double_vec) {
+            // ~8 chars per double on average (incl. separator). Slight over-reserve is far cheaper than a realloc mid-loop.
+            active_double_vec->reserve(active_double_vec->size() + line.size() / 8 + 1);
+            parseDoublesInto(p, end, *active_double_vec);
+        } else if (active_string_vec) {
+            active_string_vec->reserve(active_string_vec->size() + line.size() / 11 + 1); // YYYY-MM-DD + space ≈ 11 chars
+            parseTokensInto(p, end, *active_string_vec);
+        } else if (active_scalar == ScalarTarget::ContractSize) {
+            char* tail;
+            double v = strtod(p, &tail);
+            if (tail != p) temp_contractSize = v;
+        } else if (active_scalar == ScalarTarget::FrictionPerRoundTrip) {
+            char* tail;
+            double v = strtod(p, &tail);
+            if (tail != p) temp_frictionPerRoundTrip = v;
         }
     }
 
-    // After the loop, save the very last stock's data
     flush_current();
     file.close();
     return result;
 }
 
 unordered_map<string, StockData> ReadDukascopyData(const string &bidFile, const string &askFile) {
-    unordered_map<string, StockData> base = ReadData(bidFile);
-    unordered_map<string, StockData> ask  = ReadData(askFile);
+    // Parse bid and ask in parallel. Each side is CPU-bound during parsing once data is in the
+    // page cache, so two threads is the right amount: more threads would just thrash the disk.
+    ThreadPool pool(2);
+    auto bidFut = pool.submit([&]{ return ReadDataCached(bidFile); });
+    auto askFut = pool.submit([&]{ return ReadDataCached(askFile); });
+    unordered_map<string, StockData> base = bidFut.get();
+    unordered_map<string, StockData> ask  = askFut.get();
 
     if (base.empty()) {
         cerr << "[Error] ReadDukascopyData: bid file produced no tickers (" << bidFile << ")" << endl;
@@ -130,7 +189,7 @@ unordered_map<string, StockData> ReadDukascopyData(const string &bidFile, const 
             continue;
         }
 
-        const StockData &askData = askIt->second;
+        StockData &askData = askIt->second;
         if (askData.date.size() != bid.date.size() || askData.open.size() != bid.open.size()) {
             cerr << "[Warning] " << ticker << ": bid/ask array sizes differ (bid="
                  << bid.date.size() << ", ask=" << askData.date.size() << ") - dropping" << endl;
@@ -148,10 +207,11 @@ unordered_map<string, StockData> ReadDukascopyData(const string &bidFile, const 
             continue;
         }
 
-        bid.askOpen  = askData.open;
-        bid.askClose = askData.close;
-        bid.askHigh  = askData.high;
-        bid.askLow   = askData.low;
+        // `ask` is discarded at the end of this function, so move instead of copy.
+        bid.askOpen  = std::move(askData.open);
+        bid.askClose = std::move(askData.close);
+        bid.askHigh  = std::move(askData.high);
+        bid.askLow   = std::move(askData.low);
         ++it;
     }
 

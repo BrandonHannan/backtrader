@@ -11,3 +11,5 @@ OfferBid_SellPriceDataMinuteData.txt
 OfferAsk_BuyPriceDataMinuteData.txt
 DailyData.txt
 verification_report.txt
+*.cache
+*.cache.tmp
