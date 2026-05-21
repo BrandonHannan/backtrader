@@ -34,8 +34,8 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         volumeStatistics.addDataPoint(previousVolume);
         volumeStatistics.addDataPoint(currentVolume);
 
-        this->trend.processNextDay(previousData);
-        this->trend.processNextDay(currentData);
+        // this->trend.processNextDay(previousData);
+        // this->trend.processNextDay(currentData);
         // this->doubleTrend.processNextDay(previousData);
         // this->doubleTrend.processNextDay(currentData);
 
@@ -47,18 +47,18 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         // this->sMACD.processNextDay(previousClose);
         // this->sMACD.processNextDay(currentClose);
 
-        this->atr.processNewData(currentData, previousData);
-        this->doubleAtr.processNewData(currentData, previousData);
+        // this->atr.processNewData(currentData, previousData);
+        // this->doubleAtr.processNewData(currentData, previousData);
 
-        Trend currentTrend = this->trend.getCurrentTrend();
+        // Trend currentTrend = this->trend.getCurrentTrend();
         // Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
 
-        Trendline currentTrendLine = this->trendLine.getActiveTrend();
+        // Trendline currentTrendLine = this->trendLine.getActiveTrend();
         // Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
 
-        if (currentTrend.type != TrendType::NONE || currentTrendLine.isActive){
-            this->trendLine.update(currentTrend);
-        }
+        // if (currentTrend.type != TrendType::NONE || currentTrendLine.isActive){
+        //     this->trendLine.update(currentTrend);
+        // }
 
         // if (currentDoubleTrend.type != TrendType::NONE || currentDoubleTrendLine.isActive){
         //     this->doubleTrendLine.update(currentDoubleTrend);
@@ -69,7 +69,7 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
         priceStatistics.addDataPoint(currentClose);
         volumeStatistics.addDataPoint(currentVolume);
 
-        this->trend.processNextDay(currentData);
+        // this->trend.processNextDay(currentData);
         // this->doubleTrend.processNextDay(currentData);
 
         // this->rsi.processNextDay(currentClose);
@@ -77,18 +77,18 @@ void DowContext::updateContext(const StockDataInstance &currentData, const Stock
 
         // this->sMACD.processNextDay(currentClose);
 
-        this->atr.processNewData(currentData, previousData);
-        this->doubleAtr.processNewData(currentData, previousData);
+        // this->atr.processNewData(currentData, previousData);
+        // this->doubleAtr.processNewData(currentData, previousData);
 
-        Trend currentTrend = this->trend.getCurrentTrend();
+        // Trend currentTrend = this->trend.getCurrentTrend();
         // Trend currentDoubleTrend = this->doubleTrend.getCurrentTrend();
 
-        Trendline currentTrendLine = this->trendLine.getActiveTrend();
+        // Trendline currentTrendLine = this->trendLine.getActiveTrend();
         // Trendline currentDoubleTrendLine = this->doubleTrendLine.getActiveTrend();
 
-        if (currentTrend.type != TrendType::NONE || currentTrendLine.isActive){
-            this->trendLine.update(currentTrend);
-        }
+        // if (currentTrend.type != TrendType::NONE || currentTrendLine.isActive){
+        //     this->trendLine.update(currentTrend);
+        // }
 
         // if (currentDoubleTrend.type != TrendType::NONE || currentDoubleTrendLine.isActive){
         //     this->doubleTrendLine.update(currentDoubleTrend);
@@ -158,11 +158,11 @@ bool DowContext::shouldSellTrade(const Position &currentPosition, const StockDat
     bool shouldSell = this->checkStopLossPrice(currentPosition, currentData);
 
     // Sell Current Position if current price violates current trend line
-    Trendline currentTrendLine = this->trendLine.getActiveTrend();
+    // Trendline currentTrendLine = this->trendLine.getActiveTrend();
 
-    if (currentTrendLine.isActive && !currentTrendLine.isPointValidWithinTrendLine(currentData)){
-        shouldSell = true;
-    }
+    // if (currentTrendLine.isActive && !currentTrendLine.isPointValidWithinTrendLine(currentData)){
+    //     shouldSell = true;
+    // }
 
     return shouldSell;
 }
